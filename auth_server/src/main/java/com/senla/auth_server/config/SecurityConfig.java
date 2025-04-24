@@ -10,10 +10,12 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
 import org.springframework.http.MediaType;
-import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.ProviderManager;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -22,22 +24,18 @@ import org.springframework.security.oauth2.core.AuthorizationGrantType;
 import org.springframework.security.oauth2.core.ClientAuthenticationMethod;
 import org.springframework.security.oauth2.core.oidc.OidcScopes;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
-import org.springframework.security.oauth2.server.authorization.client.JdbcRegisteredClientRepository;
+import org.springframework.security.oauth2.server.authorization.client.InMemoryRegisteredClientRepository;
 import org.springframework.security.oauth2.server.authorization.client.RegisteredClient;
 import org.springframework.security.oauth2.server.authorization.client.RegisteredClientRepository;
 import org.springframework.security.oauth2.server.authorization.config.annotation.web.configuration.OAuth2AuthorizationServerConfiguration;
 import org.springframework.security.oauth2.server.authorization.config.annotation.web.configurers.OAuth2AuthorizationServerConfigurer;
-import org.springframework.security.oauth2.server.authorization.settings.AuthorizationServerSettings;
-import org.springframework.security.oauth2.server.authorization.settings.ClientSettings;
 import org.springframework.security.oauth2.server.authorization.token.JwtEncodingContext;
 import org.springframework.security.oauth2.server.authorization.token.OAuth2TokenCustomizer;
-import org.springframework.security.provisioning.JdbcUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint;
 import org.springframework.security.web.util.matcher.MediaTypeRequestMatcher;
 import org.springframework.security.web.util.matcher.RequestMatcher;
 
-import javax.sql.DataSource;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.security.interfaces.RSAPrivateKey;
@@ -62,13 +60,21 @@ public class SecurityConfig {
         }
         return keyPair;
     }
+    
+    @Bean
+    public AuthenticationManager authenticationManager(
+            ResourceOwnerAuthenticationProvider resourceOwnerAuthenticationProvider
+    ) {
+        return new ProviderManager(resourceOwnerAuthenticationProvider);
+    }
 
     @Bean
     @Order(1)
-    public SecurityFilterChain authorizationServerSecurityFilterChain(HttpSecurity http)
+    public SecurityFilterChain authorizationServerSecurityFilterChain(HttpSecurity http, ResourceOwnerAuthenticationProvider resourceOwnerAuthenticationProvider,
+                                                                      CustomAuthenticationConverter customAuthenticationConverter )
             throws Exception {
         OAuth2AuthorizationServerConfigurer authorizationServerConfigurer =
-                OAuth2AuthorizationServerConfigurer.authorizationServer();
+                new OAuth2AuthorizationServerConfigurer();
 
         RequestMatcher endpointsMatcher = authorizationServerConfigurer.getEndpointsMatcher();
 
@@ -77,15 +83,21 @@ public class SecurityConfig {
                 .authorizeHttpRequests(authorize -> authorize
                         .anyRequest().authenticated()
                 )
-                .with(authorizationServerConfigurer, configurer ->
-                        configurer.oidc(Customizer.withDefaults())
-                )
+                .csrf(AbstractHttpConfigurer::disable)
                 .exceptionHandling(exceptions -> exceptions
                         .defaultAuthenticationEntryPointFor(
                                 new LoginUrlAuthenticationEntryPoint("/login"),
                                 new MediaTypeRequestMatcher(MediaType.APPLICATION_JSON)
                         )
-                );
+                )
+                .formLogin(Customizer.withDefaults());
+
+        http.with(authorizationServerConfigurer, configurer -> configurer
+                .oidc(Customizer.withDefaults())
+                .tokenEndpoint(tokenEndpoint -> tokenEndpoint
+                        .accessTokenRequestConverter(customAuthenticationConverter)
+                        .authenticationProvider(resourceOwnerAuthenticationProvider)
+                ));
 
         return http.build();
     }
@@ -97,61 +109,12 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf
                         .ignoringRequestMatchers("/auth/**"))
                 .authorizeHttpRequests((authorize) -> authorize
-                        .requestMatchers("/auth/register", "/error").permitAll()
+                        .requestMatchers("/auth/login", "/error").permitAll()
                         .anyRequest().authenticated()
                 )
                 .formLogin(Customizer.withDefaults());
 
         return http.build();
-    }
-
-    @Bean
-    public JdbcUserDetailsManager userDetailsService(DataSource dataSource) {
-        JdbcUserDetailsManager userDetailsManager = new JdbcUserDetailsManager(dataSource);
-
-        userDetailsManager.setUsersByUsernameQuery("""
-                    SELECT email as username,
-                     password, enabled
-                    FROM users
-                    WHERE email = ?
-                """);
-
-        userDetailsManager.setAuthoritiesByUsernameQuery("""
-                    SELECT email,
-                            role as authority
-                    FROM users
-                    WHERE email = ?
-                """);
-        return userDetailsManager;
-    }
-
-    @Bean
-    public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
-    }
-
-    @Bean
-    public RegisteredClientRepository registeredClientRepository(DataSource dataSource) {
-        JdbcRegisteredClientRepository registeredClientRepository = new JdbcRegisteredClientRepository(new JdbcTemplate(dataSource));
-
-        if (registeredClientRepository.findByClientId("oidc_client") == null) {
-            RegisteredClient client = RegisteredClient.withId(UUID.randomUUID().toString())
-                    .clientId("oidc_client")
-                    .clientSecret(passwordEncoder().encode("secret"))
-                    .clientAuthenticationMethod(ClientAuthenticationMethod.CLIENT_SECRET_BASIC)
-                    .authorizationGrantType(AuthorizationGrantType.AUTHORIZATION_CODE)
-                    .authorizationGrantType(AuthorizationGrantType.REFRESH_TOKEN)
-                    .redirectUri("https://oauth.pstmn.io/v1/callback")
-                    .postLogoutRedirectUri("http://127.0.0.1:8080/")
-                    .scope(OidcScopes.OPENID)
-                    .scope(OidcScopes.PROFILE)
-                    .clientSettings(ClientSettings.builder().requireAuthorizationConsent(true).build())
-                    .build();
-
-            registeredClientRepository.save(client);
-        }
-
-        return registeredClientRepository;
     }
 
     @Bean
@@ -187,9 +150,26 @@ public class SecurityConfig {
         return OAuth2AuthorizationServerConfiguration.jwtDecoder(jwkSource);
     }
 
+
     @Bean
-    public AuthorizationServerSettings authorizationServerSettings() {
-        return AuthorizationServerSettings.builder().build();
+    public PasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder();
     }
 
+    @Bean
+    public RegisteredClientRepository registeredClientRepository() {
+        RegisteredClient client = RegisteredClient.withId(UUID.randomUUID().toString())
+                .clientId("oidc_client")
+                .clientSecret(passwordEncoder().encode("secret"))
+                .clientAuthenticationMethod(ClientAuthenticationMethod.CLIENT_SECRET_BASIC)
+                .authorizationGrantType(AuthorizationGrantType.AUTHORIZATION_CODE)
+                .authorizationGrantType(AuthorizationGrantType.REFRESH_TOKEN)
+                .redirectUri("https://oauth.pstmn.io/v1/callback")
+                .postLogoutRedirectUri("http://127.0.0.1:8080/")
+                .scope(OidcScopes.OPENID)
+                .scope(OidcScopes.PROFILE)
+                .build();
+
+        return new InMemoryRegisteredClientRepository(client);
+    }
 }

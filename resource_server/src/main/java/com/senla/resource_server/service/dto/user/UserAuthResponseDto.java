@@ -1,27 +1,20 @@
-package com.senla.auth_server.data.entity;
+package com.senla.resource_server.service.dto.user;
 
+import com.senla.resource_server.data.entity.User.RoleType;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class User {
-
+@EqualsAndHashCode
+@ToString
+public class UserAuthResponseDto {
     private Long id;
-
     private String email;
-
     private String password;
-
-    private Boolean enabled;
-
     private RoleType role;
-
-    public enum RoleType {
-        ROLE_USER,
-        ROLE_ADMIN,
-        ROLE_MODERATOR
-    }
 }

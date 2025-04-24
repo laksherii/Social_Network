@@ -1,18 +1,5 @@
 services:
 
-  auth-db:
-    image: postgres:16
-    container_name: auth-db
-    environment:
-      POSTGRES_DB: auth_server_db
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: root
-    ports:
-      - "5434:5432"
-    volumes:
-      - auth_data:/var/lib/postgresql/data
-      - ./auth_db.sql:/docker-entrypoint-initdb.d/auth_db.sql
-
   auth-server:
     build:
       context: ../auth_server
@@ -20,12 +7,7 @@ services:
     ports:
       - "9000:9000"
       - "5005:5005"
-    depends_on:
-      - auth-db
-    environment:
-      SPRING_DATASOURCE_URL: jdbc:postgresql://auth-db:5432/auth_server_db
-      SPRING_DATASOURCE_USERNAME: postgres
-      SPRING_DATASOURCE_PASSWORD: root
+
 
   resource-db:
     image: postgres:16
@@ -41,5 +23,4 @@ services:
       - ./resource_db.sql:/docker-entrypoint-initdb.d/resource_db.sql
 
 volumes:
-  auth_data:
   resource_data:
