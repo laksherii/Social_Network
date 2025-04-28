@@ -44,7 +44,8 @@ CREATE TABLE messages
     id           BIGSERIAL PRIMARY KEY,
     sender_id    BIGINT NOT NULL REFERENCES users (id),
     content      TEXT   NOT NULL,
-    message_type VARCHAR(100)
+    message_type VARCHAR(100),
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE TABLE group_chat

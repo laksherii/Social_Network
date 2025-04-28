@@ -51,17 +51,15 @@ public class SecurityConfig {
     public Converter<Jwt, AbstractAuthenticationToken> jwtAuthenticationConverter() {
         return jwt -> {
             Collection<GrantedAuthority> authorities = new ArrayList<>();
-
             List<String> roles = jwt.getClaimAsStringList("roles");
             if (roles != null) {
-                for (String role : roles) {
-                    authorities.add(new SimpleGrantedAuthority(role));
-                }
+                roles.forEach(role -> authorities.add(new SimpleGrantedAuthority(role)));
             }
 
             String username = jwt.getClaim("sub");
+            Long userId = jwt.getClaim("user_id");
 
-            return new UsernamePasswordAuthenticationToken(username, null, authorities);
+            return new UserIdAuthenticationToken(userId, username, null, authorities);
         };
     }
 

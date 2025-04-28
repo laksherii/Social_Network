@@ -60,7 +60,7 @@ public class SecurityConfig {
         }
         return keyPair;
     }
-    
+
     @Bean
     public AuthenticationManager authenticationManager(
             ResourceOwnerAuthenticationProvider resourceOwnerAuthenticationProvider
@@ -71,7 +71,7 @@ public class SecurityConfig {
     @Bean
     @Order(1)
     public SecurityFilterChain authorizationServerSecurityFilterChain(HttpSecurity http, ResourceOwnerAuthenticationProvider resourceOwnerAuthenticationProvider,
-                                                                      CustomAuthenticationConverter customAuthenticationConverter )
+                                                                      CustomAuthenticationConverter customAuthenticationConverter)
             throws Exception {
         OAuth2AuthorizationServerConfigurer authorizationServerConfigurer =
                 new OAuth2AuthorizationServerConfigurer();
@@ -128,6 +128,15 @@ public class SecurityConfig {
                         .collect(Collectors.toSet());
 
                 context.getClaims().claim("roles", authorities);
+
+                Long userId = null;
+                if (principal instanceof ResourceOwnerAuthenticationToken) {
+                    userId = ((ResourceOwnerAuthenticationToken) principal).getId();
+                }
+
+                if (userId != null) {
+                    context.getClaims().claim("user_id", userId);
+                }
             }
         };
     }

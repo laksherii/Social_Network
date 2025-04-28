@@ -2,7 +2,6 @@ package com.senla.auth_server.config;
 
 import com.senla.auth_server.exception.BadCredentialsException;
 import com.senla.auth_server.service.dto.UserResponseDto;
-import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -12,10 +11,10 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
-import reactor.core.publisher.Mono;
 
 import java.util.List;
 import java.util.Map;
+
 @Component
 public class ResourceOwnerAuthenticationProvider implements AuthenticationProvider {
 
@@ -47,7 +46,11 @@ public class ResourceOwnerAuthenticationProvider implements AuthenticationProvid
 
             List<GrantedAuthority> authorities = List.of(new SimpleGrantedAuthority(userDto.getRole()));
 
-            return new ResourceOwnerAuthenticationToken(username, password, authorities);
+            return new ResourceOwnerAuthenticationToken(
+                    userDto.getId(),
+                    username,
+                    password,
+                    authorities);
 
         } catch (Exception ex) {
             throw new BadCredentialsException("Invalid credentials");

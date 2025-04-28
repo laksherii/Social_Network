@@ -7,6 +7,7 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.PrimaryKeyJoinColumn;
 import jakarta.persistence.Table;
+import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -18,8 +19,8 @@ import lombok.Setter;
 @DiscriminatorValue("WALL")
 public class WallMessage extends Message {
 
+    @NotNull(message = "Wall must not be null")
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "wall_id", nullable = false)
     private Wall wall;
-
 }
