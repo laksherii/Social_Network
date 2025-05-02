@@ -19,7 +19,7 @@ import java.util.Properties;
 @ComponentScan(basePackages = "com.senla.resource_server")
 @EnableTransactionManagement
 @PropertySource("classpath:application.properties")
-public class ApplicationConfiguration {
+public class    ApplicationConfiguration {
 
     @Bean
     public DataSource dataSource() {
@@ -56,5 +56,3 @@ public class ApplicationConfiguration {
         return new JpaTransactionManager(entityManagerFactory);
     }
 }
-
-

@@ -1,17 +1,19 @@
 package com.senla.resource_server.service.impl;
 
 import com.senla.resource_server.config.UserIdAuthenticationToken;
-import com.senla.resource_server.data.dao.impl.GroupChatDaoImpl;
-import com.senla.resource_server.data.dao.impl.GroupChatMessageDaoImpl;
-import com.senla.resource_server.data.dao.impl.UserDaoImpl;
+import com.senla.resource_server.data.dao.GroupChatDao;
+import com.senla.resource_server.data.dao.GroupChatMessageDao;
+import com.senla.resource_server.data.dao.UserDao;
 import com.senla.resource_server.data.entity.GroupChat;
 import com.senla.resource_server.data.entity.GroupChatMessage;
 import com.senla.resource_server.data.entity.User;
-import com.senla.resource_server.data.mapper.MessageMapper;
 import com.senla.resource_server.exception.EntityNotFoundException;
 import com.senla.resource_server.exception.UserNotInGroupChatException;
+import com.senla.resource_server.service.dto.message.GetGroupChatMessageDto;
 import com.senla.resource_server.service.dto.message.GroupChatMessageRequestDto;
 import com.senla.resource_server.service.dto.message.GroupChatMessageResponseDto;
+import com.senla.resource_server.service.interfaces.GroupChatMessageService;
+import com.senla.resource_server.service.mapper.MessageMapper;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -25,13 +27,14 @@ import java.util.List;
 @Service
 @Transactional
 @RequiredArgsConstructor
-public class GroupChatMessageServiceImpl {
+public class GroupChatMessageServiceImpl implements GroupChatMessageService {
 
-    private final GroupChatMessageDaoImpl groupChatMessageDao;
-    private final GroupChatDaoImpl groupChatDaoImpl;
-    private final UserDaoImpl userDaoImpl;
+    private final GroupChatMessageDao groupChatMessageDao;
+    private final GroupChatDao groupChatDao;
+    private final UserDao userDaoImpl;
     private final MessageMapper messageMapper;
 
+    @Override
     public GroupChatMessageResponseDto sendGroupChatMessage(GroupChatMessageRequestDto groupChatMessage) {
         log.info("Starting to send group chat message to group ID: {}", groupChatMessage.getGroupId());
 
@@ -39,7 +42,7 @@ public class GroupChatMessageServiceImpl {
         Long userId = ((UserIdAuthenticationToken) authentication).getUserId();
         log.info("Authenticated sender user ID: {}", userId);
 
-        GroupChat groupChat = groupChatDaoImpl.findById(groupChatMessage.getGroupId())
+        GroupChat groupChat = groupChatDao.findById(groupChatMessage.getGroupId())
                 .orElseThrow(() -> new EntityNotFoundException("GroupChat not found"));
         log.info("Group chat found with ID: {}", groupChat.getId());
 
@@ -65,14 +68,15 @@ public class GroupChatMessageServiceImpl {
         return messageMapper.toGroupChatMessageResponse(savedMessage);
     }
 
-    public List<GroupChatMessageResponseDto> getGroupChatMessages(Long groupId) {
+    @Override
+    public List<GetGroupChatMessageDto> getGroupChatMessages(Long groupId) {
         log.info("Retrieving messages for group chat ID: {}", groupId);
 
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         Long userId = ((UserIdAuthenticationToken) authentication).getUserId();
         log.info("Authenticated user ID: {}", userId);
 
-        GroupChat groupChat = groupChatDaoImpl.findById(groupId)
+        GroupChat groupChat = groupChatDao.findById(groupId)
                 .orElseThrow(() -> new EntityNotFoundException("GroupChat not found"));
         log.info("Group chat found with ID: {}", groupChat.getId());
 
@@ -85,9 +89,8 @@ public class GroupChatMessageServiceImpl {
             throw new UserNotInGroupChatException("User not in group chat");
         }
 
-        List<GroupChatMessageResponseDto> messages = groupChat.getMessages().stream()
-                .map(messageMapper::toGroupChatMessageResponse)
-                .sorted()
+        List<GetGroupChatMessageDto> messages = groupChat.getMessages().stream()
+                .map(messageMapper::toGetGroupChatMessage)
                 .toList();
 
         log.info("Retrieved {} messages for group chat ID: {}", messages.size(), groupChat.getId());

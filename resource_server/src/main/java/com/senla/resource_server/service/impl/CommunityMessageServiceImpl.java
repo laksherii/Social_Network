@@ -1,17 +1,17 @@
 package com.senla.resource_server.service.impl;
 
-import com.senla.resource_server.data.dao.impl.CommunityDaoImpl;
-import com.senla.resource_server.data.dao.impl.CommunityMessageDaoImpl;
-import com.senla.resource_server.data.dao.impl.UserDaoImpl;
+import com.senla.resource_server.data.dao.CommunityDao;
+import com.senla.resource_server.data.dao.CommunityMessageDao;
+import com.senla.resource_server.data.dao.UserDao;
 import com.senla.resource_server.data.entity.Community;
 import com.senla.resource_server.data.entity.CommunityMessage;
 import com.senla.resource_server.data.entity.User;
-import com.senla.resource_server.data.mapper.CommunityMapper;
-import com.senla.resource_server.data.mapper.MessageMapper;
 import com.senla.resource_server.exception.EntityNotFoundException;
-import com.senla.resource_server.exception.IllegalStateException;
+import com.senla.resource_server.exception.UserNotAdminInGroupException;
 import com.senla.resource_server.service.dto.message.CreateCommunityMessageRequestDto;
 import com.senla.resource_server.service.dto.message.CreateCommunityMessageResponseDto;
+import com.senla.resource_server.service.interfaces.CommunityMessageService;
+import com.senla.resource_server.service.mapper.MessageMapper;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -24,14 +24,14 @@ import java.util.List;
 @Service
 @Transactional
 @RequiredArgsConstructor
-public class CommunityMessageServiceImpl {
+public class CommunityMessageServiceImpl implements CommunityMessageService {
 
-    private final CommunityDaoImpl communityDao;
-    private final UserDaoImpl userDaoImpl;
-    private final CommunityMessageDaoImpl communityMessageDaoImpl;
+    private final CommunityDao communityDao;
+    private final UserDao userDaoImpl;
+    private final CommunityMessageDao communityMessageDaoImpl;
     private final MessageMapper messageMapper;
 
-
+    @Override
     public CreateCommunityMessageResponseDto sendCommunityMessage(CreateCommunityMessageRequestDto createCommunityMessageDto) {
         log.info("Received request to send a community message: {}", createCommunityMessageDto);
 
@@ -47,8 +47,8 @@ public class CommunityMessageServiceImpl {
                 .orElseThrow(() -> new EntityNotFoundException("User not found"));
         log.info("User entity retrieved: {}", user.getEmail());
 
-        if (!user.getEmail().equals(community.getAdmin().getEmail()) && community.getAdmin().getEmail() != null) {
-            throw new IllegalStateException("Добавлять записи на стену сообщества может только администратор сообщества");
+        if (!user.getEmail().equals(community.getAdmin().getEmail())) {
+            throw new UserNotAdminInGroupException("Only the community administrator can add entries to the community wall");
         }
         log.info("User {} is verified as admin for community {}", user.getEmail(), communityId);
 

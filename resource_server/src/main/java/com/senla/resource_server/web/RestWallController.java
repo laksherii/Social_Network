@@ -3,6 +3,7 @@ package com.senla.resource_server.web;
 import com.senla.resource_server.service.dto.wall.WallRequestDto;
 import com.senla.resource_server.service.dto.wall.WallResponseDto;
 import com.senla.resource_server.service.impl.WallServiceImpl;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -22,7 +23,7 @@ public class RestWallController {
 
     @PutMapping
     @ResponseStatus(HttpStatus.OK)
-    public WallResponseDto updateWall(@RequestBody WallRequestDto requestDto) {
+    public WallResponseDto updateWall(@Valid @RequestBody WallRequestDto requestDto) {
         log.info("Received request to update wall with data: {}", requestDto);
         WallResponseDto response = wallService.updateWall(requestDto);
         log.info("Successfully updated wall, response: {}", response);

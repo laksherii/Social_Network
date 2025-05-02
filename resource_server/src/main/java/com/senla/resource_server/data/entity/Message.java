@@ -31,15 +31,12 @@ public abstract class Message {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id")
     private Long id;
 
-    @NotNull(message = "Sender must not be null")
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "sender_id", nullable = false)
     private User sender;
 
-    @NotBlank(message = "Message content must not be blank")
     @Column(name = "content", nullable = false)
     private String message;
 

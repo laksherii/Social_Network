@@ -1,4 +1,4 @@
-package com.senla.resource_server.data.mapper;
+package com.senla.resource_server.service.mapper;
 
 import com.senla.resource_server.data.entity.Wall;
 import com.senla.resource_server.data.entity.WallMessage;

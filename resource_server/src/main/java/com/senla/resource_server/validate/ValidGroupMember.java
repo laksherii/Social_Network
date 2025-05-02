@@ -1,4 +1,4 @@
-package validate;
+package com.senla.resource_server.validate;
 
 import jakarta.validation.Constraint;
 import jakarta.validation.Payload;

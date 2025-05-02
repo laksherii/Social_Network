@@ -7,10 +7,9 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.PrimaryKeyJoinColumn;
 import jakarta.persistence.Table;
-import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
-import validate.ValidGroupMember;
+import com.senla.resource_server.validate.ValidGroupMember;
 
 @Entity
 @Getter
@@ -23,6 +22,5 @@ public class GroupChatMessage extends Message {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "group_id", nullable = false)
-    @NotNull(message = "Group chat must not be null")
     private GroupChat groupChat;
 }

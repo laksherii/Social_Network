@@ -9,6 +9,7 @@ import com.senla.resource_server.service.dto.user.UserDto;
 import com.senla.resource_server.service.dto.user.UserInfoDto;
 import com.senla.resource_server.service.dto.user.UserSearchDto;
 import com.senla.resource_server.service.impl.UserServiceImpl;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -65,7 +66,7 @@ public class RestUserController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public CreateUserDtoResponse createUser(@RequestBody CreateUserDtoRequest createUserDtoRequest) {
+    public CreateUserDtoResponse createUser(@Valid @RequestBody CreateUserDtoRequest createUserDtoRequest) {
         log.info("Creating new user with email: {}", createUserDtoRequest.getEmail());
         CreateUserDtoResponse response = userService.create(createUserDtoRequest);
         log.info("Successfully created new user with email: {}", createUserDtoRequest.getEmail());
@@ -75,7 +76,7 @@ public class RestUserController {
     @PreAuthorize("#updateUserDtoRequest.email == authentication.name or hasRole('ADMIN')")
     @PutMapping
     @ResponseStatus(HttpStatus.OK)
-    public UpdateUserDtoResponse updateUser(@RequestBody UpdateUserDtoRequest updateUserDtoRequest) {
+    public UpdateUserDtoResponse updateUser(@Valid @RequestBody UpdateUserDtoRequest updateUserDtoRequest) {
         log.info("Updating user with email: {}", updateUserDtoRequest.getEmail());
         UpdateUserDtoResponse response = userService.update(updateUserDtoRequest);
         log.info("Successfully updated user with email: {}", updateUserDtoRequest.getEmail());

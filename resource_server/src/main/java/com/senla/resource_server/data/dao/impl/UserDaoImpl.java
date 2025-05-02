@@ -1,5 +1,6 @@
 package com.senla.resource_server.data.dao.impl;
 
+import com.senla.resource_server.data.dao.UserDao;
 import com.senla.resource_server.data.entity.User;
 import com.senla.resource_server.service.dto.user.UserSearchDto;
 import jakarta.persistence.EntityManager;
@@ -15,11 +16,12 @@ import java.util.Optional;
 
 @Slf4j
 @Repository
-public class UserDaoImpl {
+public class UserDaoImpl implements UserDao {
 
     @PersistenceContext
     private EntityManager entityManager;
 
+    @Override
     public Optional<User> findById(Long id) {
         log.info("Searching for user with ID: {}", id);
         User user = entityManager.find(User.class, id);
@@ -27,6 +29,7 @@ public class UserDaoImpl {
         return Optional.ofNullable(user);
     }
 
+    @Override
     public User save(User user) {
         log.info("Saving user with email: {}", user.getEmail());
         entityManager.persist(user);
@@ -34,6 +37,7 @@ public class UserDaoImpl {
         return user;
     }
 
+    @Override
     public Optional<User> findByEmail(String email) {
         log.info("Searching for user with email: {}", email);
         List<User> users = entityManager.createQuery(
@@ -43,6 +47,7 @@ public class UserDaoImpl {
         return users.stream().findFirst();
     }
 
+    @Override
     public User update(User user) {
         log.info("Updating user with ID: {}", user.getId());
         User result = entityManager.createQuery(
@@ -56,7 +61,8 @@ public class UserDaoImpl {
         return updatedUser;
     }
 
-    public List<User> searchUsers(UserSearchDto userSearchDto) {
+    @Override
+    public List<User> searchUser(UserSearchDto userSearchDto) {
         log.info("Searching for users with criteria: {}", userSearchDto);
         StringBuilder jpql = new StringBuilder("SELECT u FROM User u WHERE 1=1");
         Map<String, Object> parameters = new HashMap<>();

@@ -1,14 +1,15 @@
 package com.senla.resource_server.service.impl;
 
-import com.senla.resource_server.data.dao.impl.UserDaoImpl;
-import com.senla.resource_server.data.dao.impl.WallDaoImpl;
+import com.senla.resource_server.data.dao.UserDao;
+import com.senla.resource_server.data.dao.WallDao;
 import com.senla.resource_server.data.entity.User;
 import com.senla.resource_server.data.entity.Wall;
 import com.senla.resource_server.data.entity.WallMessage;
-import com.senla.resource_server.data.mapper.WallMapper;
 import com.senla.resource_server.exception.EntityNotFoundException;
 import com.senla.resource_server.service.dto.wall.WallRequestDto;
 import com.senla.resource_server.service.dto.wall.WallResponseDto;
+import com.senla.resource_server.service.interfaces.WallService;
+import com.senla.resource_server.service.mapper.WallMapper;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -19,12 +20,13 @@ import org.springframework.stereotype.Service;
 @Service
 @Transactional
 @RequiredArgsConstructor
-public class WallServiceImpl {
+public class WallServiceImpl implements WallService {
 
-    private final WallDaoImpl wallDao;
+    private final WallDao wallDao;
+    private final UserDao userDaoImpl;
     private final WallMapper wallMapper;
-    private final UserDaoImpl userDaoImpl;
 
+    @Override
     public WallResponseDto updateWall(WallRequestDto wallRequestDto) {
         log.info("Updating wall with new message");
 

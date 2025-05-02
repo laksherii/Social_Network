@@ -19,7 +19,6 @@ import lombok.Setter;
 @DiscriminatorValue("COMMUNITY")
 public class CommunityMessage extends Message {
 
-    @NotNull(message = "Community must be specified")
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "community_id", nullable = false)
     private Community community;

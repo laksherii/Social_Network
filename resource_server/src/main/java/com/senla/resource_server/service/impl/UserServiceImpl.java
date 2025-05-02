@@ -1,10 +1,10 @@
 package com.senla.resource_server.service.impl;
 
-import com.senla.resource_server.data.dao.impl.UserDaoImpl;
+import com.senla.resource_server.data.dao.UserDao;
 import com.senla.resource_server.data.entity.User;
 import com.senla.resource_server.data.entity.Wall;
-import com.senla.resource_server.data.mapper.UserMapper;
-import com.senla.resource_server.exception.BadRequestParamException;
+import com.senla.resource_server.service.interfaces.UserService;
+import com.senla.resource_server.service.mapper.UserMapper;
 import com.senla.resource_server.exception.EntityNotFoundException;
 import com.senla.resource_server.exception.IllegalStateException;
 import com.senla.resource_server.service.dto.user.UpdateUserDtoRequest;
@@ -27,14 +27,15 @@ import java.util.List;
 
 @Slf4j
 @Service
-@RequiredArgsConstructor
 @Transactional
-public class UserServiceImpl {
+@RequiredArgsConstructor
+public class UserServiceImpl implements UserService {
 
-    private final UserDaoImpl userDao;
-    private final UserMapper userMapper;
+    private final UserDao userDao;
     private final PasswordEncoder passwordEncoder;
+    private final UserMapper userMapper;
 
+    @Override
     public UserDto findById(Long id) {
         log.info("Fetching user by ID: {}", id);
 
@@ -46,6 +47,7 @@ public class UserServiceImpl {
         return userMapper.toUserDto(byId);
     }
 
+    @Override
     public UserDto findByEmail(String email) {
         log.info("Fetching user by email: {}", email);
 
@@ -57,6 +59,7 @@ public class UserServiceImpl {
         return userMapper.toUserDto(user);
     }
 
+    @Override
     public UserInfoDto getUserInfo(String email) {
         log.info("Fetching user info by email: {}", email);
 
@@ -68,10 +71,11 @@ public class UserServiceImpl {
         return userMapper.toUserInfoDto(user);
     }
 
+    @Override
     public CreateUserDtoResponse create(CreateUserDtoRequest userDtoRequest) {
         log.info("Creating user with email: {}", userDtoRequest.getEmail());
 
-        if (userDtoRequest.getEmail() == null || userDao.findByEmail(userDtoRequest.getEmail()).isPresent()) {
+        if (userDao.findByEmail(userDtoRequest.getEmail()).isPresent()) {
             throw new IllegalStateException("Email is already exist");
         }
 
@@ -90,6 +94,7 @@ public class UserServiceImpl {
         return userMapper.toCreateUserDtoResponse(saved);
     }
 
+    @Override
     public Mono<UserAuthResponseDto> authenticate(UserAuthRequestDto userDtoRequest) {
         log.info("Authenticating user with email: {}", userDtoRequest.getEmail());
 
@@ -102,11 +107,11 @@ public class UserServiceImpl {
             UserAuthResponseDto userAuthResponseDto = userMapper.toUserAuthResponseDto(user);
             return Mono.just(userAuthResponseDto);
         }
-
         log.info("Authentication failed for user: {}", userDtoRequest.getEmail());
         return Mono.empty();
     }
 
+    @Override
     public UpdateUserDtoResponse update(UpdateUserDtoRequest userDtoRequest) {
         log.info("Updating user with email: {}", userDtoRequest.getEmail());
 
@@ -114,10 +119,21 @@ public class UserServiceImpl {
                 .orElseThrow(() -> new EntityNotFoundException("User not found by email=" + userDtoRequest.getEmail()));
         log.info("User found: {} (ID: {})", user.getEmail(), user.getId());
 
-        user.setFirstName(userDtoRequest.getFirstName());
-        user.setLastName(userDtoRequest.getLastName());
-        user.setBirthDay(userDtoRequest.getBirthDay());
-        user.setGender(userDtoRequest.getGender());
+        if (userDtoRequest.getFirstName() != null) {
+            user.setFirstName(userDtoRequest.getFirstName());
+        }
+
+        if (userDtoRequest.getLastName() != null) {
+            user.setLastName(userDtoRequest.getLastName());
+        }
+
+        if (userDtoRequest.getGender() != null) {
+            user.setGender(userDtoRequest.getGender());
+        }
+
+        if (userDtoRequest.getBirthDay() != null) {
+            user.setBirthDay(userDtoRequest.getBirthDay());
+        }
 
         User updatedUser = userDao.update(user);
 
@@ -126,10 +142,11 @@ public class UserServiceImpl {
         return userMapper.updateUserResponseToDto(updatedUser);
     }
 
+    @Override
     public List<UserDto> searchUsers(UserSearchDto userSearchDto) {
         log.info("Searching users by criteria: {}", userSearchDto);
 
-        List<User> users = userDao.searchUsers(userSearchDto);
+        List<User> users = userDao.searchUser(userSearchDto);
 
         log.info("Found {} users matching search criteria", users.size());
 

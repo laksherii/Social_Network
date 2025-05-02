@@ -1,5 +1,6 @@
 package com.senla.resource_server.data.dao.impl;
 
+import com.senla.resource_server.data.dao.GroupChatMessageDao;
 import com.senla.resource_server.data.entity.GroupChat;
 import com.senla.resource_server.data.entity.GroupChatMessage;
 import jakarta.persistence.EntityManager;
@@ -11,11 +12,12 @@ import java.util.List;
 
 @Slf4j
 @Repository
-public class GroupChatMessageDaoImpl {
+public class GroupChatMessageDaoImpl implements GroupChatMessageDao {
 
     @PersistenceContext
     private EntityManager entityManager;
 
+    @Override
     public GroupChatMessage save(GroupChatMessage message) {
         log.info("Saving message with ID: {}", message.getId());
         entityManager.persist(message);
@@ -23,6 +25,7 @@ public class GroupChatMessageDaoImpl {
         return message;
     }
 
+    @Override
     public List<GroupChatMessage> findByGroup(GroupChat groupChat) {
         log.info("Fetching messages for group chat with ID: {}", groupChat.getId());
         List<GroupChatMessage> messages = entityManager.createQuery("""

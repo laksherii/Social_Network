@@ -1,6 +1,7 @@
 package com.senla.resource_server.service.dto.message;
 
 import com.senla.resource_server.service.dto.user.UserDto;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
@@ -16,11 +17,8 @@ import lombok.ToString;
 @EqualsAndHashCode
 @ToString
 public class GetGroupChatMessageDto {
-//todo возможно сделать имя уникальным
-    @NotBlank(message = "Group name must not be blank")
-    private String name;
 
-    @NotNull(message = "Sender must not be null")
+    @Valid
     private UserDto sender;
 
     @NotBlank(message = "Message content must not be blank")

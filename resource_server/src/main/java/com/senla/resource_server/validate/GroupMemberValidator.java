@@ -1,4 +1,4 @@
-package validate;
+package com.senla.resource_server.validate;
 
 import com.senla.resource_server.data.entity.GroupChat;
 import com.senla.resource_server.data.entity.GroupChatMessage;

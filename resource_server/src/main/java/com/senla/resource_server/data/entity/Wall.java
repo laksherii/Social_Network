@@ -31,12 +31,10 @@ public class Wall {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @NotNull(message = "Wall owner must not be null")
     @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
     private User owner;
 
-    @NotNull(message = "Wall messages list must not be null")
     @OneToMany(mappedBy = "wall", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<WallMessage> messages = new ArrayList<>();
 }

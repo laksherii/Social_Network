@@ -1,9 +1,9 @@
 package com.senla.auth_server.config;
 
-import com.senla.auth_server.exception.BadCredentialsException;
 import com.senla.auth_server.service.dto.UserResponseDto;
 import org.springframework.http.MediaType;
 import org.springframework.security.authentication.AuthenticationProvider;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
@@ -21,7 +21,7 @@ public class ResourceOwnerAuthenticationProvider implements AuthenticationProvid
     private final WebClient webClient;
 
     public ResourceOwnerAuthenticationProvider(WebClient.Builder webClientBuilder) {
-        this.webClient = webClientBuilder.baseUrl("http://localhost:8080").build(); // ресурс-сервер
+        this.webClient = webClientBuilder.baseUrl("http://localhost:8080").build();
     }
 
     @Override
@@ -52,7 +52,7 @@ public class ResourceOwnerAuthenticationProvider implements AuthenticationProvid
                     password,
                     authorities);
 
-        } catch (Exception ex) {
+        } catch (RuntimeException ex) {
             throw new BadCredentialsException("Invalid credentials");
         }
     }

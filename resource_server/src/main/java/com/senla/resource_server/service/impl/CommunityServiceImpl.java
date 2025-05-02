@@ -1,10 +1,11 @@
 package com.senla.resource_server.service.impl;
 
-import com.senla.resource_server.data.dao.impl.CommunityDaoImpl;
-import com.senla.resource_server.data.dao.impl.UserDaoImpl;
+import com.senla.resource_server.data.dao.CommunityDao;
+import com.senla.resource_server.data.dao.UserDao;
 import com.senla.resource_server.data.entity.Community;
 import com.senla.resource_server.data.entity.User;
-import com.senla.resource_server.data.mapper.CommunityMapper;
+import com.senla.resource_server.service.interfaces.CommunityService;
+import com.senla.resource_server.service.mapper.CommunityMapper;
 import com.senla.resource_server.exception.EntityExistException;
 import com.senla.resource_server.exception.EntityNotFoundException;
 import com.senla.resource_server.service.dto.community.CommunityDto;
@@ -24,12 +25,13 @@ import java.util.List;
 @Service
 @Transactional
 @RequiredArgsConstructor
-public class CommunityServiceImpl {
+public class CommunityServiceImpl implements CommunityService {
 
-    private final CommunityDaoImpl communityDao;
-    private final UserDaoImpl userDaoImpl;
+    private final CommunityDao communityDao;
+    private final UserDao userDaoImpl;
     private final CommunityMapper communityMapper;
 
+    @Override
     public CreateCommunityResponseDto createCommunity(CreateCommunityRequestDto createDto) {
         log.info("Starting community creation with name: {}", createDto.getName());
 
@@ -45,13 +47,14 @@ public class CommunityServiceImpl {
         community.setAdmin(user);
         log.info("Community entity prepared with name: {} and admin: {}", community.getName(), user.getEmail());
 
-        communityDao.save(community);
+        Community savedCommunity = communityDao.save(community);
         log.info("Successfully created community: {} (ID: {}) with admin: {}",
                 community.getName(), community.getId(), user.getEmail());
 
-        return communityMapper.toCreateCommunityResponseDto(community);
+        return communityMapper.toCreateCommunityResponseDto(savedCommunity);
     }
 
+    @Override
     public JoinCommunityResponseDto joinCommunity(JoinCommunityRequestDto communityRequestDto) {
         log.info("Processing join request for community ID: {}", communityRequestDto.getCommunityId());
 
@@ -78,6 +81,7 @@ public class CommunityServiceImpl {
         return communityMapper.toJoinCommunityResponseDto(community);
     }
 
+    @Override
     public JoinCommunityResponseDto findCommunity(Long communityId) {
         log.info("Fetching community by ID: {}", communityId);
 
@@ -88,6 +92,7 @@ public class CommunityServiceImpl {
         return communityMapper.toJoinCommunityResponseDto(community);
     }
 
+    @Override
     public List<CommunityDto> getAllCommunities(Integer page, Integer size) {
         log.info("Fetching all communities, page: {}, size: {}", page, size);
 

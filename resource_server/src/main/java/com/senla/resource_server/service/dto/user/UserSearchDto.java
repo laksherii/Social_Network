@@ -27,7 +27,7 @@ public class UserSearchDto {
 
     @Positive(message = "Age must be a positive number")
     @Min(value = 0, message = "Age cannot be negative")
-    @Max(value = 130, message = "Age cannot be greater than 150")
+    @Max(value = 130, message = "Age cannot be greater than 130")
     private Integer age;
 
     @NotNull(message = "Gender must not be null")

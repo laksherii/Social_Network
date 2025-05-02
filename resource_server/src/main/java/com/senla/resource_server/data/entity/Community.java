@@ -34,17 +34,13 @@ public class Community {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @NotBlank(message = "Community name cannot be blank")
-    @Size(min = 3, max = 100, message = "Community name must be between 3 and 100 characters")
     @Column(name = "name", nullable = false)
     private String name;
 
-    @NotNull(message = "Community admin must be specified")
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "admin_id", nullable = false)
     private User admin;
 
-    @NotNull(message = "Users list cannot be null")
     @ManyToMany
     @JoinTable(
             name = "user_community",
@@ -53,7 +49,6 @@ public class Community {
     )
     private Set<User> users = new HashSet<>();
 
-    @NotNull(message = "Messages list cannot be null")
     @OneToMany(mappedBy = "community", cascade = CascadeType.ALL)
     private List<CommunityMessage> messages = new ArrayList<>();
 }

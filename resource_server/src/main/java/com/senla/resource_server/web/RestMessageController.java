@@ -2,6 +2,7 @@ package com.senla.resource_server.web;
 
 import com.senla.resource_server.service.dto.message.CreateCommunityMessageRequestDto;
 import com.senla.resource_server.service.dto.message.CreateCommunityMessageResponseDto;
+import com.senla.resource_server.service.dto.message.GetGroupChatMessageDto;
 import com.senla.resource_server.service.dto.message.GroupChatMessageRequestDto;
 import com.senla.resource_server.service.dto.message.GroupChatMessageResponseDto;
 import com.senla.resource_server.service.dto.message.PrivateMessageRequestDto;
@@ -9,6 +10,7 @@ import com.senla.resource_server.service.dto.message.PrivateMessageResponseDto;
 import com.senla.resource_server.service.impl.CommunityMessageServiceImpl;
 import com.senla.resource_server.service.impl.GroupChatMessageServiceImpl;
 import com.senla.resource_server.service.impl.PrivateMessageServiceImpl;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -26,8 +28,8 @@ import java.util.List;
 
 @Slf4j
 @RestController
-@RequestMapping("/message")
 @RequiredArgsConstructor
+@RequestMapping("/message")
 public class RestMessageController {
 
     private final PrivateMessageServiceImpl privateMessageService;
@@ -37,7 +39,7 @@ public class RestMessageController {
     @PreAuthorize("hasAnyRole('ADMIN', 'USER', 'MODERATOR')")
     @GetMapping("/private")
     @ResponseStatus(HttpStatus.OK)
-    private List<PrivateMessageResponseDto> getMessagesByRecipientEmail(@RequestParam String email) {
+    public List<PrivateMessageResponseDto> getMessagesByRecipientEmail(@Valid @RequestParam String email) {
         log.info("Fetching private messages for recipient email: {}", email);
         List<PrivateMessageResponseDto> messages = privateMessageService.getMessagesByRecipientEmail(email);
         log.info("Successfully fetched {} private messages for recipient email: {}", messages.size(), email);
@@ -47,7 +49,7 @@ public class RestMessageController {
     @PreAuthorize("hasAnyRole('ADMIN', 'USER', 'MODERATOR')")
     @PostMapping("/private")
     @ResponseStatus(HttpStatus.OK)
-    private PrivateMessageResponseDto sendPrivateMessage(@RequestBody PrivateMessageRequestDto privateMessageRequestDto) {
+    public PrivateMessageResponseDto sendPrivateMessage(@Valid @RequestBody PrivateMessageRequestDto privateMessageRequestDto) {
         log.info("Sending private message to recipient with email: {}",
                 privateMessageRequestDto.getRecipient());
         PrivateMessageResponseDto privateMessageResponseDto = privateMessageService.sendPrivateMessage(privateMessageRequestDto);
@@ -57,19 +59,19 @@ public class RestMessageController {
     }
 
     @PreAuthorize("hasAnyRole('ADMIN', 'USER', 'MODERATOR')")
-    @GetMapping("/{id}")
+    @GetMapping("/group-chat/{id}")
     @ResponseStatus(HttpStatus.OK)
-    private List<GroupChatMessageResponseDto> getGroupChatMessages(@PathVariable Long id) {
+    public List<GetGroupChatMessageDto> getGroupChatMessages(@PathVariable Long id) {
         log.info("Fetching group chat messages for group chat with ID: {}", id);
-        List<GroupChatMessageResponseDto> groupChatMessages = groupChatMessageServiceImpl.getGroupChatMessages(id);
-        log.info("Successfully fetched {} group chat messages for group chat with ID: {}", groupChatMessages.size(), id);
+        List<GetGroupChatMessageDto> groupChatMessages = groupChatMessageServiceImpl.getGroupChatMessages(id);
+        log.info("Successfully fetched group chat messages for group chat with ID: {}", id);
         return groupChatMessages;
     }
 
     @PreAuthorize("hasAnyRole('ADMIN', 'USER', 'MODERATOR')")
     @PostMapping("/group-chat")
     @ResponseStatus(HttpStatus.OK)
-    private GroupChatMessageResponseDto sendGroupChatMessage(@RequestBody GroupChatMessageRequestDto groupChatMessageRequest) {
+    public GroupChatMessageResponseDto sendGroupChatMessage(@Valid @RequestBody GroupChatMessageRequestDto groupChatMessageRequest) {
         log.info("Sending group chat message from user to group chat ID: {}",
                 groupChatMessageRequest.getGroupId());
         GroupChatMessageResponseDto response = groupChatMessageServiceImpl.sendGroupChatMessage(groupChatMessageRequest);
@@ -81,7 +83,7 @@ public class RestMessageController {
     @PreAuthorize("hasAnyRole('ADMIN', 'USER', 'MODERATOR')")
     @PostMapping("/community-message")
     @ResponseStatus(HttpStatus.OK)
-    private CreateCommunityMessageResponseDto sendCommunityMessage(@RequestBody CreateCommunityMessageRequestDto communityMessageDto) {
+    public CreateCommunityMessageResponseDto sendCommunityMessage(@Valid @RequestBody CreateCommunityMessageRequestDto communityMessageDto) {
         log.info("Sending community message from user to community ID: {}",
                 communityMessageDto.getCommunityId());
         CreateCommunityMessageResponseDto response = communityMessageServiceImpl.sendCommunityMessage(communityMessageDto);

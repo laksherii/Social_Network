@@ -32,6 +32,7 @@ public class GroupChatDaoImpl implements GroupChatDao {
         return groupChats;
     }
 
+    @Override
     public Optional<GroupChat> findById(Long id) {
         log.info("Finding group chat with ID: {}", id);
         GroupChat groupChat = entityManager.find(GroupChat.class, id);
@@ -39,6 +40,7 @@ public class GroupChatDaoImpl implements GroupChatDao {
         return Optional.ofNullable(groupChat);
     }
 
+    @Override
     public GroupChat save(GroupChat groupChat) {
         log.info("Saving group chat with name: {}", groupChat.getName());
         entityManager.persist(groupChat);

@@ -16,7 +16,7 @@ import lombok.ToString;
 @ToString
 public class PrivateMessageRequestDto {
 
-    @NotNull(message = "Recipient ID must not be null")
+    @NotNull(message = "Recipient must not be null")
     private Long recipient;
 
     @NotBlank(message = "Message content must not be blank")

@@ -19,7 +19,6 @@ import lombok.Setter;
 @DiscriminatorValue("WALL")
 public class WallMessage extends Message {
 
-    @NotNull(message = "Wall must not be null")
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "wall_id", nullable = false)
     private Wall wall;

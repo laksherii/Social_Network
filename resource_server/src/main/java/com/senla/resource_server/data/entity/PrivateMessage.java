@@ -20,7 +20,6 @@ import lombok.Setter;
 @DiscriminatorValue("PRIVATE")
 public class PrivateMessage extends Message {
 
-    @NotNull(message = "Recipient must not be null")
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "recipient_id", nullable = false)
     private User recipient;

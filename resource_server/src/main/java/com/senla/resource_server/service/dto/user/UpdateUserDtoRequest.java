@@ -6,6 +6,7 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Past;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
@@ -14,26 +15,21 @@ import lombok.ToString;
 import java.time.LocalDate;
 
 @Data
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
 @EqualsAndHashCode
 @ToString
 public class UpdateUserDtoRequest {
 
-    @NotBlank(message = "Email must not be blank")
     @Email(message = "Invalid email format")
     private String email;
 
-    @NotBlank(message = "First name must not be blank")
+    private String password;
     private String firstName;
-
-    @NotBlank(message = "Last name must not be blank")
     private String lastName;
-
-    @NotNull(message = "Gender must not be null")
     private GenderType gender;
 
-    @NotNull(message = "Birth day must not be null")
     @Past(message = "Birth day must be a past date")
     private LocalDate birthDay;
 }

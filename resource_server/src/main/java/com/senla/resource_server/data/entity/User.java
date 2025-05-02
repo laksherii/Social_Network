@@ -5,7 +5,6 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
-import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -15,20 +14,17 @@ import jakarta.persistence.ManyToMany;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
-import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
-import lombok.Getter;
+import lombok.Builder;
+import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 
 import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.Set;
 
-@Getter
-@Setter
+@Data
+@Builder
 @Entity
 @Table(name = "users")
 @NoArgsConstructor
@@ -39,24 +35,18 @@ public class User {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Email(message = "Invalid email format")
-    @NotBlank(message = "Email must not be blank")
     @Column(nullable = false)
     private String email;
 
-    @NotBlank(message = "Password must not be blank")
     @Column(nullable = false)
     private String password;
 
-    @NotBlank(message = "First name must not be blank")
     @Column(name = "first_name", nullable = false)
     private String firstName;
 
-    @NotBlank(message = "Last name must not be blank")
     @Column(name = "last_name", nullable = false)
     private String lastName;
 
-    @NotNull(message = "Birth day must not be null")
     @Column(name = "birth_day", nullable = false)
     private LocalDate birthDay;
 
@@ -94,12 +84,10 @@ public class User {
     @OneToMany(mappedBy = "recipient")
     private Set<PrivateMessage> recipientPrivateMessages = new HashSet<>();
 
-    @NotNull(message = "Gender must not be null")
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private GenderType gender;
 
-    @NotNull(message = "Role must not be null")
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private RoleType role;

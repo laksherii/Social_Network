@@ -8,6 +8,7 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Past;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
@@ -16,6 +17,7 @@ import lombok.ToString;
 import java.time.LocalDate;
 
 @Data
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
 @EqualsAndHashCode
@@ -27,7 +29,7 @@ public class CreateUserDtoRequest {
     private String email;
 
     @NotBlank(message = "Password must not be blank")
-    @Size(min = 6, message = "Password must be at least 8 characters long")
+    @Size(min = 6, message = "Password must be at least 6 characters long")
     private String password;
 
     @NotBlank(message = "First name must not be blank")
@@ -36,7 +38,6 @@ public class CreateUserDtoRequest {
     @NotBlank(message = "Last name must not be blank")
     private String lastName;
 
-    @NotNull(message = "Role must not be null")
     private RoleType role;
 
     @NotNull(message = "Birth day must not be null")

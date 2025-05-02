@@ -1,5 +1,6 @@
 package com.senla.resource_server.data.dao.impl;
 
+import com.senla.resource_server.data.dao.CommunityDao;
 import com.senla.resource_server.data.entity.Community;
 import com.senla.resource_server.util.PaginationUtil;
 import com.senla.resource_server.util.PaginationUtil.Pagination;
@@ -15,12 +16,14 @@ import java.util.Optional;
 @Slf4j
 @Repository
 @RequiredArgsConstructor
-public class CommunityDaoImpl {
+public class CommunityDaoImpl implements CommunityDao {
 
     private final PaginationUtil paginationUtil;
+
     @PersistenceContext
     private EntityManager entityManager;
 
+    @Override
     public Community save(Community community) {
         log.info("Saving community with ID {}", community.getId());
         entityManager.persist(community);
@@ -28,6 +31,7 @@ public class CommunityDaoImpl {
         return community;
     }
 
+    @Override
     public Optional<Community> findById(Long id) {
         log.info("Finding community with ID {}", id);
         Community community = entityManager.find(Community.class, id);
@@ -35,6 +39,7 @@ public class CommunityDaoImpl {
         return Optional.ofNullable(community);
     }
 
+    @Override
     public List<Community> findAll(Integer page, Integer size) {
         log.info("Fetching all communities with pagination, page: {}, size: {}", page, size);
         Pagination pagination = paginationUtil.calculate(page, size);

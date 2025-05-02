@@ -1,13 +1,14 @@
 package com.senla.resource_server.service.impl;
 
 import com.senla.resource_server.config.UserIdAuthenticationToken;
-import com.senla.resource_server.data.dao.impl.GroupChatDaoImpl;
-import com.senla.resource_server.data.dao.impl.UserDaoImpl;
+import com.senla.resource_server.data.dao.GroupChatDao;
+import com.senla.resource_server.data.dao.UserDao;
 import com.senla.resource_server.data.entity.GroupChat;
 import com.senla.resource_server.data.entity.User;
-import com.senla.resource_server.data.mapper.GroupChatMapper;
 import com.senla.resource_server.service.dto.groupChat.CreateGroupChatRequestDto;
 import com.senla.resource_server.service.dto.groupChat.CreateGroupChatResponseDto;
+import com.senla.resource_server.service.interfaces.GroupChatService;
+import com.senla.resource_server.service.mapper.GroupChatMapper;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -23,12 +24,13 @@ import java.util.stream.Collectors;
 @Service
 @Transactional
 @RequiredArgsConstructor
-public class GroupChatServiceImpl {
+public class GroupChatServiceImpl implements GroupChatService {
 
-    private final GroupChatDaoImpl groupDaoImpl;
+    private final GroupChatDao groupDao;
+    private final UserDao userDao;
     private final GroupChatMapper groupChatMapper;
-    private final UserDaoImpl userDaoImpl;
 
+    @Override
     public CreateGroupChatResponseDto create(CreateGroupChatRequestDto groupDto) {
         log.info("Starting group chat creation with name: {}", groupDto.getName());
 
@@ -40,7 +42,7 @@ public class GroupChatServiceImpl {
         log.info("Added authenticated user to the group. Total user IDs: {}", groupDto.getUserIds().size());
 
         Set<User> users = groupDto.getUserIds().stream()
-                .map(userDaoImpl::findById)
+                .map(userDao::findById)
                 .filter(Optional::isPresent)
                 .distinct()
                 .map(Optional::get)
@@ -52,7 +54,7 @@ public class GroupChatServiceImpl {
         groupChat.setUsers(users);
         groupChat.setName(groupDto.getName());
 
-        GroupChat savedGroupChat = groupDaoImpl.save(groupChat);
+        GroupChat savedGroupChat = groupDao.save(groupChat);
         log.info("Group chat created successfully with ID: {}", savedGroupChat.getId());
 
         return groupChatMapper.toCreateGroupDtoResponse(savedGroupChat);

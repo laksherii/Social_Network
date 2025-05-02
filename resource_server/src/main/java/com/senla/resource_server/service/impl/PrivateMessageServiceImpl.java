@@ -1,14 +1,15 @@
 package com.senla.resource_server.service.impl;
 
 import com.senla.resource_server.config.UserIdAuthenticationToken;
-import com.senla.resource_server.data.dao.impl.PrivateMessageDaoImpl;
-import com.senla.resource_server.data.dao.impl.UserDaoImpl;
+import com.senla.resource_server.data.dao.PrivateMessageDao;
+import com.senla.resource_server.data.dao.UserDao;
 import com.senla.resource_server.data.entity.PrivateMessage;
 import com.senla.resource_server.data.entity.User;
-import com.senla.resource_server.data.mapper.MessageMapper;
 import com.senla.resource_server.exception.EntityNotFoundException;
 import com.senla.resource_server.service.dto.message.PrivateMessageRequestDto;
 import com.senla.resource_server.service.dto.message.PrivateMessageResponseDto;
+import com.senla.resource_server.service.interfaces.PrivateMessageService;
+import com.senla.resource_server.service.mapper.MessageMapper;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -17,18 +18,18 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Slf4j
 @Service
 @Transactional
 @RequiredArgsConstructor
-public class PrivateMessageServiceImpl {
+public class PrivateMessageServiceImpl implements PrivateMessageService {
 
-    private final PrivateMessageDaoImpl privateMessageDao;
-    private final UserDaoImpl userDao;
+    private final PrivateMessageDao privateMessageDao;
+    private final UserDao userDao;
     private final MessageMapper messageMapper;
 
+    @Override
     public PrivateMessageResponseDto sendPrivateMessage(PrivateMessageRequestDto privateMessageRequestDto) {
         log.info("Starting to send private message to user ID: {}", privateMessageRequestDto.getRecipient());
 
@@ -55,6 +56,7 @@ public class PrivateMessageServiceImpl {
         return messageMapper.toPrivateMessageResponse(savedMessage);
     }
 
+    @Override
     public List<PrivateMessageResponseDto> getMessagesByRecipientEmail(String email) {
         log.info("Fetching messages by recipient email: {}", email);
 
