@@ -12,7 +12,6 @@ import org.mapstruct.ReportingPolicy;
 @Mapper(componentModel = ComponentModel.SPRING, unmappedTargetPolicy = ReportingPolicy.IGNORE)
 public interface WallMapper {
 
-
     WallResponseDto toWallResponseDto(Wall wall);
 
     WallDto toWallDto(Wall wall);

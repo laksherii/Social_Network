@@ -47,7 +47,6 @@ class WallServiceImplTest {
 
     @BeforeEach
     void setUp() {
-        // Настройка SecurityContext для моканой аутентификации
         SecurityContext securityContext = mock(SecurityContext.class);
         Authentication authentication = mock(Authentication.class);
 

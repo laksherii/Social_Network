@@ -60,12 +60,11 @@ class GroupChatMessageServiceImplTest {
     private void mockAuthentication(Long userId) {
         UserIdAuthenticationToken auth = mock(UserIdAuthenticationToken.class);
         when(auth.getUserId()).thenReturn(userId);
-
         SecurityContext context = mock(SecurityContext.class);
         when(context.getAuthentication()).thenReturn(auth);
-
         SecurityContextHolder.setContext(context);
     }
+
     private final Long groupId = 1L;
     private final Long userId = 2L;
 

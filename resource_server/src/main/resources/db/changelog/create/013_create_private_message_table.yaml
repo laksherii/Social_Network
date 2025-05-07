@@ -1,0 +1,30 @@
+databaseChangeLog:
+  - changeSet:
+      id: 013-create-private-messages-table
+      author: Lashkevich Artem
+      preConditions:
+        - onFail: MARK_RAN
+        - not:
+            - tableExists:
+                tableName: private_messages
+      changes:
+        - createTable:
+            tableName: private_messages
+            columns:
+              - column:
+                  name: message_id
+                  type: BIGINT
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+                    foreignKeyName: fk_private_messages_message
+                    references: messages(id)
+                    deleteCascade: true
+              - column:
+                  name: recipient_id
+                  type: BIGINT
+                  constraints:
+                    nullable: false
+                    foreignKeyName: fk_private_messages_recipient
+                    references: users(id)
+                    deleteCascade: true

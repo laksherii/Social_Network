@@ -1,0 +1,136 @@
+databaseChangeLog:
+  - changeSet:
+      id: 019-1-insert-message-private-1
+      author: Lashkevich Artem
+      preConditions:
+        - onFail: MARK_RAN
+        - sqlCheck:
+            expectedResult: "0"
+            sql: "SELECT COUNT(*) FROM messages WHERE sender_id = 1 AND content = 'Привет всем! Как дела?' AND message_type = 'PRIVATE'"
+      changes:
+        - insert:
+            tableName: messages
+            columns:
+              - column: { name: sender_id, value: "1" }
+              - column: { name: content, value: "Привет всем! Как дела?" }
+              - column: { name: message_type, value: "PRIVATE" }
+              - column: { name: created_at, valueComputed: "NOW() - INTERVAL '5 days'" }
+
+  - changeSet:
+      id: 019-2-insert-message-group-2
+      author: Lashkevich Artem
+      preConditions:
+        - onFail: MARK_RAN
+        - sqlCheck:
+            expectedResult: "0"
+            sql: "SELECT COUNT(*) FROM messages WHERE sender_id = 2 AND content = 'Кто пойдет на встречу в пятницу?' AND message_type = 'GROUP'"
+      changes:
+        - insert:
+            tableName: messages
+            columns:
+              - column: { name: sender_id, value: "2" }
+              - column: { name: content, value: "Кто пойдет на встречу в пятницу?" }
+              - column: { name: message_type, value: "GROUP" }
+              - column: { name: created_at, valueComputed: "NOW() - INTERVAL '4 days'" }
+
+  - changeSet:
+      id: 019-3-insert-message-community-3
+      author: Lashkevich Artem
+      preConditions:
+        - onFail: MARK_RAN
+        - sqlCheck:
+            expectedResult: "0"
+            sql: "SELECT COUNT(*) FROM messages WHERE sender_id = 3 AND content = 'Новости сообщества: скоро будет обновление!' AND message_type = 'COMMUNITY'"
+      changes:
+        - insert:
+            tableName: messages
+            columns:
+              - column: { name: sender_id, value: "3" }
+              - column: { name: content, value: "Новости сообщества: скоро будет обновление!" }
+              - column: { name: message_type, value: "COMMUNITY" }
+              - column: { name: created_at, valueComputed: "NOW() - INTERVAL '3 days'" }
+
+  - changeSet:
+      id: 019-4-insert-message-private-4
+      author: Lashkevich Artem
+      preConditions:
+        - onFail: MARK_RAN
+        - sqlCheck:
+            expectedResult: "0"
+            sql: "SELECT COUNT(*) FROM messages WHERE sender_id = 4 AND content = 'Личное сообщение для тебя' AND message_type = 'PRIVATE'"
+      changes:
+        - insert:
+            tableName: messages
+            columns:
+              - column: { name: sender_id, value: "4" }
+              - column: { name: content, value: "Личное сообщение для тебя" }
+              - column: { name: message_type, value: "PRIVATE" }
+              - column: { name: created_at, valueComputed: "NOW() - INTERVAL '2 days'" }
+
+  - changeSet:
+      id: 019-5-insert-message-group-5
+      author: Lashkevich Artem
+      preConditions:
+        - onFail: MARK_RAN
+        - sqlCheck:
+            expectedResult: "0"
+            sql: "SELECT COUNT(*) FROM messages WHERE sender_id = 5 AND content = 'Обсудим новый проект?' AND message_type = 'GROUP'"
+      changes:
+        - insert:
+            tableName: messages
+            columns:
+              - column: { name: sender_id, value: "5" }
+              - column: { name: content, value: "Обсудим новый проект?" }
+              - column: { name: message_type, value: "GROUP" }
+              - column: { name: created_at, valueComputed: "NOW() - INTERVAL '1 days'" }
+
+  - changeSet:
+      id: 019-7-insert-message-wall-1
+      author: Lashkevich Artem
+      preConditions:
+        - onFail: MARK_RAN
+        - sqlCheck:
+            expectedResult: "0"
+            sql: "SELECT COUNT(*) FROM messages WHERE sender_id = 1 AND content = 'Как прошли выходные?' AND message_type = 'WALL'"
+      changes:
+        - insert:
+            tableName: messages
+            columns:
+              - column: { name: sender_id, value: "1" }
+              - column: { name: content, value: "Как прошли выходные?" }
+              - column: { name: message_type, value: "WALL" }
+              - column: { name: created_at, valueComputed: "NOW()" }
+
+  - changeSet:
+      id: 019-8-insert-message-wall-2
+      author: Lashkevich Artem
+      preConditions:
+        - onFail: MARK_RAN
+        - sqlCheck:
+            expectedResult: "0"
+            sql: "SELECT COUNT(*) FROM messages WHERE sender_id = 2 AND content = 'Поделюсь своими впечатлениями' AND message_type = 'WALL'"
+      changes:
+        - insert:
+            tableName: messages
+            columns:
+              - column: { name: sender_id, value: "2" }
+              - column: { name: content, value: "Поделюсь своими впечатлениями" }
+              - column: { name: message_type, value: "WALL" }
+              - column: { name: created_at, valueComputed: "NOW()" }
+
+  - changeSet:
+      id: 019-9-insert-message-wall-3
+      author: Lashkevich Artem
+      preConditions:
+        - onFail: MARK_RAN
+        - sqlCheck:
+            expectedResult: "0"
+            sql: "SELECT COUNT(*) FROM messages WHERE sender_id = 3 AND content = 'Новая фотография на стене' AND message_type = 'WALL'"
+      changes:
+        - insert:
+            tableName: messages
+            columns:
+              - column: { name: sender_id, value: "3" }
+              - column: { name: content, value: "Новая фотография на стене" }
+              - column: { name: message_type, value: "WALL" }
+              - column: { name: created_at, valueComputed: "NOW()" }

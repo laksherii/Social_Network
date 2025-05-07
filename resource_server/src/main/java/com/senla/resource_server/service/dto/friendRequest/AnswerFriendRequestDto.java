@@ -12,8 +12,6 @@ import lombok.ToString;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@EqualsAndHashCode
-@ToString
 public class AnswerFriendRequestDto {
 
     @NotNull(message = "Request ID must not be null")

@@ -5,12 +5,14 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
 
 @Data
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
 @EqualsAndHashCode
@@ -22,6 +24,6 @@ public class UserAuthRequestDto {
     private String email;
 
     @NotNull(message = "Password must not be null")
-    @Size(min = 6, message = "Password must be at least 4 characters long")
+    @Size(min = 6, message = "Password must be at least 6 characters long")
     private String password;
 }

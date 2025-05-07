@@ -46,14 +46,18 @@ class CommunityServiceImplTest {
     @InjectMocks
     private CommunityServiceImpl communityService;
 
+    private void mockAuthentication(String email) {
+        Authentication auth = mock(Authentication.class);
+        when(auth.getName()).thenReturn(email);
+        SecurityContext context = mock(SecurityContext.class);
+        when(context.getAuthentication()).thenReturn(auth);
+        SecurityContextHolder.setContext(context);
+    }
+
     @Test
     void createCommunity_WhenUserExists_ShouldReturnCreateCommunityResponseDto() {
         // given
-        Authentication auth = mock(Authentication.class);
-        when(auth.getName()).thenReturn(email);
-        SecurityContext securityContext = mock(SecurityContext.class);
-        when(securityContext.getAuthentication()).thenReturn(auth);
-        SecurityContextHolder.setContext(securityContext);
+        mockAuthentication(email);
 
         CreateCommunityRequestDto requestDto = new CreateCommunityRequestDto();
         requestDto.setName("Test Community");
@@ -82,11 +86,7 @@ class CommunityServiceImplTest {
     @Test
     void createCommunity_WhenUserNotFound_ShouldThrowEntityNotFoundException() {
         // given
-        Authentication auth = mock(Authentication.class);
-        when(auth.getName()).thenReturn(email);
-        SecurityContext securityContext = mock(SecurityContext.class);
-        when(securityContext.getAuthentication()).thenReturn(auth);
-        SecurityContextHolder.setContext(securityContext);
+        mockAuthentication(email);
 
         CreateCommunityRequestDto requestDto = new CreateCommunityRequestDto();
         requestDto.setName("Test Community");
@@ -101,11 +101,7 @@ class CommunityServiceImplTest {
     @Test
     void joinCommunity_WhenUserAndCommunityExistAndUserNotMember_ShouldAddUserAndReturnResponse() {
         // given
-        Authentication auth = mock(Authentication.class);
-        when(auth.getName()).thenReturn(email);
-        SecurityContext securityContext = mock(SecurityContext.class);
-        when(securityContext.getAuthentication()).thenReturn(auth);
-        SecurityContextHolder.setContext(securityContext);
+        mockAuthentication(email);
 
         JoinCommunityRequestDto requestDto = new JoinCommunityRequestDto();
         requestDto.setCommunityId(1L);
@@ -136,11 +132,7 @@ class CommunityServiceImplTest {
     @Test
     void joinCommunity_WhenUserNotFound_ShouldThrowEntityNotFoundException() {
         // given
-        Authentication auth = mock(Authentication.class);
-        when(auth.getName()).thenReturn(email);
-        SecurityContext securityContext = mock(SecurityContext.class);
-        when(securityContext.getAuthentication()).thenReturn(auth);
-        SecurityContextHolder.setContext(securityContext);
+        mockAuthentication(email);
 
         JoinCommunityRequestDto requestDto = new JoinCommunityRequestDto();
         requestDto.setCommunityId(1L);
@@ -155,11 +147,7 @@ class CommunityServiceImplTest {
     @Test
     void joinCommunity_WhenCommunityNotFound_ShouldThrowEntityNotFoundException() {
         // given
-        Authentication auth = mock(Authentication.class);
-        when(auth.getName()).thenReturn(email);
-        SecurityContext securityContext = mock(SecurityContext.class);
-        when(securityContext.getAuthentication()).thenReturn(auth);
-        SecurityContextHolder.setContext(securityContext);
+        mockAuthentication(email);
 
         JoinCommunityRequestDto requestDto = new JoinCommunityRequestDto();
         requestDto.setCommunityId(1L);
@@ -178,11 +166,7 @@ class CommunityServiceImplTest {
     @Test
     void joinCommunity_WhenUserAlreadyMember_ShouldThrowEntityExistException() {
         // given
-        Authentication auth = mock(Authentication.class);
-        when(auth.getName()).thenReturn(email);
-        SecurityContext securityContext = mock(SecurityContext.class);
-        when(securityContext.getAuthentication()).thenReturn(auth);
-        SecurityContextHolder.setContext(securityContext);
+        mockAuthentication(email);
 
         JoinCommunityRequestDto requestDto = new JoinCommunityRequestDto();
         requestDto.setCommunityId(1L);

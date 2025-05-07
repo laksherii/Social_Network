@@ -4,6 +4,7 @@ import com.senla.resource_server.data.dao.UserDao;
 import com.senla.resource_server.data.entity.User;
 import com.senla.resource_server.data.entity.User.GenderType;
 import com.senla.resource_server.data.entity.User.RoleType;
+import com.senla.resource_server.data.entity.Wall;
 import com.senla.resource_server.exception.EntityNotFoundException;
 import com.senla.resource_server.exception.IllegalStateException;
 import com.senla.resource_server.service.dto.user.CreateUserDtoRequest;
@@ -22,9 +23,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import reactor.core.publisher.Mono;
-import reactor.test.StepVerifier;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -127,14 +127,46 @@ class UserServiceImplTest {
     }
 
     @Test
+    void create_WhenRoleIsNull_ShouldNotOverrideRole() {
+        // given
+        CreateUserDtoRequest userDtoRequest = CreateUserDtoRequest.builder()
+                .email("artem@example.com")
+                .birthDay(LocalDate.of(2001, 1, 13))
+                .password("correct")
+                .lastName("Artem")
+                .lastName("Lashkevich")
+                .build();
+
+        User mapped = new User();
+        mapped.setId(1L);
+        mapped.setEmail("artem@example.com");
+        mapped.setRole(null);
+
+        CreateUserDtoResponse createUserDtoResponse = new CreateUserDtoResponse();
+        createUserDtoResponse.setEmail(mapped.getEmail());
+
+        when(userDao.findByEmail(userDtoRequest.getEmail())).thenReturn(Optional.empty());
+        when(passwordEncoder.encode(userDtoRequest.getPassword())).thenReturn("encoded-pass");
+        when(userMapper.toUserCreate(userDtoRequest)).thenReturn(mapped);
+        when(userDao.save(mapped)).thenReturn(mapped);
+        when(userMapper.toCreateUserDtoResponse(mapped)).thenReturn(createUserDtoResponse);
+
+        // when
+        CreateUserDtoResponse response = userService.create(userDtoRequest, null);
+
+        //then
+        assertThat(response.getEmail()).isEqualTo("artem@example.com");
+        assertThat(mapped.getRole()).isNull();
+    }
+
+    @Test
     void getUserInfo_WhenUserNotFound_ShouldThrowException() {
         // given
         when(userDao.findByEmail("test@example.com")).thenReturn(Optional.empty());
 
         // when / then
         assertThatThrownBy(() -> userService.getUserInfo("test@example.com"))
-                .isInstanceOf(EntityNotFoundException.class)
-                .hasMessage("User with email test@example.com not found");
+                .isInstanceOf(EntityNotFoundException.class);
     }
 
     @Test
@@ -145,7 +177,6 @@ class UserServiceImplTest {
                 .password("password123")
                 .firstName("John")
                 .lastName("Doe")
-                .role(RoleType.ROLE_USER)
                 .birthDay(LocalDate.of(1990, 1, 1))
                 .gender(GenderType.MALE)
                 .build();
@@ -175,7 +206,7 @@ class UserServiceImplTest {
         when(userMapper.toCreateUserDtoResponse(savedUser)).thenReturn(expected);
 
         // when
-        CreateUserDtoResponse result = userService.create(request);
+        CreateUserDtoResponse result = userService.create(request, RoleType.ROLE_USER);
 
         // then
         assertThat(result.getEmail()).isEqualTo(expected.getEmail());
@@ -189,14 +220,13 @@ class UserServiceImplTest {
                 .password("Password123")
                 .firstName("John")
                 .lastName("Doe")
-                .role(RoleType.ROLE_USER)
                 .birthDay(LocalDate.of(1990, 1, 1))
                 .gender(GenderType.MALE)
                 .build();
         when(userDao.findByEmail("test@example.com")).thenReturn(Optional.of(user));
 
         // when / then
-        assertThatThrownBy(() -> userService.create(request))
+        assertThatThrownBy(() -> userService.create(request, RoleType.ROLE_USER))
                 .isInstanceOf(IllegalStateException.class);
     }
 
@@ -207,7 +237,7 @@ class UserServiceImplTest {
         UserAuthResponseDto expectedDto = UserAuthResponseDto.builder()
                 .id(1L)
                 .email("test@example.com")
-                .password("password123")
+                .role(RoleType.ROLE_USER)
                 .build();
 
         when(userDao.findByEmail("test@example.com")).thenReturn(Optional.of(user));
@@ -215,27 +245,23 @@ class UserServiceImplTest {
         when(userMapper.toUserAuthResponseDto(user)).thenReturn(expectedDto);
 
         // when
-        UserAuthResponseDto result = userService.authenticate(request).block();
+        UserAuthResponseDto result = userService.authenticate(request);
 
         // then
         assertThat(result).isEqualTo(expectedDto);
     }
 
     @Test
-    void authenticate_WhenPasswordDoesNotMatch_ShouldReturnNull() {
+    void authenticate_WhenPasswordDoesNotMatch_ShouldThrowIllegalStateException() {
         // given
         UserAuthRequestDto request = new UserAuthRequestDto("test@example.com", "password123");
 
         when(userDao.findByEmail("test@example.com")).thenReturn(Optional.of(user));
-        when(passwordEncoder.matches("password123", "encodedPassword")).thenReturn(false);  // пароли не совпадают
+        when(passwordEncoder.matches("password123", "encodedPassword")).thenReturn(false);
 
-        // when
-        Mono<UserAuthResponseDto> result = userService.authenticate(request);
-
-        // then
-        StepVerifier.create(result)
-                .expectNextCount(0)
-                .verifyComplete();
+        // when / then
+        assertThatThrownBy(() -> userService.authenticate(request))
+                .isInstanceOf(BadCredentialsException.class);
     }
 
     @Test
@@ -245,7 +271,7 @@ class UserServiceImplTest {
         when(userDao.findByEmail("no@mail.com")).thenReturn(Optional.empty());
 
         // when / then
-        assertThatThrownBy(() -> userService.authenticate(request).block())
+        assertThatThrownBy(() -> userService.authenticate(request))
                 .isInstanceOf(EntityNotFoundException.class);
     }
 

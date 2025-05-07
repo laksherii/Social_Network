@@ -10,8 +10,6 @@ import lombok.ToString;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@EqualsAndHashCode
-@ToString
 public class GroupChatDto {
 
     @NotBlank(message = "Group chat name must not be blank")

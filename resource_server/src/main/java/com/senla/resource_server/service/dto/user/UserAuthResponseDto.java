@@ -27,10 +27,6 @@ public class UserAuthResponseDto {
     @Email(message = "Invalid email format")
     private String email;
 
-    @NotNull(message = "Password must not be null")
-    @Size(min = 6, message = "Password must be at least 4 characters long")
-    private String password;
-
     @NotNull(message = "Role must not be null")
     private RoleType role;
 }

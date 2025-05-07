@@ -1,0 +1,150 @@
+databaseChangeLog:
+  - changeSet:
+      id: 024-insert-user-friends-1-2
+      author: Lashkevich Artem
+      preConditions:
+        - onFail: MARK_RAN
+        - sqlCheck:
+            expectedResult: "0"
+            sql: "SELECT COUNT(*) FROM user_friends WHERE user_id = 1 AND friend_id = 2"
+      changes:
+        - insert:
+            tableName: user_friends
+            columns:
+              - column: { name: user_id, value: "1" }
+              - column: { name: friend_id, value: "2" }
+
+  - changeSet:
+      id: 024-insert-user-friends-1-3
+      author: Lashkevich Artem
+      preConditions:
+        - onFail: MARK_RAN
+        - sqlCheck:
+            expectedResult: "0"
+            sql: "SELECT COUNT(*) FROM user_friends WHERE user_id = 1 AND friend_id = 3"
+      changes:
+        - insert:
+            tableName: user_friends
+            columns:
+              - column: { name: user_id, value: "1" }
+              - column: { name: friend_id, value: "3" }
+
+  - changeSet:
+      id: 024-insert-user-friends-2-1
+      author: Lashkevich Artem
+      preConditions:
+        - onFail: MARK_RAN
+        - sqlCheck:
+            expectedResult: "0"
+            sql: "SELECT COUNT(*) FROM user_friends WHERE user_id = 2 AND friend_id = 1"
+      changes:
+        - insert:
+            tableName: user_friends
+            columns:
+              - column: { name: user_id, value: "2" }
+              - column: { name: friend_id, value: "1" }
+
+  - changeSet:
+      id: 024-insert-user-friends-2-4
+      author: Lashkevich Artem
+      preConditions:
+        - onFail: MARK_RAN
+        - sqlCheck:
+            expectedResult: "0"
+            sql: "SELECT COUNT(*) FROM user_friends WHERE user_id = 2 AND friend_id = 4"
+      changes:
+        - insert:
+            tableName: user_friends
+            columns:
+              - column: { name: user_id, value: "2" }
+              - column: { name: friend_id, value: "4" }
+
+  - changeSet:
+      id: 024-insert-user-friends-3-1
+      author: Lashkevich Artem
+      preConditions:
+        - onFail: MARK_RAN
+        - sqlCheck:
+            expectedResult: "0"
+            sql: "SELECT COUNT(*) FROM user_friends WHERE user_id = 3 AND friend_id = 1"
+      changes:
+        - insert:
+            tableName: user_friends
+            columns:
+              - column: { name: user_id, value: "3" }
+              - column: { name: friend_id, value: "1" }
+
+  - changeSet:
+      id: 024-insert-user-friends-4-3
+      author: Lashkevich Artem
+      preConditions:
+        - onFail: MARK_RAN
+        - sqlCheck:
+            expectedResult: "0"
+            sql: "SELECT COUNT(*) FROM user_friends WHERE user_id = 4 AND friend_id = 3"
+      changes:
+        - insert:
+            tableName: user_friends
+            columns:
+              - column: { name: user_id, value: "4" }
+              - column: { name: friend_id, value: "3" }
+
+  - changeSet:
+      id: 024-insert-user-friends-5-3
+      author: Lashkevich Artem
+      preConditions:
+        - onFail: MARK_RAN
+        - sqlCheck:
+            expectedResult: "0"
+            sql: "SELECT COUNT(*) FROM user_friends WHERE user_id = 5 AND friend_id = 3"
+      changes:
+        - insert:
+            tableName: user_friends
+            columns:
+              - column: { name: user_id, value: "5" }
+              - column: { name: friend_id, value: "3" }
+
+  - changeSet:
+      id: 024-insert-user-friends-5-1
+      author: Lashkevich Artem
+      preConditions:
+        - onFail: MARK_RAN
+        - sqlCheck:
+            expectedResult: "0"
+            sql: "SELECT COUNT(*) FROM user_friends WHERE user_id = 5 AND friend_id = 1"
+      changes:
+        - insert:
+            tableName: user_friends
+            columns:
+              - column: { name: user_id, value: "5" }
+              - column: { name: friend_id, value: "1" }
+
+  - changeSet:
+      id: 024-insert-user-friends-5-4
+      author: Lashkevich Artem
+      preConditions:
+        - onFail: MARK_RAN
+        - sqlCheck:
+            expectedResult: "0"
+            sql: "SELECT COUNT(*) FROM user_friends WHERE user_id = 5 AND friend_id = 4"
+      changes:
+        - insert:
+            tableName: user_friends
+            columns:
+              - column: { name: user_id, value: "5" }
+              - column: { name: friend_id, value: "4" }
+
+  - changeSet:
+      id: 024-insert-user-friends-1-4
+      author: Lashkevich Artem
+      preConditions:
+        - onFail: MARK_RAN
+        - sqlCheck:
+            expectedResult: "0"
+            sql: "SELECT COUNT(*) FROM user_friends WHERE user_id = 1 AND friend_id = 4"
+      changes:
+        - insert:
+            tableName: user_friends
+            columns:
+              - column: { name: user_id, value: "1" }
+              - column: { name: friend_id, value: "4" }

@@ -38,8 +38,6 @@ public class CreateUserDtoRequest {
     @NotBlank(message = "Last name must not be blank")
     private String lastName;
 
-    private RoleType role;
-
     @NotNull(message = "Birth day must not be null")
     @Past(message = "Birth day must be a past date")
     private LocalDate birthDay;

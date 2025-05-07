@@ -11,8 +11,6 @@ import lombok.ToString;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@EqualsAndHashCode
-@ToString
 public class SendFriendRequestDto {
 
     @NotBlank(message = "Receiver email must not be blank")

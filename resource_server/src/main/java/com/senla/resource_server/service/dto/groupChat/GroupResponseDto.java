@@ -19,8 +19,6 @@ import java.util.Set;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@EqualsAndHashCode
-@ToString
 public class GroupResponseDto {
     @NotBlank(message = "Group name must not be blank")
     private String name;

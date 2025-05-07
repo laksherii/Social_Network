@@ -12,8 +12,6 @@ import lombok.ToString;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@EqualsAndHashCode
-@ToString
 public class PrivateMessageRequestDto {
 
     @NotNull(message = "Recipient must not be null")

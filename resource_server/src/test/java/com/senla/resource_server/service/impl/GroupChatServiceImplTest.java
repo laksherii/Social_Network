@@ -25,9 +25,14 @@ import static org.mockito.Mockito.*;
 @ExtendWith(MockitoExtension.class)
 class GroupChatServiceImplTest {
 
-    @Mock private GroupChatDao groupDao;
-    @Mock private UserDao userDao;
-    @Mock private GroupChatMapper groupChatMapper;
+    @Mock
+    private GroupChatDao groupDao;
+
+    @Mock
+    private UserDao userDao;
+
+    @Mock
+    private GroupChatMapper groupChatMapper;
 
     @InjectMocks
     private GroupChatServiceImpl service;

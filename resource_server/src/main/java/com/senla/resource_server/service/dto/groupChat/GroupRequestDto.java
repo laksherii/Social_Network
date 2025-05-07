@@ -18,8 +18,6 @@ import java.util.Set;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@EqualsAndHashCode
-@ToString
 public class GroupRequestDto {
 
     @NotBlank(message = "Group name must not be blank")

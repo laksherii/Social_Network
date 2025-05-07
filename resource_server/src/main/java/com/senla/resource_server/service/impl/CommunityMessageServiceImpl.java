@@ -8,8 +8,8 @@ import com.senla.resource_server.data.entity.CommunityMessage;
 import com.senla.resource_server.data.entity.User;
 import com.senla.resource_server.exception.EntityNotFoundException;
 import com.senla.resource_server.exception.UserNotAdminInGroupException;
-import com.senla.resource_server.service.dto.message.CreateCommunityMessageRequestDto;
-import com.senla.resource_server.service.dto.message.CreateCommunityMessageResponseDto;
+import com.senla.resource_server.service.dto.message.SendCommunityMessageRequestDto;
+import com.senla.resource_server.service.dto.message.SendCommunityMessageResponseDto;
 import com.senla.resource_server.service.interfaces.CommunityMessageService;
 import com.senla.resource_server.service.mapper.MessageMapper;
 import jakarta.transaction.Transactional;
@@ -32,7 +32,7 @@ public class CommunityMessageServiceImpl implements CommunityMessageService {
     private final MessageMapper messageMapper;
 
     @Override
-    public CreateCommunityMessageResponseDto sendCommunityMessage(CreateCommunityMessageRequestDto createCommunityMessageDto) {
+    public SendCommunityMessageResponseDto sendCommunityMessage(SendCommunityMessageRequestDto createCommunityMessageDto) {
         log.info("Received request to send a community message: {}", createCommunityMessageDto);
 
         Long communityId = createCommunityMessageDto.getCommunityId();

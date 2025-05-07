@@ -13,11 +13,6 @@ import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Size;
-import lombok.Getter;
-import lombok.Setter;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -26,8 +21,6 @@ import java.util.Set;
 
 @Entity
 @Table(name = "community")
-@Getter
-@Setter
 public class Community {
 
     @Id
@@ -51,4 +44,44 @@ public class Community {
 
     @OneToMany(mappedBy = "community", cascade = CascadeType.ALL)
     private List<CommunityMessage> messages = new ArrayList<>();
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public void setAdmin(User admin) {
+        this.admin = admin;
+    }
+
+    public void setUsers(Set<User> users) {
+        this.users = users;
+    }
+
+    public void setMessages(List<CommunityMessage> messages) {
+        this.messages = messages;
+    }
+
+    public Long getId() {
+        return this.id;
+    }
+
+    public String getName() {
+        return this.name;
+    }
+
+    public User getAdmin() {
+        return this.admin;
+    }
+
+    public Set<User> getUsers() {
+        return this.users;
+    }
+
+    public List<CommunityMessage> getMessages() {
+        return this.messages;
+    }
 }

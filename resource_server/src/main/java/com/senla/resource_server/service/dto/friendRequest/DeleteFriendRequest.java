@@ -12,8 +12,6 @@ import lombok.ToString;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@EqualsAndHashCode
-@ToString
 public class DeleteFriendRequest {
 
     @NotNull(message = "Request ID must not be null")

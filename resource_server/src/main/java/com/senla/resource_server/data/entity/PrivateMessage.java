@@ -23,7 +23,4 @@ public class PrivateMessage extends Message {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "recipient_id", nullable = false)
     private User recipient;
-
-    @Column(name = "is_read", nullable = false)
-    private boolean isRead = false;
 }

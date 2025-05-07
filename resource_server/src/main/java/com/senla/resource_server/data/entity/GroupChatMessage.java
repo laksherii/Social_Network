@@ -9,7 +9,6 @@ import jakarta.persistence.PrimaryKeyJoinColumn;
 import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
-import com.senla.resource_server.validate.ValidGroupMember;
 
 @Entity
 @Getter
@@ -17,7 +16,6 @@ import com.senla.resource_server.validate.ValidGroupMember;
 @Table(name = "group_chat_message")
 @PrimaryKeyJoinColumn(name = "message_id")
 @DiscriminatorValue("GROUP")
-@ValidGroupMember
 public class GroupChatMessage extends Message {
 
     @ManyToOne(fetch = FetchType.LAZY)

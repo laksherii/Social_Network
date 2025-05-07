@@ -1,0 +1,40 @@
+databaseChangeLog:
+  - changeSet:
+      id: 012-create-wall-messages-table
+      author: Lashkevich Artem
+      preConditions:
+        - onFail: MARK_RAN
+        - not:
+            - tableExists:
+                tableName: wall_messages
+      changes:
+        - createTable:
+            tableName: wall_messages
+            columns:
+              - column:
+                  name: id
+                  type: BIGINT
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: wall_id
+                  type: BIGINT
+                  constraints:
+                    nullable: false
+                    foreignKeyName: fk_wall_messages_wall
+                    references: wall(id)
+                    deleteCascade: true
+              - column:
+                  name: message_id
+                  type: BIGINT
+                  constraints:
+                    nullable: false
+                    foreignKeyName: fk_wall_messages_message
+                    references: messages(id)
+                    deleteCascade: true
+        - addUniqueConstraint:
+            tableName: wall_messages
+            columnNames: wall_id, message_id
+            constraintName: uk_wall_messages_wall_id_message_id

@@ -1,0 +1,30 @@
+databaseChangeLog:
+  - changeSet:
+      id: 021-1-insert-group-chat-message-2-1
+      author: Lashkevich Artem
+      preConditions:
+        - onFail: MARK_RAN
+        - sqlCheck:
+            expectedResult: "0"
+            sql: "SELECT COUNT(*) FROM group_chat_message WHERE message_id = 2 AND group_id = 1"
+      changes:
+        - insert:
+            tableName: group_chat_message
+            columns:
+              - column: { name: message_id, value: "2" }
+              - column: { name: group_id, value: "1" }
+
+  - changeSet:
+      id: 021-2-insert-group-chat-message-5-2
+      author: Lashkevich Artem
+      preConditions:
+        - onFail: MARK_RAN
+        - sqlCheck:
+            expectedResult: "0"
+            sql: "SELECT COUNT(*) FROM group_chat_message WHERE message_id = 5 AND group_id = 2"
+      changes:
+        - insert:
+            tableName: group_chat_message
+            columns:
+              - column: { name: message_id, value: "5" }
+              - column: { name: group_id, value: "2" }

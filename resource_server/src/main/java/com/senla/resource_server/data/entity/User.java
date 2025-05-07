@@ -62,6 +62,7 @@ public class User {
             joinColumns = @JoinColumn(name = "user_id"),
             inverseJoinColumns = @JoinColumn(name = "friend_id")
     )
+    @Builder.Default
     private Set<User> friends = new HashSet<>();
 
     @ManyToMany
@@ -70,18 +71,23 @@ public class User {
             joinColumns = @JoinColumn(name = "user_id"),
             inverseJoinColumns = @JoinColumn(name = "community_id")
     )
+    @Builder.Default
     private Set<Community> communities = new HashSet<>();
 
     @OneToMany(mappedBy = "sender")
+    @Builder.Default
     private Set<FriendRequest> senderRequest = new HashSet<>();
 
     @OneToMany(mappedBy = "recipient")
+    @Builder.Default
     private Set<FriendRequest> recipientRequest = new HashSet<>();
 
     @OneToMany(mappedBy = "sender")
+    @Builder.Default
     private Set<PrivateMessage> sentPrivateMessages = new HashSet<>();
 
     @OneToMany(mappedBy = "recipient")
+    @Builder.Default
     private Set<PrivateMessage> recipientPrivateMessages = new HashSet<>();
 
     @Enumerated(EnumType.STRING)

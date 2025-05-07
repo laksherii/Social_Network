@@ -1,0 +1,84 @@
+databaseChangeLog:
+  - changeSet:
+      id: 015-1-insert-wall-alexander
+      author: Lashkevich Artem
+      preConditions:
+        - onFail: MARK_RAN
+        - sqlCheck:
+            expectedResult: "1"
+            sql: "SELECT COUNT(*) FROM users WHERE email = 'alexander@example.com'"
+      changes:
+        - sql:
+            sql: |
+              INSERT INTO wall (user_id)
+              SELECT id FROM users WHERE email = 'alexander@example.com';
+
+  - changeSet:
+      id: 015-2-insert-wall-elizabeth
+      author: Lashkevich Artem
+      preConditions:
+        - onFail: MARK_RAN
+        - sqlCheck:
+            expectedResult: "1"
+            sql: "SELECT COUNT(*) FROM users WHERE email = 'elizabeth@example.com'"
+      changes:
+        - sql:
+            sql: |
+              INSERT INTO wall (user_id)
+              SELECT id FROM users WHERE email = 'elizabeth@example.com';
+
+  - changeSet:
+      id: 015-3-insert-wall-christopher
+      author: Lashkevich Artem
+      preConditions:
+        - onFail: MARK_RAN
+        - sqlCheck:
+            expectedResult: "1"
+            sql: "SELECT COUNT(*) FROM users WHERE email = 'christopher@example.com'"
+      changes:
+        - sql:
+            sql: |
+              INSERT INTO wall (user_id)
+              SELECT id FROM users WHERE email = 'christopher@example.com';
+
+  - changeSet:
+      id: 015-4-insert-wall-victoria
+      author: Lashkevich Artem
+      preConditions:
+        - onFail: MARK_RAN
+        - sqlCheck:
+            expectedResult: "1"
+            sql: "SELECT COUNT(*) FROM users WHERE email = 'victoria@example.com'"
+      changes:
+        - sql:
+            sql: |
+              INSERT INTO wall (user_id)
+              SELECT id FROM users WHERE email = 'victoria@example.com';
+
+  - changeSet:
+      id: 015-5-insert-wall-benjamin
+      author: Lashkevich Artem
+      preConditions:
+        - onFail: MARK_RAN
+        - sqlCheck:
+            expectedResult: "1"
+            sql: "SELECT COUNT(*) FROM users WHERE email = 'benjamin@example.com'"
+      changes:
+        - sql:
+            sql: |
+              INSERT INTO wall (user_id)
+              SELECT id FROM users WHERE email = 'benjamin@example.com';
+
+  - changeSet:
+      id: 015-6-insert-wall-natalie
+      author: Lashkevich Artem
+      preConditions:
+        - onFail: MARK_RAN
+        - sqlCheck:
+            expectedResult: "1"
+            sql: "SELECT COUNT(*) FROM users WHERE email = 'natalie@example.com'"
+      changes:
+        - sql:
+            sql: |
+              INSERT INTO wall (user_id)
+              SELECT id FROM users WHERE email = 'natalie@example.com';

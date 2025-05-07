@@ -1,5 +1,6 @@
 package com.senla.resource_server.service.interfaces;
 
+import com.senla.resource_server.data.entity.User.RoleType;
 import com.senla.resource_server.service.dto.user.CreateUserDtoRequest;
 import com.senla.resource_server.service.dto.user.CreateUserDtoResponse;
 import com.senla.resource_server.service.dto.user.UpdateUserDtoRequest;
@@ -20,9 +21,9 @@ public interface UserService {
 
     UserInfoDto getUserInfo(String email);
 
-    CreateUserDtoResponse create(CreateUserDtoRequest userDtoRequest);
+    CreateUserDtoResponse create(CreateUserDtoRequest userDtoRequest, RoleType role);
 
-    Mono<UserAuthResponseDto> authenticate(UserAuthRequestDto userDtoRequest);
+    UserAuthResponseDto authenticate(UserAuthRequestDto userDtoRequest);
 
     UpdateUserDtoResponse update(UpdateUserDtoRequest userDtoRequest);
 

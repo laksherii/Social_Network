@@ -1,0 +1,30 @@
+databaseChangeLog:
+  - changeSet:
+      id: 026-insert-private-messages-1-2
+      author: Lashkevich Artem
+      preConditions:
+        - onFail: MARK_RAN
+        - sqlCheck:
+            expectedResult: "0"
+            sql: "SELECT COUNT(*) FROM private_messages WHERE message_id = 1 AND recipient_id = 2"
+      changes:
+        - insert:
+            tableName: private_messages
+            columns:
+              - column: { name: message_id, value: "1" }
+              - column: { name: recipient_id, value: "2" }
+
+  - changeSet:
+      id: 026-insert-private-messages-4-1
+      author: Lashkevich Artem
+      preConditions:
+        - onFail: MARK_RAN
+        - sqlCheck:
+            expectedResult: "0"
+            sql: "SELECT COUNT(*) FROM private_messages WHERE message_id = 4 AND recipient_id = 1"
+      changes:
+        - insert:
+            tableName: private_messages
+            columns:
+              - column: { name: message_id, value: "4" }
+              - column: { name: recipient_id, value: "1" }

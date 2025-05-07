@@ -40,6 +40,7 @@ public class FriendRequest {
 
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false)
+    @Builder.Default
     private FriendRequestStatus status = FriendRequestStatus.UNDEFINED;
 
     public enum FriendRequestStatus {

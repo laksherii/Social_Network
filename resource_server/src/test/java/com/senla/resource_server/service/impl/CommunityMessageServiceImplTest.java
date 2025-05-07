@@ -8,8 +8,8 @@ import com.senla.resource_server.data.entity.CommunityMessage;
 import com.senla.resource_server.data.entity.User;
 import com.senla.resource_server.exception.EntityNotFoundException;
 import com.senla.resource_server.exception.UserNotAdminInGroupException;
-import com.senla.resource_server.service.dto.message.CreateCommunityMessageRequestDto;
-import com.senla.resource_server.service.dto.message.CreateCommunityMessageResponseDto;
+import com.senla.resource_server.service.dto.message.SendCommunityMessageRequestDto;
+import com.senla.resource_server.service.dto.message.SendCommunityMessageResponseDto;
 import com.senla.resource_server.service.mapper.MessageMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -33,33 +33,27 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 class CommunityMessageServiceImplTest {
 
-    @Mock
-    private CommunityDao communityDao;
-
-    @Mock
-    private UserDao userDaoImpl;
-
-    @Mock
-    private CommunityMessageDao communityMessageDaoImpl;
-
-    @Mock
-    private MessageMapper messageMapper;
-
-    @InjectMocks
-    private CommunityMessageServiceImpl communityMessageService;
-
     private final Long communityId = 1L;
     private final String email = "admin@example.com";
-
-    private CreateCommunityMessageRequestDto requestDto;
+    @Mock
+    private CommunityDao communityDao;
+    @Mock
+    private UserDao userDaoImpl;
+    @Mock
+    private CommunityMessageDao communityMessageDaoImpl;
+    @Mock
+    private MessageMapper messageMapper;
+    @InjectMocks
+    private CommunityMessageServiceImpl communityMessageService;
+    private SendCommunityMessageRequestDto requestDto;
     private User user;
     private Community community;
     private CommunityMessage savedMessage;
-    private CreateCommunityMessageResponseDto responseDto;
+    private SendCommunityMessageResponseDto responseDto;
 
     @BeforeEach
     void setUp() {
-        requestDto = new CreateCommunityMessageRequestDto();
+        requestDto = new SendCommunityMessageRequestDto();
         requestDto.setCommunityId(communityId);
         requestDto.setMessage("Hello community!");
 
@@ -78,7 +72,7 @@ class CommunityMessageServiceImplTest {
         savedMessage.setSender(user);
         savedMessage.setCommunity(community);
 
-        responseDto = new CreateCommunityMessageResponseDto();
+        responseDto = new SendCommunityMessageResponseDto();
         responseDto.setCommunityName(savedMessage.getCommunity().getName());
         responseDto.setMessage(savedMessage.getMessage());
     }
@@ -98,7 +92,7 @@ class CommunityMessageServiceImplTest {
         when(messageMapper.toCreateCommunityMessageResponseDto(savedMessage)).thenReturn(responseDto);
 
         // When
-        CreateCommunityMessageResponseDto result = communityMessageService.sendCommunityMessage(requestDto);
+        SendCommunityMessageResponseDto result = communityMessageService.sendCommunityMessage(requestDto);
 
         // Then
         assertThat(result).isNotNull();

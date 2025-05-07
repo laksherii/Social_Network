@@ -17,14 +17,12 @@ import org.mapstruct.ReportingPolicy;
 @Mapper(componentModel = ComponentModel.SPRING, unmappedTargetPolicy = ReportingPolicy.IGNORE)
 public interface UserMapper {
 
-    @Mapping(source = "email", target = "email")
     UserDto toUserDto(User user);
 
     UserInfoDto toUserInfoDto(User user);
 
     User toUser(UserDto userDto);
 
-    @Mapping(target = "role", constant = "ROLE_USER")
     User toUserCreate(CreateUserDtoRequest createUserDtoRequest);
 
     CreateUserDtoResponse toCreateUserDtoResponse(User user);

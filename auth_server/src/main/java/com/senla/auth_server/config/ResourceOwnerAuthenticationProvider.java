@@ -10,6 +10,7 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.stereotype.Component;
+import org.springframework.web.client.RestClient;
 import org.springframework.web.reactive.function.client.WebClient;
 
 import java.util.List;
@@ -18,10 +19,10 @@ import java.util.Map;
 @Component
 public class ResourceOwnerAuthenticationProvider implements AuthenticationProvider {
 
-    private final WebClient webClient;
+    private final RestClient restClient;
 
-    public ResourceOwnerAuthenticationProvider(WebClient.Builder webClientBuilder) {
-        this.webClient = webClientBuilder.baseUrl("http://localhost:8080").build();
+    public ResourceOwnerAuthenticationProvider(RestClient.Builder restClientBuilder) {
+        this.restClient = restClientBuilder.baseUrl("http://resource-server:8080").build();
     }
 
     @Override
@@ -29,16 +30,14 @@ public class ResourceOwnerAuthenticationProvider implements AuthenticationProvid
         String username = authentication.getName();
         String password = authentication.getCredentials().toString();
 
-
         try {
-            UserResponseDto userDto = webClient
+            UserResponseDto userDto = restClient
                     .post()
-                    .uri("http://localhost:8080/authenticate")
+                    .uri("/authenticate")
                     .contentType(MediaType.APPLICATION_JSON)
-                    .bodyValue(Map.of("email", username, "password", password))
+                    .body(Map.of("email", username, "password", password))
                     .retrieve()
-                    .bodyToMono(UserResponseDto.class)
-                    .block();
+                    .body(UserResponseDto.class);
 
             if (userDto == null) {
                 throw new BadCredentialsException("Invalid credentials");

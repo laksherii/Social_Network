@@ -1,0 +1,45 @@
+databaseChangeLog:
+  - changeSet:
+      id: 025-insert-wall-messages-1-7
+      author: Lashkevich Artem
+      preConditions:
+        - onFail: MARK_RAN
+        - sqlCheck:
+            expectedResult: "0"
+            sql: "SELECT COUNT(*) FROM wall_messages WHERE wall_id = 1 AND message_id = 7"
+      changes:
+        - insert:
+            tableName: wall_messages
+            columns:
+              - column: { name: wall_id, value: "1" }
+              - column: { name: message_id, value: "7" }
+
+  - changeSet:
+      id: 025-insert-wall-messages-2-8
+      author: Lashkevich Artem
+      preConditions:
+        - onFail: MARK_RAN
+        - sqlCheck:
+            expectedResult: "0"
+            sql: "SELECT COUNT(*) FROM wall_messages WHERE wall_id = 2 AND message_id = 8"
+      changes:
+        - insert:
+            tableName: wall_messages
+            columns:
+              - column: { name: wall_id, value: "2" }
+              - column: { name: message_id, value: "8" }
+
+  - changeSet:
+      id: 025-insert-wall-messages-3-8
+      author: Lashkevich Artem
+      preConditions:
+        - onFail: MARK_RAN
+        - sqlCheck:
+            expectedResult: "0"
+            sql: "SELECT COUNT(*) FROM wall_messages WHERE wall_id = 3 AND message_id = 8"
+      changes:
+        - insert:
+            tableName: wall_messages
+            columns:
+              - column: { name: wall_id, value: "3" }
+              - column: { name: message_id, value: "8" }

@@ -1,0 +1,37 @@
+databaseChangeLog:
+  - changeSet:
+      id: 004-create-community-table
+      author: Lashkevich Artem
+      preConditions:
+        - onFail: MARK_RAN
+        - not:
+            - tableExists:
+                tableName: community
+      changes:
+        - createTable:
+            tableName: community
+            columns:
+              - column:
+                  name: id
+                  type: BIGINT
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: name
+                  type: VARCHAR(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: admin_id
+                  type: BIGINT
+                  constraints:
+                    nullable: false
+        - addForeignKeyConstraint:
+            baseTableName: community
+            baseColumnNames: admin_id
+            referencedTableName: users
+            referencedColumnNames: id
+            constraintName: fk_community_admin
+            onDelete: CASCADE

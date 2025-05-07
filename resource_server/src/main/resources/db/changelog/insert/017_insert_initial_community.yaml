@@ -1,0 +1,45 @@
+databaseChangeLog:
+  - changeSet:
+      id: 017-1-insert-community-real-madrid
+      author: Lashkevich Artem
+      preConditions:
+        - onFail: MARK_RAN
+        - sqlCheck:
+            expectedResult: "0"
+            sql: "SELECT COUNT(*) FROM community WHERE name = 'Real Madrid' AND admin_id = 1"
+      changes:
+        - insert:
+            tableName: community
+            columns:
+              - column: { name: name, value: "Real Madrid" }
+              - column: { name: admin_id, value: "1" }
+
+  - changeSet:
+      id: 017-2-insert-community-liverpool
+      author: Lashkevich Artem
+      preConditions:
+        - onFail: MARK_RAN
+        - sqlCheck:
+            expectedResult: "0"
+            sql: "SELECT COUNT(*) FROM community WHERE name = 'Liverpool' AND admin_id = 2"
+      changes:
+        - insert:
+            tableName: community
+            columns:
+              - column: { name: name, value: "Liverpool" }
+              - column: { name: admin_id, value: "2" }
+
+  - changeSet:
+      id: 017-3-insert-community-manchester-united
+      author: Lashkevich Artem
+      preConditions:
+        - onFail: MARK_RAN
+        - sqlCheck:
+            expectedResult: "0"
+            sql: "SELECT COUNT(*) FROM community WHERE name = 'Manchester United' AND admin_id = 4"
+      changes:
+        - insert:
+            tableName: community
+            columns:
+              - column: { name: name, value: "Manchester United" }
+              - column: { name: admin_id, value: "4" }

@@ -1,0 +1,150 @@
+databaseChangeLog:
+  - changeSet:
+      id: 023-insert-group-chat-user-1-1
+      author: Lashkevich Artem
+      preConditions:
+        - onFail: MARK_RAN
+        - sqlCheck:
+            expectedResult: "0"
+            sql: "SELECT COUNT(*) FROM group_chat_user WHERE group_chat_id = 1 AND user_id = 1"
+      changes:
+        - insert:
+            tableName: group_chat_user
+            columns:
+              - column: { name: group_chat_id, value: "1" }
+              - column: { name: user_id, value: "1" }
+
+  - changeSet:
+      id: 023-insert-group-chat-user-1-2
+      author: Lashkevich Artem
+      preConditions:
+        - onFail: MARK_RAN
+        - sqlCheck:
+            expectedResult: "0"
+            sql: "SELECT COUNT(*) FROM group_chat_user WHERE group_chat_id = 1 AND user_id = 2"
+      changes:
+        - insert:
+            tableName: group_chat_user
+            columns:
+              - column: { name: group_chat_id, value: "1" }
+              - column: { name: user_id, value: "2" }
+
+  - changeSet:
+      id: 023-insert-group-chat-user-1-3
+      author: Lashkevich Artem
+      preConditions:
+        - onFail: MARK_RAN
+        - sqlCheck:
+            expectedResult: "0"
+            sql: "SELECT COUNT(*) FROM group_chat_user WHERE group_chat_id = 1 AND user_id = 3"
+      changes:
+        - insert:
+            tableName: group_chat_user
+            columns:
+              - column: { name: group_chat_id, value: "1" }
+              - column: { name: user_id, value: "3" }
+
+  - changeSet:
+      id: 023-insert-group-chat-user-1-4
+      author: Lashkevich Artem
+      preConditions:
+        - onFail: MARK_RAN
+        - sqlCheck:
+            expectedResult: "0"
+            sql: "SELECT COUNT(*) FROM group_chat_user WHERE group_chat_id = 1 AND user_id = 4"
+      changes:
+        - insert:
+            tableName: group_chat_user
+            columns:
+              - column: { name: group_chat_id, value: "1" }
+              - column: { name: user_id, value: "4" }
+
+  - changeSet:
+      id: 023-insert-group-chat-user-2-1
+      author: Lashkevich Artem
+      preConditions:
+        - onFail: MARK_RAN
+        - sqlCheck:
+            expectedResult: "0"
+            sql: "SELECT COUNT(*) FROM group_chat_user WHERE group_chat_id = 2 AND user_id = 1"
+      changes:
+        - insert:
+            tableName: group_chat_user
+            columns:
+              - column: { name: group_chat_id, value: "2" }
+              - column: { name: user_id, value: "1" }
+
+  - changeSet:
+      id: 023-insert-group-chat-user-2-3
+      author: Lashkevich Artem
+      preConditions:
+        - onFail: MARK_RAN
+        - sqlCheck:
+            expectedResult: "0"
+            sql: "SELECT COUNT(*) FROM group_chat_user WHERE group_chat_id = 2 AND user_id = 3"
+      changes:
+        - insert:
+            tableName: group_chat_user
+            columns:
+              - column: { name: group_chat_id, value: "2" }
+              - column: { name: user_id, value: "3" }
+
+  - changeSet:
+      id: 023-insert-group-chat-user-2-5
+      author: Lashkevich Artem
+      preConditions:
+        - onFail: MARK_RAN
+        - sqlCheck:
+            expectedResult: "0"
+            sql: "SELECT COUNT(*) FROM group_chat_user WHERE group_chat_id = 2 AND user_id = 5"
+      changes:
+        - insert:
+            tableName: group_chat_user
+            columns:
+              - column: { name: group_chat_id, value: "2" }
+              - column: { name: user_id, value: "5" }
+
+  - changeSet:
+      id: 023-insert-group-chat-user-3-2
+      author: Lashkevich Artem
+      preConditions:
+        - onFail: MARK_RAN
+        - sqlCheck:
+            expectedResult: "0"
+            sql: "SELECT COUNT(*) FROM group_chat_user WHERE group_chat_id = 3 AND user_id = 2"
+      changes:
+        - insert:
+            tableName: group_chat_user
+            columns:
+              - column: { name: group_chat_id, value: "3" }
+              - column: { name: user_id, value: "2" }
+
+  - changeSet:
+      id: 023-insert-group-chat-user-3-4
+      author: Lashkevich Artem
+      preConditions:
+        - onFail: MARK_RAN
+        - sqlCheck:
+            expectedResult: "0"
+            sql: "SELECT COUNT(*) FROM group_chat_user WHERE group_chat_id = 3 AND user_id = 4"
+      changes:
+        - insert:
+            tableName: group_chat_user
+            columns:
+              - column: { name: group_chat_id, value: "3" }
+              - column: { name: user_id, value: "4" }
+
+  - changeSet:
+      id: 023-insert-group-chat-user-3-6
+      author: Lashkevich Artem
+      preConditions:
+        - onFail: MARK_RAN
+        - sqlCheck:
+            expectedResult: "0"
+            sql: "SELECT COUNT(*) FROM group_chat_user WHERE group_chat_id = 3 AND user_id = 5"
+      changes:
+        - insert:
+            tableName: group_chat_user
+            columns:
+              - column: { name: group_chat_id, value: "3" }
+              - column: { name: user_id, value: "5" }

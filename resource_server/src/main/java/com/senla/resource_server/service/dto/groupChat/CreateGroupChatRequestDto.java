@@ -14,8 +14,6 @@ import java.util.Set;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@EqualsAndHashCode
-@ToString
 public class CreateGroupChatRequestDto {
 
     @NotBlank(message = "Group chat name must not be blank")

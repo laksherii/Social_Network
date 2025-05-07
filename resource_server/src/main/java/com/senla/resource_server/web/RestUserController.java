@@ -1,6 +1,7 @@
 package com.senla.resource_server.web;
 
 import com.senla.resource_server.data.entity.User.GenderType;
+import com.senla.resource_server.data.entity.User.RoleType;
 import com.senla.resource_server.service.dto.user.UpdateUserDtoRequest;
 import com.senla.resource_server.service.dto.user.UpdateUserDtoResponse;
 import com.senla.resource_server.service.dto.user.CreateUserDtoRequest;
@@ -19,6 +20,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
@@ -66,9 +68,10 @@ public class RestUserController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public CreateUserDtoResponse createUser(@Valid @RequestBody CreateUserDtoRequest createUserDtoRequest) {
+    public CreateUserDtoResponse createUser(@Valid @RequestBody CreateUserDtoRequest createUserDtoRequest,
+                                            @RequestHeader(name = "Role", required = false, defaultValue = "ROLE_USER") RoleType role) {
         log.info("Creating new user with email: {}", createUserDtoRequest.getEmail());
-        CreateUserDtoResponse response = userService.create(createUserDtoRequest);
+        CreateUserDtoResponse response = userService.create(createUserDtoRequest, role);
         log.info("Successfully created new user with email: {}", createUserDtoRequest.getEmail());
         return response;
     }

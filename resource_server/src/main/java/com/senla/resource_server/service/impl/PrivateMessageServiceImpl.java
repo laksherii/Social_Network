@@ -48,7 +48,6 @@ public class PrivateMessageServiceImpl implements PrivateMessageService {
         message.setSender(sender);
         message.setRecipient(recipient);
         message.setMessage(privateMessageRequestDto.getMessage());
-        message.setRead(false);
 
         PrivateMessage savedMessage = privateMessageDao.save(message);
         log.info("Private message successfully sent from {} to {} (Message ID: {})", sender.getEmail(), recipient.getEmail(), savedMessage.getId());

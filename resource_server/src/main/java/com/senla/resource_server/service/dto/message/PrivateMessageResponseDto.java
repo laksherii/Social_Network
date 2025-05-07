@@ -13,8 +13,6 @@ import lombok.ToString;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@EqualsAndHashCode
-@ToString
 public class PrivateMessageResponseDto {
 
     @Valid

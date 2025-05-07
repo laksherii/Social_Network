@@ -3,10 +3,8 @@ package com.senla.resource_server.config;
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 import jakarta.persistence.EntityManagerFactory;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.ComponentScan;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.PropertySource;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.*;
 import org.springframework.orm.jpa.JpaTransactionManager;
 import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
 import org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter;
@@ -18,18 +16,32 @@ import java.util.Properties;
 @Configuration
 @ComponentScan(basePackages = "com.senla.resource_server")
 @EnableTransactionManagement
-@PropertySource("classpath:application.properties")
-public class    ApplicationConfiguration {
+public class ApplicationConfiguration {
+
+    @Value("${spring.datasource.url}")
+    private String jdbcUrl;
+
+    @Value("${spring.datasource.username}")
+    private String username;
+
+    @Value("${spring.datasource.password}")
+    private String password;
+
+    @Value("${spring.datasource.driver-class-name}")
+    private String driver;
+
+    @Value("${spring.datasource.hikari.maximum-pool-size}")
+    private int poolSize;
 
     @Bean
     public DataSource dataSource() {
-        HikariConfig hikariConfig = new HikariConfig();
-        hikariConfig.setJdbcUrl("jdbc:postgresql://localhost:5435/resource_server_db");
-        hikariConfig.setUsername("postgres");
-        hikariConfig.setPassword("root");
-        hikariConfig.setDriverClassName("org.postgresql.Driver");
-        hikariConfig.setMaximumPoolSize(5);
-        return new HikariDataSource(hikariConfig);
+        HikariConfig config = new HikariConfig();
+        config.setJdbcUrl(jdbcUrl);
+        config.setUsername(username);
+        config.setPassword(password);
+        config.setDriverClassName(driver);
+        config.setMaximumPoolSize(poolSize);
+        return new HikariDataSource(config);
     }
 
     @Bean

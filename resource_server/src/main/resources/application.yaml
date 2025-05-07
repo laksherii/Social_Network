@@ -1,0 +1,28 @@
+spring:
+
+  application:
+    name: social_network
+
+  liquibase:
+    change-log: /db/db.changelog-master.yaml
+
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          jwk-set-uri: http://localhost:9000/oauth2/jwks
+
+  datasource:
+    url: jdbc:postgresql://localhost:5435/resource_server_db
+    username: postgres
+    password: root
+    driver-class-name: org.postgresql.Driver
+    hikari:
+      maximum-pool-size: 10
+
+app:
+  pagination:
+    default:
+      size: 20
+    max:
+      size: 30

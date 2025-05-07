@@ -1,12 +1,12 @@
 package com.senla.resource_server.web;
 
-import com.senla.resource_server.service.dto.message.CreateCommunityMessageRequestDto;
-import com.senla.resource_server.service.dto.message.CreateCommunityMessageResponseDto;
 import com.senla.resource_server.service.dto.message.GetGroupChatMessageDto;
 import com.senla.resource_server.service.dto.message.GroupChatMessageRequestDto;
 import com.senla.resource_server.service.dto.message.GroupChatMessageResponseDto;
 import com.senla.resource_server.service.dto.message.PrivateMessageRequestDto;
 import com.senla.resource_server.service.dto.message.PrivateMessageResponseDto;
+import com.senla.resource_server.service.dto.message.SendCommunityMessageRequestDto;
+import com.senla.resource_server.service.dto.message.SendCommunityMessageResponseDto;
 import com.senla.resource_server.service.impl.CommunityMessageServiceImpl;
 import com.senla.resource_server.service.impl.GroupChatMessageServiceImpl;
 import com.senla.resource_server.service.impl.PrivateMessageServiceImpl;
@@ -81,12 +81,12 @@ public class RestMessageController {
     }
 
     @PreAuthorize("hasAnyRole('ADMIN', 'USER', 'MODERATOR')")
-    @PostMapping("/community-message")
+    @PostMapping("/community")
     @ResponseStatus(HttpStatus.OK)
-    public CreateCommunityMessageResponseDto sendCommunityMessage(@Valid @RequestBody CreateCommunityMessageRequestDto communityMessageDto) {
+    public SendCommunityMessageResponseDto sendCommunityMessage(@Valid @RequestBody SendCommunityMessageRequestDto communityMessageDto) {
         log.info("Sending community message from user to community ID: {}",
                 communityMessageDto.getCommunityId());
-        CreateCommunityMessageResponseDto response = communityMessageServiceImpl.sendCommunityMessage(communityMessageDto);
+        SendCommunityMessageResponseDto response = communityMessageServiceImpl.sendCommunityMessage(communityMessageDto);
         log.info("Successfully sent community message from user to community ID: {}",
                 communityMessageDto.getCommunityId());
         return response;

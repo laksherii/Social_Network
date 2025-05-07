@@ -15,8 +15,6 @@ import static com.senla.resource_server.data.entity.FriendRequest.FriendRequestS
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@EqualsAndHashCode
-@ToString
 public class SendFriendResponseDto {
 
     @NotNull(message = "Sender must not be null")

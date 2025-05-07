@@ -2,6 +2,7 @@ package com.senla.resource_server.service.impl;
 
 import com.senla.resource_server.data.dao.UserDao;
 import com.senla.resource_server.data.entity.User;
+import com.senla.resource_server.data.entity.User.RoleType;
 import com.senla.resource_server.data.entity.Wall;
 import com.senla.resource_server.service.interfaces.UserService;
 import com.senla.resource_server.service.mapper.UserMapper;
@@ -18,10 +19,10 @@ import com.senla.resource_server.service.dto.user.UserInfoDto;
 import com.senla.resource_server.service.dto.user.UserSearchDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import reactor.core.publisher.Mono;
 
 import java.util.List;
 
@@ -72,7 +73,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public CreateUserDtoResponse create(CreateUserDtoRequest userDtoRequest) {
+    public CreateUserDtoResponse create(CreateUserDtoRequest userDtoRequest, RoleType role) {
         log.info("Creating user with email: {}", userDtoRequest.getEmail());
 
         if (userDao.findByEmail(userDtoRequest.getEmail()).isPresent()) {
@@ -82,6 +83,10 @@ public class UserServiceImpl implements UserService {
         User user = userMapper.toUserCreate(userDtoRequest);
         user.setEnabled(true);
         user.setPassword(passwordEncoder.encode(userDtoRequest.getPassword()));
+
+        if (role != null) {
+            user.setRole(role);
+        }
 
         Wall wall = new Wall();
         wall.setOwner(user);
@@ -95,7 +100,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public Mono<UserAuthResponseDto> authenticate(UserAuthRequestDto userDtoRequest) {
+    public UserAuthResponseDto authenticate(UserAuthRequestDto userDtoRequest) {
         log.info("Authenticating user with email: {}", userDtoRequest.getEmail());
 
         User user = userDao.findByEmail(userDtoRequest.getEmail())
@@ -104,11 +109,11 @@ public class UserServiceImpl implements UserService {
 
         if (passwordEncoder.matches(userDtoRequest.getPassword(), user.getPassword())) {
             log.info("User authenticated successfully: {} (ID: {})", user.getEmail(), user.getId());
-            UserAuthResponseDto userAuthResponseDto = userMapper.toUserAuthResponseDto(user);
-            return Mono.just(userAuthResponseDto);
+            return userMapper.toUserAuthResponseDto(user);
+        }else {
+            log.info("Authentication failed for user: {}", userDtoRequest.getEmail());
+            throw new BadCredentialsException("Wrong password");
         }
-        log.info("Authentication failed for user: {}", userDtoRequest.getEmail());
-        return Mono.empty();
     }
 
     @Override

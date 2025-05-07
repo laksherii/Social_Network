@@ -12,8 +12,6 @@ import lombok.ToString;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@EqualsAndHashCode
-@ToString
 public class GroupChatMessageRequestDto {
 
     @NotNull(message = "Group ID must not be null")

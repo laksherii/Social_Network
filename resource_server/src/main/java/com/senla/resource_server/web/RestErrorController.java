@@ -13,6 +13,7 @@ import jakarta.validation.ConstraintViolationException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authorization.AuthorizationDeniedException;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
@@ -20,6 +21,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -49,16 +51,23 @@ public class RestErrorController {
         return String.format("%s: %s", fieldError.getField(), fieldError.getDefaultMessage());
     }
 
+    @ExceptionHandler(BadCredentialsException.class)
+    @ResponseStatus(HttpStatus.UNAUTHORIZED)
+    public ErrorDto handleBadCredentialsException(BadCredentialsException ex) {
+        log.error("Bad Credentials Exception", ex);
+        return new ErrorDto(ErrorStatus.CLIENT_ERROR, ex.getMessage());
+    }
+
     @ExceptionHandler(AuthorizationDeniedException.class)
     @ResponseStatus(HttpStatus.FORBIDDEN)
-    public ErrorDto AuthorizationDeniedException(AuthorizationDeniedException ex) {
+    public ErrorDto handleAuthorizationDeniedException(AuthorizationDeniedException ex) {
         log.error("Access Denied Exception", ex);
         return new ErrorDto(ErrorStatus.CLIENT_ERROR, ex.getMessage());
     }
 
     @ExceptionHandler(UserNotAdminInGroupException.class)
     @ResponseStatus(HttpStatus.CONFLICT)
-    public ErrorDto UserNotAdminInGroup(UserNotAdminInGroupException ex) {
+    public ErrorDto handleUserNotAdminInGroupException(UserNotAdminInGroupException ex) {
         log.error("User Not Admin Exception", ex);
         return new ErrorDto(ErrorStatus.CLIENT_ERROR, ex.getMessage());
     }

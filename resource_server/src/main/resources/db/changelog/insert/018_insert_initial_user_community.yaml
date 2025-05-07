@@ -1,0 +1,150 @@
+databaseChangeLog:
+  - changeSet:
+      id: 018-1-insert-user-community-1-1
+      author: Lashkevich Artem
+      preConditions:
+        - onFail: MARK_RAN
+        - sqlCheck:
+            expectedResult: "0"
+            sql: "SELECT COUNT(*) FROM user_community WHERE user_id = 1 AND community_id = 1"
+      changes:
+        - insert:
+            tableName: user_community
+            columns:
+              - column: { name: user_id, value: "1" }
+              - column: { name: community_id, value: "1" }
+
+  - changeSet:
+      id: 018-2-insert-user-community-1-2
+      author: Lashkevich Artem
+      preConditions:
+        - onFail: MARK_RAN
+        - sqlCheck:
+            expectedResult: "0"
+            sql: "SELECT COUNT(*) FROM user_community WHERE user_id = 1 AND community_id = 2"
+      changes:
+        - insert:
+            tableName: user_community
+            columns:
+              - column: { name: user_id, value: "1" }
+              - column: { name: community_id, value: "2" }
+
+  - changeSet:
+      id: 018-3-insert-user-community-2-2
+      author: Lashkevich Artem
+      preConditions:
+        - onFail: MARK_RAN
+        - sqlCheck:
+            expectedResult: "0"
+            sql: "SELECT COUNT(*) FROM user_community WHERE user_id = 2 AND community_id = 2"
+      changes:
+        - insert:
+            tableName: user_community
+            columns:
+              - column: { name: user_id, value: "2" }
+              - column: { name: community_id, value: "2" }
+
+  - changeSet:
+      id: 018-4-insert-user-community-2-3
+      author: Lashkevich Artem
+      preConditions:
+        - onFail: MARK_RAN
+        - sqlCheck:
+            expectedResult: "0"
+            sql: "SELECT COUNT(*) FROM user_community WHERE user_id = 2 AND community_id = 3"
+      changes:
+        - insert:
+            tableName: user_community
+            columns:
+              - column: { name: user_id, value: "2" }
+              - column: { name: community_id, value: "3" }
+
+  - changeSet:
+      id: 018-5-insert-user-community-3-1
+      author: Lashkevich Artem
+      preConditions:
+        - onFail: MARK_RAN
+        - sqlCheck:
+            expectedResult: "0"
+            sql: "SELECT COUNT(*) FROM user_community WHERE user_id = 3 AND community_id = 1"
+      changes:
+        - insert:
+            tableName: user_community
+            columns:
+              - column: { name: user_id, value: "3" }
+              - column: { name: community_id, value: "1" }
+
+  - changeSet:
+      id: 018-6-insert-user-community-3-3
+      author: Lashkevich Artem
+      preConditions:
+        - onFail: MARK_RAN
+        - sqlCheck:
+            expectedResult: "0"
+            sql: "SELECT COUNT(*) FROM user_community WHERE user_id = 3 AND community_id = 3"
+      changes:
+        - insert:
+            tableName: user_community
+            columns:
+              - column: { name: user_id, value: "3" }
+              - column: { name: community_id, value: "3" }
+
+  - changeSet:
+      id: 018-7-insert-user-community-4-1
+      author: Lashkevich Artem
+      preConditions:
+        - onFail: MARK_RAN
+        - sqlCheck:
+            expectedResult: "0"
+            sql: "SELECT COUNT(*) FROM user_community WHERE user_id = 4 AND community_id = 1"
+      changes:
+        - insert:
+            tableName: user_community
+            columns:
+              - column: { name: user_id, value: "4" }
+              - column: { name: community_id, value: "1" }
+
+  - changeSet:
+      id: 018-8-insert-user-community-4-2
+      author: Lashkevich Artem
+      preConditions:
+        - onFail: MARK_RAN
+        - sqlCheck:
+            expectedResult: "0"
+            sql: "SELECT COUNT(*) FROM user_community WHERE user_id = 4 AND community_id = 2"
+      changes:
+        - insert:
+            tableName: user_community
+            columns:
+              - column: { name: user_id, value: "4" }
+              - column: { name: community_id, value: "2" }
+
+  - changeSet:
+      id: 018-9-insert-user-community-5-1
+      author: Lashkevich Artem
+      preConditions:
+        - onFail: MARK_RAN
+        - sqlCheck:
+            expectedResult: "0"
+            sql: "SELECT COUNT(*) FROM user_community WHERE user_id = 5 AND community_id = 1"
+      changes:
+        - insert:
+            tableName: user_community
+            columns:
+              - column: { name: user_id, value: "5" }
+              - column: { name: community_id, value: "1" }
+
+  - changeSet:
+      id: 018-10-insert-user-community-4-3
+      author: Lashkevich Artem
+      preConditions:
+        - onFail: MARK_RAN
+        - sqlCheck:
+            expectedResult: "0"
+            sql: "SELECT COUNT(*) FROM user_community WHERE user_id = 4 AND community_id = 3"
+      changes:
+        - insert:
+            tableName: user_community
+            columns:
+              - column: { name: user_id, value: "4" }
+              - column: { name: community_id, value: "3" }

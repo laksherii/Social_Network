@@ -1,8 +1,9 @@
 package com.senla.resource_server.service.interfaces;
 
-import com.senla.resource_server.service.dto.message.CreateCommunityMessageRequestDto;
-import com.senla.resource_server.service.dto.message.CreateCommunityMessageResponseDto;
+import com.senla.resource_server.service.dto.message.SendCommunityMessageRequestDto;
+import com.senla.resource_server.service.dto.message.SendCommunityMessageResponseDto;
 
 public interface CommunityMessageService {
-    CreateCommunityMessageResponseDto sendCommunityMessage(CreateCommunityMessageRequestDto createCommunityMessageDto);
+
+    SendCommunityMessageResponseDto sendCommunityMessage(SendCommunityMessageRequestDto createCommunityMessageDto);
 }

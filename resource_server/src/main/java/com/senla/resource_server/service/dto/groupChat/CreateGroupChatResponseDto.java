@@ -15,8 +15,6 @@ import java.util.Set;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@EqualsAndHashCode
-@ToString
 public class CreateGroupChatResponseDto {
 
     @NotNull(message = "Group chat ID must not be null")
