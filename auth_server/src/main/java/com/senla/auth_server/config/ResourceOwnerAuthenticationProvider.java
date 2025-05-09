@@ -1,6 +1,8 @@
 package com.senla.auth_server.config;
 
 import com.senla.auth_server.service.dto.UserResponseDto;
+import jakarta.annotation.PostConstruct;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -19,10 +21,19 @@ import java.util.Map;
 @Component
 public class ResourceOwnerAuthenticationProvider implements AuthenticationProvider {
 
-    private final RestClient restClient;
+    private final RestClient.Builder restClientBuilder;
+    private RestClient restClient;
+
+    @Value("${resource-server.url[0]}")
+    private String resourceServerUrl;
 
     public ResourceOwnerAuthenticationProvider(RestClient.Builder restClientBuilder) {
-        this.restClient = restClientBuilder.baseUrl("http://resource-server:8080").build();
+        this.restClientBuilder = restClientBuilder;
+    }
+
+    @PostConstruct
+    public void init() {
+        this.restClient = restClientBuilder.baseUrl(resourceServerUrl).build();
     }
 
     @Override
@@ -33,7 +44,7 @@ public class ResourceOwnerAuthenticationProvider implements AuthenticationProvid
         try {
             UserResponseDto userDto = restClient
                     .post()
-                    .uri("/authenticate")
+                    .uri(resourceServerUrl + "/authenticate")
                     .contentType(MediaType.APPLICATION_JSON)
                     .body(Map.of("email", username, "password", password))
                     .retrieve()

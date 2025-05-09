@@ -17,18 +17,22 @@ import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.DynamicUpdate;
 
 import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.Set;
 
+@Entity
 @Data
 @Builder
-@Entity
 @Table(name = "users")
 @NoArgsConstructor
 @AllArgsConstructor
+@EqualsAndHashCode(exclude = "wall")
+@DynamicUpdate
 public class User {
 
     @Id

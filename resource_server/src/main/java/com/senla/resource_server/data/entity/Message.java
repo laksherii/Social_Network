@@ -15,15 +15,20 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.Instant;
 
-@Getter
-@Setter
 @Entity
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
 @Table(name = "messages")
 @Inheritance(strategy = InheritanceType.JOINED)
 @DiscriminatorColumn(name = "message_type", discriminatorType = DiscriminatorType.STRING)

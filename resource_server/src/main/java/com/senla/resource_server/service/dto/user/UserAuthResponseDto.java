@@ -16,8 +16,6 @@ import lombok.ToString;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@EqualsAndHashCode
-@ToString
 public class UserAuthResponseDto {
 
     @NotNull(message = "ID must not be null")

@@ -13,6 +13,12 @@ import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -20,6 +26,10 @@ import java.util.List;
 import java.util.Set;
 
 @Entity
+@Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 @Table(name = "community")
 public class Community {
 
@@ -40,48 +50,11 @@ public class Community {
             joinColumns = @JoinColumn(name = "community_id"),
             inverseJoinColumns = @JoinColumn(name = "user_id")
     )
+    @Builder.Default
     private Set<User> users = new HashSet<>();
 
     @OneToMany(mappedBy = "community", cascade = CascadeType.ALL)
+    @Builder.Default
     private List<CommunityMessage> messages = new ArrayList<>();
 
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public void setAdmin(User admin) {
-        this.admin = admin;
-    }
-
-    public void setUsers(Set<User> users) {
-        this.users = users;
-    }
-
-    public void setMessages(List<CommunityMessage> messages) {
-        this.messages = messages;
-    }
-
-    public Long getId() {
-        return this.id;
-    }
-
-    public String getName() {
-        return this.name;
-    }
-
-    public User getAdmin() {
-        return this.admin;
-    }
-
-    public Set<User> getUsers() {
-        return this.users;
-    }
-
-    public List<CommunityMessage> getMessages() {
-        return this.messages;
-    }
 }

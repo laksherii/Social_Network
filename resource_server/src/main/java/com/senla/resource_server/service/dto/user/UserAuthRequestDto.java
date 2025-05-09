@@ -15,8 +15,6 @@ import lombok.ToString;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@EqualsAndHashCode
-@ToString
 public class UserAuthRequestDto {
 
     @NotBlank(message = "Email must not be blank")

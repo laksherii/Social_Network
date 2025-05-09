@@ -19,8 +19,6 @@ import java.time.LocalDate;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@EqualsAndHashCode
-@ToString
 public class CreateUserDtoResponse {
 
     @NotBlank(message = "Email must not be blank")

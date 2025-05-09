@@ -19,9 +19,9 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+@Entity
 @Data
 @Builder
-@Entity
 @Table(name = "friend_request")
 @NoArgsConstructor
 @AllArgsConstructor

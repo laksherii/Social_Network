@@ -1,7 +1,6 @@
 package com.senla.resource_server.service.dto.user;
 
 import com.senla.resource_server.data.entity.User.GenderType;
-import com.senla.resource_server.data.entity.User.RoleType;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -10,9 +9,7 @@ import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
-import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
-import lombok.ToString;
 
 import java.time.LocalDate;
 
@@ -20,8 +17,6 @@ import java.time.LocalDate;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@EqualsAndHashCode
-@ToString
 public class CreateUserDtoRequest {
 
     @NotBlank(message = "Email must not be blank")
