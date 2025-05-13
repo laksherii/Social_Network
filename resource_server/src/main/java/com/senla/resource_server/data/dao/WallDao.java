@@ -9,5 +9,5 @@ public interface WallDao {
 
     Wall update(Wall wall);
 
-    Optional<Wall> findByEmail(String email);
+//    Optional<Wall> findByEmail(String email);
 }

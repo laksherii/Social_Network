@@ -8,9 +8,9 @@ import java.util.Optional;
 public interface FriendRequestDao {
     FriendRequest save(FriendRequest request);
 
-    boolean existsBySenderAndRecipient(User sender, User recipient);
-
     Optional<FriendRequest> findById(Long id);
 
     Optional<FriendRequest> findBySenderAndRecipient(User sender, User recipient);
+
+    void delete(Long id);
 }

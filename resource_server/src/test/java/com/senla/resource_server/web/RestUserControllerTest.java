@@ -2,7 +2,6 @@ package com.senla.resource_server.web;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.senla.resource_server.data.entity.User.GenderType;
-import com.senla.resource_server.data.entity.User.RoleType;
 import com.senla.resource_server.service.dto.user.CreateUserDtoRequest;
 import com.senla.resource_server.service.dto.user.CreateUserDtoResponse;
 import com.senla.resource_server.service.dto.user.UpdateUserDtoRequest;
@@ -11,7 +10,6 @@ import com.senla.resource_server.service.dto.user.UserDto;
 import com.senla.resource_server.service.dto.user.UserInfoDto;
 import com.senla.resource_server.service.dto.user.UserSearchDto;
 import com.senla.resource_server.service.dto.wall.WallDto;
-import com.senla.resource_server.service.dto.wall.WallResponseDto;
 import com.senla.resource_server.service.impl.UserServiceImpl;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,7 +23,6 @@ import java.time.LocalDate;
 import java.util.List;
 
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -110,7 +107,6 @@ class RestUserControllerTest {
         // Given
         CreateUserDtoRequest request = CreateUserDtoRequest.builder()
                 .email("new@example.com")
-                .password("password123")
                 .firstName("Alice")
                 .lastName("Smith")
                 .birthDay(LocalDate.of(1995, 5, 15))
@@ -124,7 +120,7 @@ class RestUserControllerTest {
                 .birthDay(LocalDate.of(1995, 5, 15))
                 .build();
 
-        given(userService.create(any(CreateUserDtoRequest.class), eq(RoleType.ROLE_USER)))
+        given(userService.create(any(CreateUserDtoRequest.class)))
                 .willReturn(expectedResponse);
 
         // When & Then

@@ -47,8 +47,10 @@ public class GroupChat {
             joinColumns = @JoinColumn(name = "group_chat_id"),
             inverseJoinColumns = @JoinColumn(name = "user_id")
     )
+    @Builder.Default
     private Set<User> users = new HashSet<>();
 
     @OneToMany(mappedBy = "groupChat", cascade = CascadeType.ALL)
+    @Builder.Default
     private List<GroupChatMessage> messages = new ArrayList<>();
 }

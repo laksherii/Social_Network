@@ -14,9 +14,6 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class DeleteFriendRequest {
 
-    @NotNull(message = "Request ID must not be null")
-    private Long requestId;
-
     @NotBlank(message = "Friend email must not be blank")
     @Email(message = "Friend email must be a valid email address")
     private String friendEmail;

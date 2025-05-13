@@ -1,29 +1,25 @@
 package com.senla.resource_server.config;
 
+import com.auth0.jwt.algorithms.Algorithm;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.convert.converter.Converter;
 import org.springframework.http.HttpMethod;
-import org.springframework.security.authentication.AbstractAuthenticationToken;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.oauth2.jwt.Jwt;
-import org.springframework.security.web.AuthenticationEntryPoint;
+import org.springframework.security.provisioning.JdbcUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.access.AccessDeniedHandler;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
+import javax.sql.DataSource;
 
 @Configuration
 @EnableWebSecurity
@@ -39,50 +35,46 @@ public class SecurityConfig {
     }
 
     @Bean
-    public AuthenticationEntryPoint authenticationEntryPoint() {
-        return new CustomAuthenticationEntryPoint(objectMapper());
-    }
-
-    @Bean
-    public AccessDeniedHandler accessDeniedHandler() {
-        return new CustomAccessDeniedHandler(objectMapper());
-    }
-
-    @Bean
-    public SecurityFilterChain resourceServerSecurityFilterChain(HttpSecurity http) throws Exception {
+    public SecurityFilterChain filterChain(HttpSecurity http, JwtAuthenticationFilter jwtAuthenticationFilter, CustomAccessDeniedHandler accessDeniedHandler, CustomAuthenticationEntryPoint authenticationEntryPoint) throws Exception {
         http
                 .csrf(AbstractHttpConfigurer::disable)
-                .authorizeHttpRequests(authorize -> authorize
-                        .requestMatchers(HttpMethod.POST, "/user").permitAll()
-                        .requestMatchers(HttpMethod.POST, "/authenticate").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/error").permitAll()
+                .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .authorizeHttpRequests(auth -> auth
+                        .requestMatchers(HttpMethod.POST, "/user/**").permitAll()
                         .anyRequest().authenticated()
                 )
-
-                .oauth2ResourceServer(oauth2 -> oauth2
-                        .authenticationEntryPoint(authenticationEntryPoint())
-                        .accessDeniedHandler(accessDeniedHandler())
-                        .jwt(jwt -> jwt
-                                .jwtAuthenticationConverter(jwtAuthenticationConverter())
-                        )
-                );
-
+                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
+                .exceptionHandling(e -> e
+                        .authenticationEntryPoint(authenticationEntryPoint)
+                        .accessDeniedHandler(accessDeniedHandler));
         return http.build();
     }
 
-    public Converter<Jwt, AbstractAuthenticationToken> jwtAuthenticationConverter() {
-        return jwt -> {
-            Collection<GrantedAuthority> authorities = new ArrayList<>();
-            List<String> roles = jwt.getClaimAsStringList("roles");
-            if (roles != null) {
-                roles.forEach(role -> authorities.add(new SimpleGrantedAuthority(role)));
-            }
+    @Bean
+    public Algorithm jwtAlgorithm(@Value("${jwt.secretKey}") String secretKey) {
+        if (secretKey == null || secretKey.isEmpty()) {
+            throw new IllegalStateException("Secret key must not be null or empty");
+        }
+        return Algorithm.HMAC256(secretKey);
+    }
 
-            String username = jwt.getClaim("sub");
-            Long userId = jwt.getClaim("user_id");
+    @Bean
+    public JdbcUserDetailsManager userDetailsService(DataSource dataSource) {
+        JdbcUserDetailsManager manager = new JdbcUserDetailsManager(dataSource);
 
-            return new UserIdAuthenticationToken(userId, username, null, authorities);
-        };
+        manager.setUsersByUsernameQuery("""
+                    SELECT email AS username, password, true AS enabled
+                    FROM users
+                    WHERE email = ?
+                """);
+
+        manager.setAuthoritiesByUsernameQuery("""
+                    SELECT u.email AS username, u.role AS authority
+                    FROM users u
+                    WHERE u.email = ?
+                """);
+
+        return manager;
     }
 
     @Bean

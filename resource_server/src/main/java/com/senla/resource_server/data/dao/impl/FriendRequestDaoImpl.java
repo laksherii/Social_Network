@@ -27,19 +27,6 @@ public class FriendRequestDaoImpl implements FriendRequestDao {
     }
 
     @Override
-    public boolean existsBySenderAndRecipient(User sender, User recipient) {
-        log.info("Checking if friend request exists from {} to {}", sender.getEmail(), recipient.getEmail());
-        String query = "SELECT COUNT(fr) FROM FriendRequest fr WHERE fr.sender = :sender AND fr.recipient = :recipient";
-        Long count = entityManager.createQuery(query, Long.class)
-                .setParameter("sender", sender)
-                .setParameter("recipient", recipient)
-                .getSingleResult();
-        boolean exists = count > 0;
-        log.info("Friend request exists from {} to {}: {}", sender.getEmail(), recipient.getEmail(), exists);
-        return exists;
-    }
-
-    @Override
     public Optional<FriendRequest> findById(Long id) {
         log.info("Finding friend request by ID: {}", id);
         FriendRequest request = entityManager.find(FriendRequest.class, id);
@@ -61,5 +48,13 @@ public class FriendRequestDaoImpl implements FriendRequestDao {
             log.info("Friend request found from {} to {}", sender.getEmail(), recipient.getEmail());
         }
         return result.stream().findFirst();
+    }
+
+    @Override
+    public void delete(Long id) {
+        log.info("Deleting friend request with ID: {}", id);
+        FriendRequest request = entityManager.find(FriendRequest.class, id);
+        entityManager.remove(request);
+        log.info("Deleted friend request from {} to {}", request.getSender().getEmail(), request.getRecipient().getEmail());
     }
 }

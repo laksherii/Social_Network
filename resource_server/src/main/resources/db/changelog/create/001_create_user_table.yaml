@@ -23,11 +23,6 @@ databaseChangeLog:
                   constraints:
                     nullable: false
               - column:
-                  name: password
-                  type: VARCHAR(255)
-                  constraints:
-                    nullable: false
-              - column:
                   name: first_name
                   type: VARCHAR(100)
                   constraints:

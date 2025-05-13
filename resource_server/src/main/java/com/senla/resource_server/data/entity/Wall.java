@@ -27,7 +27,6 @@ import java.util.List;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-@EqualsAndHashCode(exclude = "owner")
 @Table(name = "wall")
 public class Wall {
 
@@ -40,6 +39,7 @@ public class Wall {
     private User owner;
 
     @OneToMany(mappedBy = "wall", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
     private List<WallMessage> messages = new ArrayList<>();
 }
 

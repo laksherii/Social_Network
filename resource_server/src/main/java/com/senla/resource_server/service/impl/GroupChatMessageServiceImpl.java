@@ -1,6 +1,5 @@
 package com.senla.resource_server.service.impl;
 
-import com.senla.resource_server.config.UserIdAuthenticationToken;
 import com.senla.resource_server.data.dao.GroupChatDao;
 import com.senla.resource_server.data.dao.GroupChatMessageDao;
 import com.senla.resource_server.data.dao.UserDao;
@@ -22,6 +21,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 @Slf4j
 @Service
@@ -38,16 +38,18 @@ public class GroupChatMessageServiceImpl implements GroupChatMessageService {
     public GroupChatMessageResponseDto sendGroupChatMessage(GroupChatMessageRequestDto groupChatMessage) {
         log.info("Starting to send group chat message to group ID: {}", groupChatMessage.getGroupId());
 
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        Long userId = ((UserIdAuthenticationToken) authentication).getUserId();
-        log.info("Authenticated sender user ID: {}", userId);
 
         GroupChat groupChat = groupChatDao.findById(groupChatMessage.getGroupId())
                 .orElseThrow(() -> new EntityNotFoundException("GroupChat not found"));
         log.info("Group chat found with ID: {}", groupChat.getId());
 
-        User user = userDaoImpl.findById(userId)
-                .orElseThrow(() -> new EntityNotFoundException("No such user"));
+        //todo проверить
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String senderEmail = authentication.getName();
+        log.info("Authenticated sender: {}", senderEmail);
+
+        User user = userDaoImpl.findByEmail(senderEmail)
+                .orElseThrow(() -> new EntityNotFoundException("User not found"));
 
         if (!groupChat.getUsers().contains(user)) {
             log.info("User ID {} is not a participant of group chat ID {}", user.getId(), groupChat.getId());
@@ -72,15 +74,16 @@ public class GroupChatMessageServiceImpl implements GroupChatMessageService {
     public List<GetGroupChatMessageDto> getGroupChatMessages(Long groupId) {
         log.info("Retrieving messages for group chat ID: {}", groupId);
 
+        //todo проверить
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        Long userId = ((UserIdAuthenticationToken) authentication).getUserId();
-        log.info("Authenticated user ID: {}", userId);
+        String senderEmail = authentication.getName();
+        log.info("Authenticated sender: {}", senderEmail);
 
         GroupChat groupChat = groupChatDao.findById(groupId)
                 .orElseThrow(() -> new EntityNotFoundException("GroupChat not found"));
         log.info("Group chat found with ID: {}", groupChat.getId());
 
-        User user = userDaoImpl.findById(userId)
+        User user = userDaoImpl.findByEmail(senderEmail)
                 .orElseThrow(() -> new EntityNotFoundException("No such user"));
         log.info("User found with ID: {}", user.getId());
 

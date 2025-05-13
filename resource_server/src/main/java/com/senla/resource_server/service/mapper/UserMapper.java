@@ -3,6 +3,7 @@ package com.senla.resource_server.service.mapper;
 
 import com.senla.resource_server.data.entity.User;
 import com.senla.resource_server.data.entity.User.RoleType;
+import com.senla.resource_server.service.dto.user.UpdateRoleUserDtoResponse;
 import com.senla.resource_server.service.dto.user.UpdateUserDtoResponse;
 import com.senla.resource_server.service.dto.user.CreateUserDtoRequest;
 import com.senla.resource_server.service.dto.user.CreateUserDtoResponse;
@@ -31,4 +32,6 @@ public interface UserMapper {
     UpdateUserDtoResponse updateUserResponseToDto(User user);
 
     UserAuthResponseDto toUserAuthResponseDto(User user);
+
+    UpdateRoleUserDtoResponse toUpdateRoleUserDtoResponse(User user);
 }

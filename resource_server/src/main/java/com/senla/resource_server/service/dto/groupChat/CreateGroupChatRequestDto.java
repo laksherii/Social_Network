@@ -23,5 +23,5 @@ public class CreateGroupChatRequestDto {
 
     @NotNull(message = "User IDs set must not be null")
     @NotEmpty(message = "User IDs set must not be empty")
-    private Set<Long> userIds;
+    private Set<String> userEmails;
 }

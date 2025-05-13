@@ -2,10 +2,12 @@ package com.senla.resource_server.web;
 
 import com.senla.resource_server.data.entity.User.GenderType;
 import com.senla.resource_server.data.entity.User.RoleType;
-import com.senla.resource_server.service.dto.user.UpdateUserDtoRequest;
-import com.senla.resource_server.service.dto.user.UpdateUserDtoResponse;
 import com.senla.resource_server.service.dto.user.CreateUserDtoRequest;
 import com.senla.resource_server.service.dto.user.CreateUserDtoResponse;
+import com.senla.resource_server.service.dto.user.UpdateRoleUserDtoRequest;
+import com.senla.resource_server.service.dto.user.UpdateRoleUserDtoResponse;
+import com.senla.resource_server.service.dto.user.UpdateUserDtoRequest;
+import com.senla.resource_server.service.dto.user.UpdateUserDtoResponse;
 import com.senla.resource_server.service.dto.user.UserDto;
 import com.senla.resource_server.service.dto.user.UserInfoDto;
 import com.senla.resource_server.service.dto.user.UserSearchDto;
@@ -16,6 +18,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -68,10 +71,9 @@ public class RestUserController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public CreateUserDtoResponse createUser(@Valid @RequestBody CreateUserDtoRequest createUserDtoRequest,
-                                            @RequestHeader(name = "Role", required = false, defaultValue = "ROLE_USER") RoleType role) {
+    public CreateUserDtoResponse createUser(@Valid @RequestBody CreateUserDtoRequest createUserDtoRequest) {
         log.info("Creating new user with email: {}", createUserDtoRequest.getEmail());
-        CreateUserDtoResponse response = userService.create(createUserDtoRequest, role);
+        CreateUserDtoResponse response = userService.create(createUserDtoRequest);
         log.info("Successfully created new user with email: {}", createUserDtoRequest.getEmail());
         return response;
     }
@@ -84,6 +86,16 @@ public class RestUserController {
         UpdateUserDtoResponse response = userService.update(updateUserDtoRequest);
         log.info("Successfully updated user with email: {}", updateUserDtoRequest.getEmail());
         return response;
+    }
+
+    @PreAuthorize("hasRole('ADMIN')")
+    @PatchMapping
+    @ResponseStatus(HttpStatus.OK)
+    public UpdateRoleUserDtoResponse updateRoleUser(@Valid @RequestBody UpdateRoleUserDtoRequest updateRoleUserDtoRequest) {
+        log.info("Updating role user with email: {}", updateRoleUserDtoRequest.getEmail());
+        UpdateRoleUserDtoResponse updateRoleUserDtoResponse = userService.updateRole(updateRoleUserDtoRequest);
+        log.info("Successfully updated role user with email: {}", updateRoleUserDtoRequest.getEmail());
+        return updateRoleUserDtoResponse;
     }
 
     @PreAuthorize("hasRole('ADMIN') or hasRole('USER') or hasRole('MODERATOR')")

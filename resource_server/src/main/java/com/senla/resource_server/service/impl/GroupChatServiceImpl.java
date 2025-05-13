@@ -1,6 +1,5 @@
 package com.senla.resource_server.service.impl;
 
-import com.senla.resource_server.config.UserIdAuthenticationToken;
 import com.senla.resource_server.data.dao.GroupChatDao;
 import com.senla.resource_server.data.dao.UserDao;
 import com.senla.resource_server.data.entity.GroupChat;
@@ -34,15 +33,16 @@ public class GroupChatServiceImpl implements GroupChatService {
     public CreateGroupChatResponseDto create(CreateGroupChatRequestDto groupDto) {
         log.info("Starting group chat creation with name: {}", groupDto.getName());
 
+        //todo проверить
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        Long userId = ((UserIdAuthenticationToken) authentication).getUserId();
-        log.info("Authenticated user ID: {}", userId);
+        String senderEmail = authentication.getName();
+        log.info("Authenticated sender: {}", senderEmail);
 
-        groupDto.getUserIds().add(userId);
-        log.info("Added authenticated user to the group. Total user IDs: {}", groupDto.getUserIds().size());
+        groupDto.getUserEmails().add(senderEmail);
+        log.info("Added authenticated user to the group. Total user IDs: {}", groupDto.getUserEmails().size());
 
-        Set<User> users = groupDto.getUserIds().stream()
-                .map(userDao::findById)
+        Set<User> users = groupDto.getUserEmails().stream()
+                .map(userDao::findByEmail)
                 .filter(Optional::isPresent)
                 .distinct()
                 .map(Optional::get)

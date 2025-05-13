@@ -1,15 +1,5 @@
 services:
 
-  auth-server:
-    build:
-      context: auth_server
-    container_name: auth-server
-    ports:
-      - "9000:9000"
-      - "5006:5006"
-    environment:
-      JAVA_TOOL_OPTIONS: "-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5006"
-
   resource-db:
     image: postgres:16
     container_name: resource-db
@@ -21,6 +11,33 @@ services:
       - "5435:5432"
     volumes:
       - resource_data:/var/lib/postgresql/data
+
+  auth-db:
+    image: postgres:16
+    container_name: auth-db
+    environment:
+      POSTGRES_DB: auth_server_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: root
+    ports:
+      - "5436:5432"
+    volumes:
+      - auth_data:/var/lib/postgresql/data
+
+  auth-server:
+    build:
+      context: auth_server
+    container_name: auth-server
+    ports:
+      - "9000:9000"
+      - "5006:5006"
+    environment:
+      SPRING_DATASOURCE_URL: "jdbc:postgresql://auth-db:5432/auth_server_db"
+      SPRING_DATASOURCE_USERNAME: "postgres"
+      SPRING_DATASOURCE_PASSWORD: "root"
+      JAVA_TOOL_OPTIONS: "-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5006"
+    depends_on:
+      - auth-db
 
   resource-server:
     build:
@@ -39,3 +56,4 @@ services:
 
 volumes:
   resource_data:
+  auth_data:

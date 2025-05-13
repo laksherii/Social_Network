@@ -1,6 +1,5 @@
 package com.senla.resource_server.service.impl;
 
-import com.senla.resource_server.config.UserIdAuthenticationToken;
 import com.senla.resource_server.data.dao.PrivateMessageDao;
 import com.senla.resource_server.data.dao.UserDao;
 import com.senla.resource_server.data.entity.PrivateMessage;
@@ -31,16 +30,16 @@ public class PrivateMessageServiceImpl implements PrivateMessageService {
 
     @Override
     public PrivateMessageResponseDto sendPrivateMessage(PrivateMessageRequestDto privateMessageRequestDto) {
-        log.info("Starting to send private message to user ID: {}", privateMessageRequestDto.getRecipient());
+        log.info("Starting to send private message to user ID: {}", privateMessageRequestDto.getRecipientEmail());
 
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        Long userId = ((UserIdAuthenticationToken) authentication).getUserId();
-        log.info("Authenticated sender ID: {}", userId);
+        String senderEmail = authentication.getName();
+        log.info("Authenticated sender: {}", senderEmail);
 
-        User sender = userDao.findById(userId)
+        User sender = userDao.findByEmail(senderEmail)
                 .orElseThrow(() -> new EntityNotFoundException("User not found"));
 
-        User recipient = userDao.findById(privateMessageRequestDto.getRecipient())
+        User recipient = userDao.findByEmail(privateMessageRequestDto.getRecipientEmail())
                 .orElseThrow(() -> new EntityNotFoundException("User not found"));
         log.info("Authenticated recipient ID: {}", recipient.getId());
 
@@ -59,17 +58,18 @@ public class PrivateMessageServiceImpl implements PrivateMessageService {
     public List<PrivateMessageResponseDto> getMessagesByRecipientEmail(String email) {
         log.info("Fetching messages by recipient email: {}", email);
 
+        //todo проверить
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        Long userId = ((UserIdAuthenticationToken) authentication).getUserId();
-        log.info("Authenticated sender ID: {}", userId);
+        String senderEmail = authentication.getName();
+        log.info("Authenticated sender: {}", senderEmail);
 
-        User sender = userDao.findById(userId)
+        User sender = userDao.findByEmail(senderEmail)
                 .orElseThrow(() -> new EntityNotFoundException("User not found"));
-        log.info("Sender found by ID: {}", userId);
+        log.info("Sender found by Email: {}", sender.getEmail());
 
         User recipient = userDao.findByEmail(email)
                 .orElseThrow(() -> new EntityNotFoundException("User not found"));
-        log.info("Recipient found by ID: {}", userId);
+        log.info("Recipient found by Email: {}", recipient.getEmail());
 
         List<PrivateMessage> privateMessageList = privateMessageDao.findBySenderAndRecipient(sender, recipient);
         log.info("Found {} messages between sender {} and recipient {}", privateMessageList.size(), sender.getEmail(), recipient.getEmail());

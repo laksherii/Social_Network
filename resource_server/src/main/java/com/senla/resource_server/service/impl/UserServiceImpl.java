@@ -4,22 +4,21 @@ import com.senla.resource_server.data.dao.UserDao;
 import com.senla.resource_server.data.entity.User;
 import com.senla.resource_server.data.entity.User.RoleType;
 import com.senla.resource_server.data.entity.Wall;
-import com.senla.resource_server.service.interfaces.UserService;
-import com.senla.resource_server.service.mapper.UserMapper;
 import com.senla.resource_server.exception.EntityNotFoundException;
 import com.senla.resource_server.exception.IllegalStateException;
-import com.senla.resource_server.service.dto.user.UpdateUserDtoRequest;
-import com.senla.resource_server.service.dto.user.UpdateUserDtoResponse;
 import com.senla.resource_server.service.dto.user.CreateUserDtoRequest;
 import com.senla.resource_server.service.dto.user.CreateUserDtoResponse;
-import com.senla.resource_server.service.dto.user.UserAuthRequestDto;
-import com.senla.resource_server.service.dto.user.UserAuthResponseDto;
+import com.senla.resource_server.service.dto.user.UpdateRoleUserDtoRequest;
+import com.senla.resource_server.service.dto.user.UpdateRoleUserDtoResponse;
+import com.senla.resource_server.service.dto.user.UpdateUserDtoRequest;
+import com.senla.resource_server.service.dto.user.UpdateUserDtoResponse;
 import com.senla.resource_server.service.dto.user.UserDto;
 import com.senla.resource_server.service.dto.user.UserInfoDto;
 import com.senla.resource_server.service.dto.user.UserSearchDto;
+import com.senla.resource_server.service.interfaces.UserService;
+import com.senla.resource_server.service.mapper.UserMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -33,7 +32,6 @@ import java.util.List;
 public class UserServiceImpl implements UserService {
 
     private final UserDao userDao;
-    private final PasswordEncoder passwordEncoder;
     private final UserMapper userMapper;
 
     @Override
@@ -73,7 +71,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public CreateUserDtoResponse create(CreateUserDtoRequest userDtoRequest, RoleType role) {
+    public CreateUserDtoResponse create(CreateUserDtoRequest userDtoRequest) {
         log.info("Creating user with email: {}", userDtoRequest.getEmail());
 
         if (userDao.findByEmail(userDtoRequest.getEmail()).isPresent()) {
@@ -82,38 +80,17 @@ public class UserServiceImpl implements UserService {
 
         User user = userMapper.toUserCreate(userDtoRequest);
         user.setEnabled(true);
-        user.setPassword(passwordEncoder.encode(userDtoRequest.getPassword()));
-
-        if (role != null) {
-            user.setRole(role);
-        }
+        user.setRole(RoleType.ROLE_USER);
 
         Wall wall = new Wall();
-        wall.setOwner(user);
         user.setWall(wall);
+        wall.setOwner(user);
 
         User saved = userDao.save(user);
 
         log.info("User successfully created: {} (ID: {})", saved.getEmail(), saved.getId());
 
         return userMapper.toCreateUserDtoResponse(saved);
-    }
-
-    @Override
-    public UserAuthResponseDto authenticate(UserAuthRequestDto userDtoRequest) {
-        log.info("Authenticating user with email: {}", userDtoRequest.getEmail());
-
-        User user = userDao.findByEmail(userDtoRequest.getEmail())
-                .orElseThrow(() -> new EntityNotFoundException("User not found"));
-        log.info("User found: {} (ID: {})", user.getEmail(), user.getId());
-
-        if (passwordEncoder.matches(userDtoRequest.getPassword(), user.getPassword())) {
-            log.info("User authenticated successfully: {} (ID: {})", user.getEmail(), user.getId());
-            return userMapper.toUserAuthResponseDto(user);
-        }else {
-            log.info("Authentication failed for user: {}", userDtoRequest.getEmail());
-            throw new BadCredentialsException("Wrong password");
-        }
     }
 
     @Override
@@ -150,13 +127,24 @@ public class UserServiceImpl implements UserService {
     @Override
     public List<UserDto> searchUsers(UserSearchDto userSearchDto) {
         log.info("Searching users by criteria: {}", userSearchDto);
-
         List<User> users = userDao.searchUser(userSearchDto);
-
         log.info("Found {} users matching search criteria", users.size());
-
         return users.stream()
                 .map(userMapper::toUserDto)
                 .toList();
+    }
+
+    @Override
+    public UpdateRoleUserDtoResponse updateRole(UpdateRoleUserDtoRequest updateRoleUserDtoRequest) {
+        log.info("Updating role user with email: {}", updateRoleUserDtoRequest.getEmail());
+        User user = userDao.findByEmail(updateRoleUserDtoRequest.getEmail())
+                .orElseThrow(() -> new EntityNotFoundException("User not found by email=" + updateRoleUserDtoRequest.getEmail()));
+        log.info("User found: {} (ID: {})", user.getEmail(), user.getId());
+        user.setRole(updateRoleUserDtoRequest.getRole());
+        User updatedUser = userDao.update(user);
+        log.info("User updated successfully: {} (ID: {})", updatedUser.getEmail(), updatedUser.getId());
+        UpdateRoleUserDtoResponse updateUserDtoResponse = userMapper.toUpdateRoleUserDtoResponse(updatedUser);
+        log.info("User mapped successfully: {} (ID: {})", user.getEmail(), user.getId());
+        return updateUserDtoResponse;
     }
 }

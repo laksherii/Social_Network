@@ -47,7 +47,6 @@ public class FriendRequest {
         UNDEFINED,
         ACCEPTED,
         REJECTED,
-        DELETED
     }
 }
 

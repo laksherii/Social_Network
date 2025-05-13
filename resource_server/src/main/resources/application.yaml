@@ -6,11 +6,6 @@ spring:
   liquibase:
     change-log: /db/db.changelog-master.yaml
 
-  security:
-    oauth2:
-      resourceserver:
-        jwt:
-          jwk-set-uri: http://auth-server:9000/oauth2/jwks
 
   datasource:
     url: jdbc:postgresql://localhost:5435/resource_server_db
@@ -19,6 +14,8 @@ spring:
     driver-class-name: org.postgresql.Driver
     hikari:
       maximum-pool-size: 10
+jwt:
+  secretKey: Hala_Madrid
 
 app:
   pagination:

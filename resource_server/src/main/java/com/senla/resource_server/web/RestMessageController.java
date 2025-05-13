@@ -51,10 +51,10 @@ public class RestMessageController {
     @ResponseStatus(HttpStatus.OK)
     public PrivateMessageResponseDto sendPrivateMessage(@Valid @RequestBody PrivateMessageRequestDto privateMessageRequestDto) {
         log.info("Sending private message to recipient with email: {}",
-                privateMessageRequestDto.getRecipient());
+                privateMessageRequestDto.getRecipientEmail());
         PrivateMessageResponseDto privateMessageResponseDto = privateMessageService.sendPrivateMessage(privateMessageRequestDto);
         log.info("Successfully sent private message from user to recipient with email: {}",
-                privateMessageRequestDto.getRecipient());
+                privateMessageRequestDto.getRecipientEmail());
         return privateMessageResponseDto;
     }
 

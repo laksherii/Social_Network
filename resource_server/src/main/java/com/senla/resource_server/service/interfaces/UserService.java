@@ -3,6 +3,8 @@ package com.senla.resource_server.service.interfaces;
 import com.senla.resource_server.data.entity.User.RoleType;
 import com.senla.resource_server.service.dto.user.CreateUserDtoRequest;
 import com.senla.resource_server.service.dto.user.CreateUserDtoResponse;
+import com.senla.resource_server.service.dto.user.UpdateRoleUserDtoRequest;
+import com.senla.resource_server.service.dto.user.UpdateRoleUserDtoResponse;
 import com.senla.resource_server.service.dto.user.UpdateUserDtoRequest;
 import com.senla.resource_server.service.dto.user.UpdateUserDtoResponse;
 import com.senla.resource_server.service.dto.user.UserAuthRequestDto;
@@ -10,7 +12,7 @@ import com.senla.resource_server.service.dto.user.UserAuthResponseDto;
 import com.senla.resource_server.service.dto.user.UserDto;
 import com.senla.resource_server.service.dto.user.UserInfoDto;
 import com.senla.resource_server.service.dto.user.UserSearchDto;
-import reactor.core.publisher.Mono;
+import jakarta.validation.Valid;
 
 import java.util.List;
 
@@ -21,11 +23,11 @@ public interface UserService {
 
     UserInfoDto getUserInfo(String email);
 
-    CreateUserDtoResponse create(CreateUserDtoRequest userDtoRequest, RoleType role);
-
-    UserAuthResponseDto authenticate(UserAuthRequestDto userDtoRequest);
+    CreateUserDtoResponse create(CreateUserDtoRequest userDtoRequest);
 
     UpdateUserDtoResponse update(UpdateUserDtoRequest userDtoRequest);
 
     List<UserDto> searchUsers(UserSearchDto userSearchDto);
+
+    UpdateRoleUserDtoResponse updateRole(@Valid UpdateRoleUserDtoRequest updateRoleUserDtoRequest);
 }

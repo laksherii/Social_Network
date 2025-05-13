@@ -19,6 +19,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 import org.hibernate.annotations.DynamicUpdate;
 
 import java.time.LocalDate;
@@ -28,11 +29,11 @@ import java.util.Set;
 @Entity
 @Data
 @Builder
-@Table(name = "users")
 @NoArgsConstructor
 @AllArgsConstructor
 @EqualsAndHashCode(exclude = "wall")
-@DynamicUpdate
+@ToString(exclude = "wall")
+@Table(name = "users")
 public class User {
 
     @Id
@@ -41,9 +42,6 @@ public class User {
 
     @Column(nullable = false)
     private String email;
-
-    @Column(nullable = false)
-    private String password;
 
     @Column(name = "first_name", nullable = false)
     private String firstName;

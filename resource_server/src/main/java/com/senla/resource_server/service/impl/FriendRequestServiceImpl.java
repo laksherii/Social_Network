@@ -6,23 +6,26 @@ import com.senla.resource_server.data.dao.UserDao;
 import com.senla.resource_server.data.entity.FriendRequest;
 import com.senla.resource_server.data.entity.FriendRequest.FriendRequestStatus;
 import com.senla.resource_server.data.entity.User;
-import com.senla.resource_server.service.interfaces.FriendRequestService;
-import com.senla.resource_server.service.mapper.FriendRequestMapper;
-import com.senla.resource_server.exception.BadRequestParamException;
 import com.senla.resource_server.exception.EntityNotFoundException;
 import com.senla.resource_server.exception.IllegalArgumentException;
 import com.senla.resource_server.exception.IllegalStateException;
+import com.senla.resource_server.exception.UserNotYourFriend;
 import com.senla.resource_server.service.dto.friendRequest.AnswerFriendRequestDto;
 import com.senla.resource_server.service.dto.friendRequest.AnswerFriendResponseDto;
 import com.senla.resource_server.service.dto.friendRequest.DeleteFriendRequest;
 import com.senla.resource_server.service.dto.friendRequest.SendFriendRequestDto;
 import com.senla.resource_server.service.dto.friendRequest.SendFriendResponseDto;
+import com.senla.resource_server.service.interfaces.FriendRequestService;
+import com.senla.resource_server.service.mapper.FriendRequestMapper;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -44,7 +47,7 @@ public class FriendRequestServiceImpl implements FriendRequestService {
 
         if (friendRequestDto.getReceiverEmail().equals(senderEmail)) {
             log.info("Sender and receiver are the same: {}", senderEmail);
-            throw new IllegalArgumentException("Нельзя отправить запрос самому себе.");
+            throw new IllegalArgumentException("You cannot send a request to yourself");
         }
 
         User sender = userDao.findByEmail(senderEmail)
@@ -60,25 +63,10 @@ public class FriendRequestServiceImpl implements FriendRequestService {
 
         if (existingRequest != null) {
             log.info("Existing friend request found between {} and {}", sender.getEmail(), recipient.getEmail());
-
             if (existingRequest.getStatus() == FriendRequestStatus.UNDEFINED) {
                 throw new IllegalStateException("Friend request has already been sent");
             }
-
-            if (existingRequest.getStatus() == FriendRequestStatus.ACCEPTED) {
-                throw new IllegalStateException("You are already friends");
-            }
-
-            if (existingRequest.getStatus() == FriendRequestStatus.DELETED ||
-                existingRequest.getStatus() == FriendRequestStatus.REJECTED) {
-
-                existingRequest.setStatus(FriendRequestStatus.UNDEFINED);
-                FriendRequest updatedRequest = friendRequestDao.save(existingRequest);
-                log.info("Friend request status reset to UNDEFINED between {} and {}", sender.getEmail(), recipient.getEmail());
-                return friendRequestMapper.toSendFriendResponseDto(updatedRequest);
-            }
         }
-
         FriendRequest friendRequest = new FriendRequest();
         friendRequest.setSender(sender);
         friendRequest.setRecipient(recipient);
@@ -105,8 +93,7 @@ public class FriendRequestServiceImpl implements FriendRequestService {
                 .orElseThrow(() -> new EntityNotFoundException("Not found User"));
         log.info("Recipient user found: {}", recipient.getEmail());
 
-        if (!recipient.getEmail().equals(request.getRecipient().getEmail()) ||
-            request.getStatus() != FriendRequestStatus.UNDEFINED) {
+        if (!recipient.getEmail().equals(request.getRecipient().getEmail())) {
             log.info("Invalid friend request handling attempt by {}", recipient.getEmail());
             throw new IllegalStateException("The request has already been processed or the user is not authorised to process the request");
         }
@@ -118,6 +105,13 @@ public class FriendRequestServiceImpl implements FriendRequestService {
         if (status == FriendRequestStatus.ACCEPTED) {
             addFriend(request);
             log.info("Users {} and {} are now friends", request.getSender().getEmail(), request.getRecipient().getEmail());
+            friendRequestDao.delete(answerRequestDto.getRequestId());
+            log.info("Deleted friend request from {} to {} with status {}", request.getSender().getEmail(), request.getRecipient().getEmail(), status);
+        }
+
+        if (status == FriendRequestStatus.REJECTED) {
+            friendRequestDao.delete(answerRequestDto.getRequestId());
+            log.info("Deleted friend request from {} to {} with Status {}", request.getSender().getEmail(), request.getRecipient().getEmail(), status);
         }
 
         FriendRequest savedRequest = friendRequestDao.save(request);
@@ -141,47 +135,36 @@ public class FriendRequestServiceImpl implements FriendRequestService {
     public void deleteFriend(DeleteFriendRequest friendRequestDto) {
         log.info("Starting to delete friend with email: {}", friendRequestDto.getFriendEmail());
 
-        FriendRequest request = friendRequestDao.findById(friendRequestDto.getRequestId())
-                .orElseThrow(() -> new EntityNotFoundException("Запрос не найден"));
-
-        log.info("Friend request found for deletion between {} and {}",
-                request.getSender().getEmail(), request.getRecipient().getEmail());
-
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String emailUser = authentication.getName();
         log.info("Authenticated user: {}", emailUser);
-
-        String senderEmail = request.getSender().getEmail();
-        String recipientEmail = request.getRecipient().getEmail();
-        boolean isParticipant = emailUser.equals(senderEmail) || emailUser.equals(recipientEmail);
-        boolean isAccepted = request.getStatus() == FriendRequestStatus.ACCEPTED;
-
-        if (!isParticipant || !isAccepted) {
-            throw new IllegalArgumentException("It's not your friend");
-        }
 
         User user = userDao.findByEmail(emailUser)
                 .orElseThrow(() -> new EntityNotFoundException("Not found User"));
         log.info("User found: {}", user.getEmail());
 
+        Set<String> friends = user.getFriends().stream()
+                .map(User::getEmail)
+                .filter(email -> email.equals(friendRequestDto.getFriendEmail()))
+                .collect(Collectors.toSet());
+
+        if (!friends.contains(friendRequestDto.getFriendEmail())) {
+            throw new UserNotYourFriend("User wit email: " + friendRequestDto.getFriendEmail() + "not your friend ");
+        }
+
         User friend = userDao.findByEmail(friendRequestDto.getFriendEmail())
                 .orElseThrow(() -> new EntityNotFoundException("Not found User"));
         log.info("Friend found: {}", friend.getEmail());
 
-        request.setStatus(FriendRequestStatus.DELETED);
+        user.getFriends().remove(friend);
+        userDao.save(friend);
+        log.info("User {} deleted from friend request", friend.getEmail());
+        friend.getFriends().remove(friend);
+        userDao.save(friend);
+        log.info("User {} deleted from friend request", friend.getEmail());
 
-        User sender = request.getSender();
-        User recipient = request.getRecipient();
+        log.info("Users {} and {} are no longer friends", user.getEmail(), friend.getEmail());
 
-        sender.getFriends().remove(recipient);
-        recipient.getFriends().remove(sender);
-
-        userDao.save(sender);
-        userDao.save(recipient);
-        log.info("Users {} and {} are no longer friends", sender.getEmail(), recipient.getEmail());
-
-        friendRequestDao.save(request);
-        log.info("Friend request status updated to DELETED for request ID: {}", request.getId());
     }
 }
 

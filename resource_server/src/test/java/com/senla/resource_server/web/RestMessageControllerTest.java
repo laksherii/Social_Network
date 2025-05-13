@@ -54,8 +54,13 @@ class RestMessageControllerTest {
     void getMessagesByRecipientEmail_ShouldReturnMessages_WhenValidRequest() throws Exception {
         // Given
         String email = "test@example.com";
-        UserDto sender = new UserDto("sender@example.com");
-        PrivateMessageResponseDto message = new PrivateMessageResponseDto(sender, "Hello");
+        UserDto sender = UserDto.builder()
+                .email("sender@example.com")
+                .build();
+        PrivateMessageResponseDto message = PrivateMessageResponseDto.builder()
+                .sender(sender)
+                .message("Hello")
+                .build();
 
         given(privateMessageService.getMessagesByRecipientEmail(email))
                 .willReturn(List.of(message));
@@ -65,15 +70,22 @@ class RestMessageControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].message").value("Hello"))
                 .andExpect(jsonPath("$[0].sender.email").value("sender@example.com"));
-
     }
 
     @Test
     void sendPrivateMessage_ShouldReturnMessage_WhenValidRequest() throws Exception {
         // Given
-        PrivateMessageRequestDto requestDto = new PrivateMessageRequestDto(1L, "Test message");
-        UserDto sender = new UserDto("sender@example.com");
-        PrivateMessageResponseDto responseDto = new PrivateMessageResponseDto(sender, "Test message");
+        PrivateMessageRequestDto requestDto = PrivateMessageRequestDto.builder()
+                .recipientEmail("recipient@example.com")
+                .message("Test message")
+                .build();
+        UserDto sender = UserDto.builder()
+                .email("sender@example.com")
+                .build();
+        PrivateMessageResponseDto responseDto = PrivateMessageResponseDto.builder()
+                .sender(sender)
+                .message("Test message")
+                .build();
 
         given(privateMessageService.sendPrivateMessage(any(PrivateMessageRequestDto.class)))
                 .willReturn(responseDto);
@@ -92,8 +104,13 @@ class RestMessageControllerTest {
     void getGroupChatMessages_ShouldReturnMessages_WhenValidRequest() throws Exception {
         // Given
         Long groupId = 1L;
-        UserDto sender = new UserDto("sender@example.com");
-        GetGroupChatMessageDto message = new GetGroupChatMessageDto(sender, "Group message");
+        UserDto sender = UserDto.builder()
+                .email("sender@example.com")
+                .build();
+        GetGroupChatMessageDto message = GetGroupChatMessageDto.builder()
+                .sender(sender)
+                .message("Group message")
+                .build();
 
         given(groupChatMessageService.getGroupChatMessages(groupId))
                 .willReturn(List.of(message));
@@ -108,8 +125,14 @@ class RestMessageControllerTest {
     @Test
     void sendGroupChatMessage_ShouldReturnMessage_WhenValidRequest() throws Exception {
         // Given
-        GroupChatMessageRequestDto requestDto = new GroupChatMessageRequestDto(1L, "Group message");
-        GroupChatMessageResponseDto responseDto = new GroupChatMessageResponseDto("Group 1", "Group message");
+        GroupChatMessageRequestDto requestDto = GroupChatMessageRequestDto.builder()
+                .groupId(1L)
+                .message("Group message")
+                .build();
+        GroupChatMessageResponseDto responseDto = GroupChatMessageResponseDto.builder()
+                .name("Group 1")
+                .message("Group message")
+                .build();
 
         given(groupChatMessageService.sendGroupChatMessage(any(GroupChatMessageRequestDto.class)))
                 .willReturn(responseDto);
@@ -127,8 +150,14 @@ class RestMessageControllerTest {
     @Test
     void sendCommunityMessage_ShouldReturnMessage_WhenValidRequest() throws Exception {
         // Given
-        SendCommunityMessageRequestDto requestDto = new SendCommunityMessageRequestDto(1L, "Community message");
-        SendCommunityMessageResponseDto responseDto = new SendCommunityMessageResponseDto("Community 1", "Community message");
+        SendCommunityMessageRequestDto requestDto = SendCommunityMessageRequestDto.builder()
+                .communityId(1L)
+                .message("Community message")
+                .build();
+        SendCommunityMessageResponseDto responseDto = SendCommunityMessageResponseDto.builder()
+                .communityName("Community 1")
+                .message("Community message")
+                .build();
 
         given(communityMessageService.sendCommunityMessage(any(SendCommunityMessageRequestDto.class)))
                 .willReturn(responseDto);
@@ -143,5 +172,4 @@ class RestMessageControllerTest {
                 .andExpect(jsonPath("$.communityName").value("Community 1"));
     }
 }
-
 

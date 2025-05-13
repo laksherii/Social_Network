@@ -17,7 +17,7 @@ import lombok.ToString;
 public class PrivateMessageRequestDto {
 
     @NotNull(message = "Recipient must not be null")
-    private Long recipient;
+    private String recipientEmail;
 
     @NotBlank(message = "Message content must not be blank")
     @Size(max = 1000, message = "Message content must not exceed 1000 characters")

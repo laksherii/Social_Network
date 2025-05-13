@@ -37,16 +37,30 @@ class RestGroupChatControllerTest {
     @Test
     void createGroupChat_shouldReturnCreated() throws Exception {
         // Given
-        UserDto userDto1 = new UserDto();
-        userDto1.setEmail("user1@email.com");
-        UserDto userDto2 = new UserDto();
-        userDto2.setEmail("user2@email.com");
-        UserDto userDto3 = new UserDto();
-        userDto3.setEmail("user3@email.com");
+        UserDto userDto1 = UserDto.builder()
+                .email("user1@email.com")
+                .build();
+        UserDto userDto2 = UserDto.builder()
+                .email("user2@email.com")
+                .build();
+        UserDto userDto3 = UserDto.builder()
+                .email("user3@email.com")
+                .build();
 
-        CreateGroupChatRequestDto requestDto = new CreateGroupChatRequestDto("Fun Chat", Set.of(1L, 2L, 3L));
-        CreateGroupChatResponseDto responseDto = new CreateGroupChatResponseDto(1L, "Fun Chat",
-                Set.of(userDto1, userDto2, userDto3));
+        CreateGroupChatRequestDto requestDto = CreateGroupChatRequestDto.builder()
+                .name("Fun Chat")
+                .userEmails(Set.of(
+                        userDto1.getEmail(),
+                        userDto2.getEmail(),
+                        userDto3.getEmail()
+                ))
+                .build();
+
+        CreateGroupChatResponseDto responseDto = CreateGroupChatResponseDto.builder()
+                .id(1L)
+                .name("Fun Chat")
+                .users(Set.of(userDto1, userDto2, userDto3))
+                .build();
 
         given(groupService.create(requestDto)).willReturn(responseDto);
 
@@ -57,8 +71,7 @@ class RestGroupChatControllerTest {
                         .content(objectMapper.writeValueAsString(requestDto)))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.id").value(1L))
-                .andExpect(jsonPath("$.name").value("Fun Chat"))
-                .andReturn().getResponse().getContentAsString();
-
+                .andExpect(jsonPath("$.name").value("Fun Chat"));
     }
+
 }

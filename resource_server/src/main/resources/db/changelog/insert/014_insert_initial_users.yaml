@@ -6,17 +6,16 @@ databaseChangeLog:
         - onFail: MARK_RAN
         - sqlCheck:
             expectedResult: "0"
-            sql: "SELECT COUNT(*) FROM users WHERE email = 'elizabeth@example.com'"
+            sql: "SELECT COUNT(*) FROM users WHERE email = 'admin@example.com'"
       changes:
         - insert:
             tableName: users
             columns:
-              - column: { name: email, value: 'elizabeth@example.com' }
-              - column: { name: password, value: '$2a$10$mobQ7tsoLxVx1D2aKxmTQOIwLC6yELm5piX8vToPOU1//TZ6OWiJO' }
-              - column: { name: first_name, value: 'Elizabeth' }
-              - column: { name: last_name, value: 'Johnson' }
+              - column: { name: email, value: 'admin@example.com' }
+              - column: { name: first_name, value: 'Admin' }
+              - column: { name: last_name, value: 'Admin' }
               - column: { name: birth_day, value: '1992-08-20' }
-              - column: { name: enabled, value: 'true'}
+              - column: { name: enabled, value: 'true' }
               - column: { name: gender, value: 'FEMALE' }
               - column: { name: role, value: 'ROLE_ADMIN' }
 
@@ -33,11 +32,10 @@ databaseChangeLog:
             tableName: users
             columns:
               - column: { name: email, value: 'christopher@example.com' }
-              - column: { name: password, value: '$2a$10$6s4Q2i.8d5j2.zl7qFNy5udOWoMOavcvnzPySLLnT6kmA/2hkUnm6' }
               - column: { name: first_name, value: 'Christopher' }
               - column: { name: last_name, value: 'Williams' }
               - column: { name: birth_day, value: '1988-11-03' }
-              - column: { name: enabled, value: 'true'}
+              - column: { name: enabled, value: 'true' }
               - column: { name: gender, value: 'MALE' }
               - column: { name: role, value: 'ROLE_USER' }
 
@@ -54,11 +52,10 @@ databaseChangeLog:
             tableName: users
             columns:
               - column: { name: email, value: 'victoria@example.com' }
-              - column: { name: password, value: '$2a$10$MeUPEDJxuk14vhpJtkZQneRum7IIJmRBCCwgb.LTkmT8AmfjkdKYm' }
               - column: { name: first_name, value: 'Victoria' }
               - column: { name: last_name, value: 'Brown' }
               - column: { name: birth_day, value: '1995-02-28' }
-              - column: { name: enabled, value: 'true'}
+              - column: { name: enabled, value: 'true' }
               - column: { name: gender, value: 'FEMALE' }
               - column: { name: role, value: 'ROLE_MODERATOR' }
 
@@ -75,11 +72,10 @@ databaseChangeLog:
             tableName: users
             columns:
               - column: { name: email, value: 'benjamin@example.com' }
-              - column: { name: password, value: '$2a$10$1fdtPJRS/RnQK3PpMPimVuxog/tT5Ekc/zCo9muReYgP3cZa/j4ea' }
               - column: { name: first_name, value: 'Benjamin' }
               - column: { name: last_name, value: 'Jones' }
               - column: { name: birth_day, value: '1993-07-10' }
-              - column: { name: enabled, value: 'true'}
+              - column: { name: enabled, value: 'true' }
               - column: { name: gender, value: 'MALE' }
               - column: { name: role, value: 'ROLE_USER' }
 
@@ -96,10 +92,9 @@ databaseChangeLog:
             tableName: users
             columns:
               - column: { name: email, value: 'natalie@example.com' }
-              - column: { name: password, value: '$2a$10$NeMBlFBkVawmb5cKyLnmxut8eZvHOQsa0EWfSh4WcpiVjOml8FBGG' }
               - column: { name: first_name, value: 'Natalie' }
               - column: { name: last_name, value: 'Garcia' }
               - column: { name: birth_day, value: '1991-04-22' }
-              - column: { name: enabled, value: 'true'}
+              - column: { name: enabled, value: 'true' }
               - column: { name: gender, value: 'FEMALE' }
               - column: { name: role, value: 'ROLE_USER' }

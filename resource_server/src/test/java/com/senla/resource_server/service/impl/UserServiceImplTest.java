@@ -4,15 +4,12 @@ import com.senla.resource_server.data.dao.UserDao;
 import com.senla.resource_server.data.entity.User;
 import com.senla.resource_server.data.entity.User.GenderType;
 import com.senla.resource_server.data.entity.User.RoleType;
-import com.senla.resource_server.data.entity.Wall;
 import com.senla.resource_server.exception.EntityNotFoundException;
 import com.senla.resource_server.exception.IllegalStateException;
 import com.senla.resource_server.service.dto.user.CreateUserDtoRequest;
 import com.senla.resource_server.service.dto.user.CreateUserDtoResponse;
 import com.senla.resource_server.service.dto.user.UpdateUserDtoRequest;
 import com.senla.resource_server.service.dto.user.UpdateUserDtoResponse;
-import com.senla.resource_server.service.dto.user.UserAuthRequestDto;
-import com.senla.resource_server.service.dto.user.UserAuthResponseDto;
 import com.senla.resource_server.service.dto.user.UserDto;
 import com.senla.resource_server.service.dto.user.UserInfoDto;
 import com.senla.resource_server.service.dto.user.UserSearchDto;
@@ -23,7 +20,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.time.LocalDate;
@@ -57,7 +53,6 @@ class UserServiceImplTest {
         user = new User();
         user.setId(1L);
         user.setEmail("test@example.com");
-        user.setPassword("encodedPassword");
         user.setEnabled(true);
     }
 
@@ -132,7 +127,6 @@ class UserServiceImplTest {
         CreateUserDtoRequest userDtoRequest = CreateUserDtoRequest.builder()
                 .email("artem@example.com")
                 .birthDay(LocalDate.of(2001, 1, 13))
-                .password("correct")
                 .lastName("Artem")
                 .lastName("Lashkevich")
                 .build();
@@ -146,13 +140,12 @@ class UserServiceImplTest {
         createUserDtoResponse.setEmail(mapped.getEmail());
 
         when(userDao.findByEmail(userDtoRequest.getEmail())).thenReturn(Optional.empty());
-        when(passwordEncoder.encode(userDtoRequest.getPassword())).thenReturn("encoded-pass");
         when(userMapper.toUserCreate(userDtoRequest)).thenReturn(mapped);
         when(userDao.save(mapped)).thenReturn(mapped);
         when(userMapper.toCreateUserDtoResponse(mapped)).thenReturn(createUserDtoResponse);
 
         // when
-        CreateUserDtoResponse response = userService.create(userDtoRequest, null);
+        CreateUserDtoResponse response = userService.create(userDtoRequest);
 
         //then
         assertThat(response.getEmail()).isEqualTo("artem@example.com");
@@ -174,7 +167,6 @@ class UserServiceImplTest {
         // given
         CreateUserDtoRequest request = CreateUserDtoRequest.builder()
                 .email("test@example.com")
-                .password("password123")
                 .firstName("John")
                 .lastName("Doe")
                 .birthDay(LocalDate.of(1990, 1, 1))
@@ -183,7 +175,6 @@ class UserServiceImplTest {
 
         User newUser = User.builder()
                 .email("test@example.com")
-                .password("password123")
                 .firstName("John")
                 .lastName("Doe")
                 .role(RoleType.ROLE_USER)
@@ -206,7 +197,7 @@ class UserServiceImplTest {
         when(userMapper.toCreateUserDtoResponse(savedUser)).thenReturn(expected);
 
         // when
-        CreateUserDtoResponse result = userService.create(request, RoleType.ROLE_USER);
+        CreateUserDtoResponse result = userService.create(request);
 
         // then
         assertThat(result.getEmail()).isEqualTo(expected.getEmail());
@@ -217,7 +208,6 @@ class UserServiceImplTest {
         // given
         CreateUserDtoRequest request = CreateUserDtoRequest.builder()
                 .email("test@example.com")
-                .password("Password123")
                 .firstName("John")
                 .lastName("Doe")
                 .birthDay(LocalDate.of(1990, 1, 1))
@@ -226,53 +216,8 @@ class UserServiceImplTest {
         when(userDao.findByEmail("test@example.com")).thenReturn(Optional.of(user));
 
         // when / then
-        assertThatThrownBy(() -> userService.create(request, RoleType.ROLE_USER))
+        assertThatThrownBy(() -> userService.create(request))
                 .isInstanceOf(IllegalStateException.class);
-    }
-
-    @Test
-    void authenticate_WhenPasswordMatches_ShouldReturnDto() {
-        // given
-        UserAuthRequestDto request = new UserAuthRequestDto("test@example.com", "password123");
-        UserAuthResponseDto expectedDto = UserAuthResponseDto.builder()
-                .id(1L)
-                .email("test@example.com")
-                .role(RoleType.ROLE_USER)
-                .build();
-
-        when(userDao.findByEmail("test@example.com")).thenReturn(Optional.of(user));
-        when(passwordEncoder.matches("password123", "encodedPassword")).thenReturn(true);
-        when(userMapper.toUserAuthResponseDto(user)).thenReturn(expectedDto);
-
-        // when
-        UserAuthResponseDto result = userService.authenticate(request);
-
-        // then
-        assertThat(result).isEqualTo(expectedDto);
-    }
-
-    @Test
-    void authenticate_WhenPasswordDoesNotMatch_ShouldThrowIllegalStateException() {
-        // given
-        UserAuthRequestDto request = new UserAuthRequestDto("test@example.com", "password123");
-
-        when(userDao.findByEmail("test@example.com")).thenReturn(Optional.of(user));
-        when(passwordEncoder.matches("password123", "encodedPassword")).thenReturn(false);
-
-        // when / then
-        assertThatThrownBy(() -> userService.authenticate(request))
-                .isInstanceOf(BadCredentialsException.class);
-    }
-
-    @Test
-    void authenticate_WhenUserNotFound_ShouldThrowException() {
-        // given
-        UserAuthRequestDto request = new UserAuthRequestDto("no@mail.com", "pass");
-        when(userDao.findByEmail("no@mail.com")).thenReturn(Optional.empty());
-
-        // when / then
-        assertThatThrownBy(() -> userService.authenticate(request))
-                .isInstanceOf(EntityNotFoundException.class);
     }
 
     @Test
@@ -280,14 +225,12 @@ class UserServiceImplTest {
         // given
         UpdateUserDtoRequest request = UpdateUserDtoRequest.builder()
                 .email("updated@example.com")
-                .password("newPassword123")
                 .firstName("UpdatedName")
                 .lastName("UpdatedLastName")
                 .build();
 
         User updated = User.builder()
                 .email("updated@example.com")
-                .password("newPassword123")
                 .firstName("UpdatedName")
                 .lastName("UpdatedLastName")
                 .build();
