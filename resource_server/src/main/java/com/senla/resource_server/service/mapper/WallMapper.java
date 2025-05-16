@@ -1,7 +1,7 @@
 package com.senla.resource_server.service.mapper;
 
+import com.senla.resource_server.data.entity.PublicMessage;
 import com.senla.resource_server.data.entity.Wall;
-import com.senla.resource_server.data.entity.WallMessage;
 import com.senla.resource_server.service.dto.message.WallMessageDto;
 import com.senla.resource_server.service.dto.wall.WallDto;
 import com.senla.resource_server.service.dto.wall.WallResponseDto;
@@ -14,7 +14,5 @@ public interface WallMapper {
 
     WallResponseDto toWallResponseDto(Wall wall);
 
-    WallDto toWallDto(Wall wall);
-
-    WallMessageDto toWallMessageDto(WallMessage wallMessage);
+    WallMessageDto toWallMessageDto(PublicMessage wallMessage);
 }

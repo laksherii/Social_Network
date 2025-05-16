@@ -12,6 +12,7 @@ import com.senla.resource_server.service.dto.user.UserAuthResponseDto;
 import com.senla.resource_server.service.dto.user.UserDto;
 import com.senla.resource_server.service.dto.user.UserInfoDto;
 import com.senla.resource_server.service.dto.user.UserSearchDto;
+import com.senla.resource_server.service.dto.user.UserSearchDtoResponse;
 import jakarta.validation.Valid;
 
 import java.util.List;
@@ -25,9 +26,9 @@ public interface UserService {
 
     CreateUserDtoResponse create(CreateUserDtoRequest userDtoRequest);
 
-    UpdateUserDtoResponse update(UpdateUserDtoRequest userDtoRequest);
+    UserSearchDtoResponse update(UpdateUserDtoRequest userDtoRequest);
 
-    List<UserDto> searchUsers(UserSearchDto userSearchDto);
+    List<UserSearchDtoResponse> searchUsers(UserSearchDto userSearchDto);
 
     UpdateRoleUserDtoResponse updateRole(@Valid UpdateRoleUserDtoRequest updateRoleUserDtoRequest);
 }

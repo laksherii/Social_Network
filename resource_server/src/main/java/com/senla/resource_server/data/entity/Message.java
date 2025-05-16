@@ -1,10 +1,7 @@
 package com.senla.resource_server.data.entity;
 
 import jakarta.persistence.Column;
-import jakarta.persistence.DiscriminatorColumn;
-import jakarta.persistence.DiscriminatorType;
 import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -13,39 +10,38 @@ import jakarta.persistence.InheritanceType;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
-import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
-import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
-import org.hibernate.annotations.CreationTimestamp;
+import lombok.experimental.SuperBuilder;
 
 import java.time.Instant;
 
+@SuperBuilder
+@NoArgsConstructor
 @Entity
 @Data
-@NoArgsConstructor
-@AllArgsConstructor
 @Table(name = "messages")
 @Inheritance(strategy = InheritanceType.JOINED)
-@DiscriminatorColumn(name = "message_type", discriminatorType = DiscriminatorType.STRING)
 public abstract class Message {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "sender_id", nullable = false)
+    @ManyToOne(optional = false)
+    @JoinColumn(name = "sender_id")
     private User sender;
 
-    @Column(name = "content", nullable = false)
-    private String message;
+    @Column(nullable = false, columnDefinition = "TEXT")
+    private String content;
 
-    @Column(name = "created_at", updatable = false)
-    @CreationTimestamp
-    private Instant createdAt;
+    @Column(name = "created_at", nullable = false)
+    @Builder.Default
+    private Instant createdAt = Instant.now();
+
 }
+
+
+
+

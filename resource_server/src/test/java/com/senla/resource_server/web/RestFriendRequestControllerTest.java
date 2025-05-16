@@ -78,7 +78,7 @@ class RestFriendRequestControllerTest {
     @Test
     void deleteFriend_shouldReturnNoContent() throws Exception {
         // Given
-        DeleteFriendRequest requestDto = new DeleteFriendRequest(1L, "friend@example.com");
+        DeleteFriendRequest requestDto = new DeleteFriendRequest("friend@example.com");
 
         // When / Then
         mockMvc.perform(delete("/friend-request")

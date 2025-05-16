@@ -2,6 +2,7 @@ package com.senla.resource_server.data.dao.impl;
 
 import com.senla.resource_server.data.dao.GroupChatDao;
 import com.senla.resource_server.data.entity.GroupChat;
+import com.senla.resource_server.data.entity.PublicMessage;
 import com.senla.resource_server.data.entity.User;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
@@ -46,5 +47,13 @@ public class GroupChatDaoImpl implements GroupChatDao {
         entityManager.persist(groupChat);
         log.info("Successfully saved group chat with name: {}", groupChat.getName());
         return groupChat;
+    }
+
+    @Override
+    public PublicMessage sendMessage(PublicMessage publicMessage) {
+        log.info("Sending public message with ID: {}", publicMessage.getId());
+        entityManager.persist(publicMessage);
+        log.info("Successfully sent public message with ID: {}", publicMessage.getId());
+        return publicMessage;
     }
 }

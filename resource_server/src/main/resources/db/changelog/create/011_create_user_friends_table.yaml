@@ -39,3 +39,15 @@ databaseChangeLog:
             referencedTableName: users
             referencedColumnNames: id
             onDelete: CASCADE
+
+  - changeSet:
+      id: add-symmetric-unique-friend-request
+      author: Lashkevich Artem
+      changes:
+        - sql:
+            sql: >
+              CREATE UNIQUE INDEX uniq_friend_request_pair_symmetric
+              ON friend_request (
+                LEAST(sender_id, recipient_id),
+                GREATEST(sender_id, recipient_id)
+              );

@@ -11,6 +11,7 @@ import com.senla.resource_server.service.dto.user.UpdateUserDtoResponse;
 import com.senla.resource_server.service.dto.user.UserDto;
 import com.senla.resource_server.service.dto.user.UserInfoDto;
 import com.senla.resource_server.service.dto.user.UserSearchDto;
+import com.senla.resource_server.service.dto.user.UserSearchDtoResponse;
 import com.senla.resource_server.service.impl.UserServiceImpl;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -81,10 +82,10 @@ public class RestUserController {
     @PreAuthorize("#updateUserDtoRequest.email == authentication.name or hasRole('ADMIN')")
     @PutMapping
     @ResponseStatus(HttpStatus.OK)
-    public UpdateUserDtoResponse updateUser(@Valid @RequestBody UpdateUserDtoRequest updateUserDtoRequest) {
-        log.info("Updating user with email: {}", updateUserDtoRequest.getEmail());
-        UpdateUserDtoResponse response = userService.update(updateUserDtoRequest);
-        log.info("Successfully updated user with email: {}", updateUserDtoRequest.getEmail());
+    public UserSearchDtoResponse updateUser(@Valid @RequestBody UpdateUserDtoRequest updateUserDtoRequest) {
+        log.info("Updating user: {}", updateUserDtoRequest);
+        UserSearchDtoResponse response = userService.update(updateUserDtoRequest);
+        log.info("Successfully updated user: {}", updateUserDtoRequest);
         return response;
     }
 
@@ -101,7 +102,7 @@ public class RestUserController {
     @PreAuthorize("hasRole('ADMIN') or hasRole('USER') or hasRole('MODERATOR')")
     @GetMapping("/search")
     @ResponseStatus(HttpStatus.OK)
-    public List<UserDto> searchUsers(
+    public List<UserSearchDtoResponse> searchUsers(
             @RequestParam(required = false) String firstName,
             @RequestParam(required = false) String lastName,
             @RequestParam(required = false) Integer age,
@@ -110,13 +111,14 @@ public class RestUserController {
         log.info("Searching users with userSearchDto: firstName={}, lastName={}, age={}, gender={}",
                 firstName, lastName, age, gender);
 
-        UserSearchDto userSearchDto = new UserSearchDto();
-        userSearchDto.setFirstName(firstName);
-        userSearchDto.setLastName(lastName);
-        userSearchDto.setAge(age);
-        userSearchDto.setGender(gender);
+        UserSearchDto userSearchDto = UserSearchDto.builder()
+                .firstName(firstName)
+                .lastName(lastName)
+                .age(age)
+                .gender(gender)
+                .build();
 
-        List<UserDto> users = userService.searchUsers(userSearchDto);
+        List<UserSearchDtoResponse> users = userService.searchUsers(userSearchDto);
         log.info("Successfully found {} users matching the search userSearchDto.", users.size());
         return users;
     }

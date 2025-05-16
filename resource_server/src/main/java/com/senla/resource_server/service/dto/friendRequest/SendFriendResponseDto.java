@@ -17,7 +17,7 @@ import static com.senla.resource_server.data.entity.FriendRequest.FriendRequestS
 public class SendFriendResponseDto {
 
     @NotNull(message = "Sender must not be null")
-    private UserDto sender;
+    private UserDto recipient;
 
     @NotBlank(message = "Status must not be blank")
     private FriendRequestStatus status;

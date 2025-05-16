@@ -18,6 +18,7 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.ToString;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -28,18 +29,20 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @Table(name = "wall")
+@EqualsAndHashCode(exclude = "owner")
 public class Wall {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @OneToOne()
     @JoinColumn(name = "user_id", nullable = false)
+    @ToString.Exclude
     private User owner;
 
     @OneToMany(mappedBy = "wall", cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default
-    private List<WallMessage> messages = new ArrayList<>();
+    private List<PublicMessage> messages = new ArrayList<>();
 }
 

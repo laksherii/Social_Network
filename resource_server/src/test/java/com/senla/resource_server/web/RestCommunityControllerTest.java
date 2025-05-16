@@ -1,13 +1,15 @@
 package com.senla.resource_server.web;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.senla.resource_server.config.JwtAuthenticationFilter;
+import com.senla.resource_server.config.JwtTokenProvider;
 import com.senla.resource_server.service.dto.community.CommunityDto;
+import com.senla.resource_server.service.dto.community.CommunityMessageDto;
 import com.senla.resource_server.service.dto.community.CreateCommunityRequestDto;
 import com.senla.resource_server.service.dto.community.CreateCommunityResponseDto;
 import com.senla.resource_server.service.dto.community.JoinCommunityRequestDto;
 import com.senla.resource_server.service.dto.community.JoinCommunityResponseDto;
-import com.senla.resource_server.service.dto.message.CommunityMessageDto;
-import com.senla.resource_server.service.impl.CommunityServiceImpl;
+import com.senla.resource_server.service.interfaces.CommunityService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -36,7 +38,13 @@ class RestCommunityControllerTest {
     private MockMvc mockMvc;
 
     @MockitoBean
-    private CommunityServiceImpl communityService;
+    private CommunityService communityService;
+
+    @MockitoBean
+    private JwtTokenProvider jwtTokenProvider;
+
+    @MockitoBean
+    private JwtAuthenticationFilter jwtAuthenticationFilter;
 
     @Autowired
     private ObjectMapper objectMapper;
@@ -44,7 +52,7 @@ class RestCommunityControllerTest {
     @Test
     void createCommunity_WhenValid_ShouldReturnCreated() throws Exception {
         // Given
-        CreateCommunityRequestDto request = new CreateCommunityRequestDto("Test Community");
+        CreateCommunityRequestDto request = new CreateCommunityRequestDto("Test Community", "Test");
         CreateCommunityResponseDto response = new CreateCommunityResponseDto("Test Community");
         given(communityService.createCommunity(request)).willReturn(response);
 
@@ -62,8 +70,8 @@ class RestCommunityControllerTest {
         // Given
         JoinCommunityRequestDto request = new JoinCommunityRequestDto(1L);
         CommunityMessageDto message = new CommunityMessageDto();
-        message.setMessage("Welcome!");
-        JoinCommunityResponseDto response = new JoinCommunityResponseDto("Test Community", List.of(message));
+        message.setContent("Welcome!");
+        JoinCommunityResponseDto response = new JoinCommunityResponseDto("Test Community", "Test", List.of(message));
         given(communityService.joinCommunity(request)).willReturn(response);
 
         // When / Then
@@ -81,8 +89,8 @@ class RestCommunityControllerTest {
     void getCommunity_WhenExists_ShouldReturnCommunity() throws Exception {
         // Given
         CommunityMessageDto message = new CommunityMessageDto();
-        message.setMessage("Test Message");
-        JoinCommunityResponseDto response = new JoinCommunityResponseDto("Test Community", List.of(message));
+        message.setContent("Test Message");
+        JoinCommunityResponseDto response = new JoinCommunityResponseDto("Test Community", "Test", List.of(message));
         given(communityService.findCommunity(1L)).willReturn(response);
 
         // When / Then
@@ -96,8 +104,8 @@ class RestCommunityControllerTest {
     void getAllCommunities_ShouldReturnList() throws Exception {
         // Given
         List<CommunityDto> communities = List.of(
-                new CommunityDto("Community 1"),
-                new CommunityDto("Community 2")
+                new CommunityDto("Community 1", "Test Community 1"),
+                new CommunityDto("Community 2", "Test Community 2")
         );
         given(communityService.getAllCommunities(0, 10)).willReturn(communities);
 

@@ -1,4 +1,4 @@
-package com.senla.resource_server.service.dto.message;
+package com.senla.resource_server.service.dto.community;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
@@ -18,5 +18,5 @@ public class SendCommunityMessageResponseDto {
 
     @NotBlank(message = "Message content must not be blank")
     @Size(max = 1000, message = "Message content must not exceed 1000 characters")
-    private String message;
+    private String content;
 }

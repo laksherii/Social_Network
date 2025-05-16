@@ -15,5 +15,5 @@ public class WallMessageDto {
 
     @NotBlank(message = "Message content must not be blank")
     @Size(max = 1000, message = "Message content must not exceed 1000 characters")
-    private String message;
+    private String content;
 }

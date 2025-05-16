@@ -21,8 +21,3 @@ jwt:
   validateTimeForRefreshToken: 2592000
   secretKey: Hala_Madrid
   resourceServerUrl: http://localhost:8080
-
-resource-server:
-  url:
-    - http://resource-server:8080
-    - http://localhost:8080

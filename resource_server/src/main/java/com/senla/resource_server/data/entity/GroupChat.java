@@ -32,7 +32,7 @@ import java.util.Set;
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(name = "group_chat")
-public class GroupChat {
+public class    GroupChat {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -52,5 +52,5 @@ public class GroupChat {
 
     @OneToMany(mappedBy = "groupChat", cascade = CascadeType.ALL)
     @Builder.Default
-    private List<GroupChatMessage> messages = new ArrayList<>();
+    private List<PublicMessage> messages = new ArrayList<>();
 }

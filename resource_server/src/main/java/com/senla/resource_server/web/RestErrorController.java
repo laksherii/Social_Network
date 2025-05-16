@@ -7,6 +7,7 @@ import com.senla.resource_server.exception.IllegalArgumentException;
 import com.senla.resource_server.exception.IllegalStateException;
 import com.senla.resource_server.exception.UserNotAdminInGroupException;
 import com.senla.resource_server.exception.UserNotInGroupChatException;
+import com.senla.resource_server.exception.UserNotYourFriendException;
 import com.senla.resource_server.service.dto.ErrorDto;
 import com.senla.resource_server.service.dto.ErrorDto.ErrorStatus;
 import jakarta.validation.ConstraintViolationException;
@@ -21,7 +22,6 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -113,6 +113,14 @@ public class RestErrorController {
         log.error("UserNotInGroupChatException", ex);
         return new ErrorDto(ErrorStatus.CLIENT_ERROR, ex.getMessage());
     }
+
+    @ExceptionHandler(UserNotYourFriendException.class)
+    @ResponseStatus(HttpStatus.FORBIDDEN)
+    public ErrorDto handleUserNotYourFriendException(UserNotYourFriendException ex) {
+        log.error("UserNotInGroupChatException", ex);
+        return new ErrorDto(ErrorStatus.CLIENT_ERROR, ex.getMessage());
+    }
+
 
     @ExceptionHandler(Exception.class)
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)

@@ -2,6 +2,7 @@ package com.senla.resource_server.data.dao.impl;
 
 import com.senla.resource_server.data.dao.CommunityDao;
 import com.senla.resource_server.data.entity.Community;
+import com.senla.resource_server.data.entity.PublicMessage;
 import com.senla.resource_server.util.PaginationUtil;
 import com.senla.resource_server.util.PaginationUtil.Pagination;
 import jakarta.persistence.EntityManager;
@@ -52,6 +53,14 @@ public class CommunityDaoImpl implements CommunityDao {
 
         log.info("Fetched {} communities", communities.size());
         return communities;
+    }
+
+    @Override
+    public PublicMessage sendMessage(PublicMessage publicMessage) {
+        log.info("Sending public message with ID {}", publicMessage.getId());
+        entityManager.persist(publicMessage);
+        log.info("Successfully sent public message with ID {}", publicMessage.getId());
+        return publicMessage;
     }
 }
 

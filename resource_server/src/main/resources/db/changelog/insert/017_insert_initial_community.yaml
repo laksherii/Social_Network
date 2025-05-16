@@ -13,6 +13,7 @@ databaseChangeLog:
             columns:
               - column: { name: name, value: "Real Madrid" }
               - column: { name: admin_id, value: "1" }
+              - column: { name: description, value: "Real Madrid official fan community" }
 
   - changeSet:
       id: 017-2-insert-community-liverpool
@@ -28,6 +29,7 @@ databaseChangeLog:
             columns:
               - column: { name: name, value: "Liverpool" }
               - column: { name: admin_id, value: "2" }
+              - column: { name: description, value: "Liverpool FC supporters community" }
 
   - changeSet:
       id: 017-3-insert-community-manchester-united
@@ -43,3 +45,4 @@ databaseChangeLog:
             columns:
               - column: { name: name, value: "Manchester United" }
               - column: { name: admin_id, value: "4" }
+              - column: { name: description, value: "Manchester United global fans" }

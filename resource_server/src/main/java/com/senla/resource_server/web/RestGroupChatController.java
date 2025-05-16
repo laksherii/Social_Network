@@ -1,9 +1,12 @@
 package com.senla.resource_server.web;
 
+import com.senla.resource_server.data.entity.GroupChat;
 import com.senla.resource_server.service.dto.groupChat.CreateGroupChatRequestDto;
 import com.senla.resource_server.service.dto.groupChat.CreateGroupChatResponseDto;
+import com.senla.resource_server.service.dto.groupChat.GroupChatDto;
 import com.senla.resource_server.service.dto.message.GetGroupChatMessageDto;
 import com.senla.resource_server.service.impl.GroupChatServiceImpl;
+import com.senla.resource_server.service.mapper.GroupChatMapper;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -26,6 +29,7 @@ import java.util.List;
 public class RestGroupChatController {
 
     private final GroupChatServiceImpl groupService;
+    private final GroupChatMapper groupChatMapper;
 
     @PreAuthorize("hasAnyRole('ADMIN', 'USER', 'MODERATOR')")
     @PostMapping
@@ -38,4 +42,15 @@ public class RestGroupChatController {
                 groupDto.getName());
         return response;
     }
+
+    @PreAuthorize("hasAnyRole('ADMIN', 'USER', 'MODERATOR')")
+    @GetMapping("/{id}")
+    @ResponseStatus(HttpStatus.OK)
+    public GroupChatDto findCommunity(@PathVariable Long id) {
+        log.info("User is attempting to find a group chat with ID: {}", id);
+        GroupChatDto groupChat = groupService.findById(id);
+        log.info("Successfully retrieved group chat with name: {}", groupChat.getName());
+        return groupChat;
+    }
+
 }

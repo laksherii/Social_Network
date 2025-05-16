@@ -1,12 +1,12 @@
 databaseChangeLog:
   - changeSet:
-      id: 006-create-messages-table
+      id: 007-create-messages-table
       author: Lashkevich Artem
       preConditions:
         - onFail: MARK_RAN
         - not:
-            - tableExists:
-                tableName: messages
+            tableExists:
+              tableName: messages
       changes:
         - createTable:
             tableName: messages
@@ -28,9 +28,6 @@ databaseChangeLog:
                   constraints:
                     nullable: false
               - column:
-                  name: message_type
-                  type: VARCHAR(100)
-              - column:
                   name: created_at
                   type: TIMESTAMP WITH TIME ZONE
                   defaultValueComputed: CURRENT_TIMESTAMP
@@ -39,4 +36,4 @@ databaseChangeLog:
             baseColumnNames: sender_id
             referencedTableName: users
             referencedColumnNames: id
-            constraintName: fk_messages_sender
+            constraintName: fk_message_sender

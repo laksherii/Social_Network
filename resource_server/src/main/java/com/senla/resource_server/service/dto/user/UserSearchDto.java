@@ -1,6 +1,7 @@
 package com.senla.resource_server.service.dto.user;
 
 import com.senla.resource_server.data.entity.User.GenderType;
+import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
@@ -19,7 +20,8 @@ import lombok.ToString;
 @AllArgsConstructor
 public class UserSearchDto {
 
-    @NotBlank(message = "First name must not be blank")
+    @NotBlank(message = "Email must not be blank")
+    @Email(message = "Invalid email format")
     private String firstName;
 
     @NotBlank(message = "Last name must not be blank")

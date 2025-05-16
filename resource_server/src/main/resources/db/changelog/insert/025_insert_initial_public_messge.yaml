@@ -1,0 +1,102 @@
+databaseChangeLog:
+  - changeSet:
+      id: 018-5-insert-public-group-1
+      author: Lashkevich Artem
+      preConditions:
+        - onFail: MARK_RAN
+        - sqlCheck:
+            expectedResult: "0"
+            sql: "SELECT COUNT(*) FROM public_messages WHERE id = 105"
+      changes:
+        - insert:
+            tableName: public_messages
+            columns:
+              - column: { name: id,        value: "105" }
+              - column: { name: group_id,  value: "1" }
+              - column: { name: community_id, value: "null" }
+              - column: { name: wall_id,     value: "null" }
+
+  - changeSet:
+            id: 018-6-insert-public-group-2
+            author: Lashkevich Artem
+            preConditions:
+              - onFail: MARK_RAN
+              - sqlCheck:
+                  expectedResult: "0"
+                  sql: "SELECT COUNT(*) FROM public_messages WHERE id = 106"
+            changes:
+              - insert:
+                  tableName: public_messages
+                  columns:
+                    - column: { name: id,        value: "106" }
+                    - column: { name: group_id,  value: "2" }
+                    - column: { name: community_id, value: "null" }
+                    - column: { name: wall_id,     value: "null" }
+
+  - changeSet:
+            id: 018-7-insert-public-group-3
+            author: Lashkevich Artem
+            preConditions:
+              - onFail: MARK_RAN
+              - sqlCheck:
+                  expectedResult: "0"
+                  sql: "SELECT COUNT(*) FROM public_messages WHERE id = 107"
+            changes:
+              - insert:
+                  tableName: public_messages
+                  columns:
+                    - column: { name: id,        value: "107" }
+                    - column: { name: group_id,  value: "3" }
+                    - column: { name: community_id, value: "null" }
+                    - column: { name: wall_id,     value: "null" }
+
+  - changeSet:
+            id: 018-8-insert-public-community-1
+            author: Lashkevich Artem
+            preConditions:
+              - onFail: MARK_RAN
+              - sqlCheck:
+                  expectedResult: "0"
+                  sql: "SELECT COUNT(*) FROM public_messages WHERE id = 108"
+            changes:
+              - insert:
+                  tableName: public_messages
+                  columns:
+                    - column: { name: id,           value: "108" }
+                    - column: { name: group_id,     value: "null" }
+                    - column: { name: community_id, value: "1" }
+                    - column: { name: wall_id,      value: "null" }
+
+  - changeSet:
+            id: 018-9-insert-public-community-2
+            author: Lashkevich Artem
+            preConditions:
+              - onFail: MARK_RAN
+              - sqlCheck:
+                  expectedResult: "0"
+                  sql: "SELECT COUNT(*) FROM public_messages WHERE id = 109"
+            changes:
+              - insert:
+                  tableName: public_messages
+                  columns:
+                    - column: { name: id,           value: "109" }
+                    - column: { name: group_id,     value: "null" }
+                    - column: { name: community_id, value: "2" }
+                    - column: { name: wall_id,      value: "null" }
+
+  - changeSet:
+            id: 018-10-insert-public-wall
+            author: Lashkevich Artem
+            preConditions:
+              - onFail: MARK_RAN
+              - sqlCheck:
+                  expectedResult: "0"
+                  sql: "SELECT COUNT(*) FROM public_messages WHERE id = 110"
+            changes:
+              - insert:
+                  tableName: public_messages
+                  columns:
+                    - column: { name: id,        value: "110" }
+                    - column: { name: group_id,  value: "null" }
+                    - column: { name: community_id, value: "null" }
+                    - column: { name: wall_id,      value: "3" }

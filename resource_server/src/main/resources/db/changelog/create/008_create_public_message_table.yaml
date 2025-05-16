@@ -1,0 +1,70 @@
+databaseChangeLog:
+  - changeSet:
+      id: 007-2-create-public-message-table
+      author: Lashkevich Artem
+      preConditions:
+        - onFail: MARK_RAN
+        - not:
+            tableExists:
+              tableName: public_messages
+      changes:
+        - createTable:
+            tableName: public_messages
+            columns:
+              - column:
+                  name: id
+                  type: BIGINT
+                  constraints:
+                    primaryKey: true
+              - column:
+                  name: group_id
+                  type: BIGINT
+              - column:
+                  name: community_id
+                  type: BIGINT
+              - column:
+                  name: wall_id
+                  type: BIGINT
+        - addForeignKeyConstraint:
+            baseTableName: public_messages
+            baseColumnNames: id
+            referencedTableName: messages
+            referencedColumnNames: id
+            constraintName: fk_public_message_id
+        - addForeignKeyConstraint:
+            baseTableName: public_messages
+            baseColumnNames: group_id
+            referencedTableName: group_chat
+            referencedColumnNames: id
+            constraintName: fk_public_message_group
+        - addForeignKeyConstraint:
+            baseTableName: public_messages
+            baseColumnNames: community_id
+            referencedTableName: community
+            referencedColumnNames: id
+            constraintName: fk_public_message_community
+        - addForeignKeyConstraint:
+            baseTableName: public_messages
+            baseColumnNames: wall_id
+            referencedTableName: wall
+            referencedColumnNames: id
+            constraintName: fk_public_message_wall
+
+  - changeSet:
+      id: 007-3-add-check-constraint-to-public-message
+      author: Lashkevich Artem
+      preConditions:
+        - onFail: MARK_RAN
+        - tableExists:
+            tableName: public_messages
+      changes:
+        - sql:
+            dbms: postgres
+            sql: |
+              ALTER TABLE public_message
+              ADD CONSTRAINT check_only_one_target
+              CHECK (
+                  (group_id IS NOT NULL AND community_id IS NULL AND wall_id IS NULL) OR
+                  (group_id IS NULL AND community_id IS NOT NULL AND wall_id IS NULL) OR
+                  (group_id IS NULL AND community_id IS NULL AND wall_id IS NOT NULL)
+              );

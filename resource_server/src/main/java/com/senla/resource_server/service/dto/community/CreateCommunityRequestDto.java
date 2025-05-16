@@ -14,4 +14,7 @@ public class CreateCommunityRequestDto {
 
     @NotBlank(message = "Community name must not be blank")
     private String name;
+
+    @NotBlank(message = "Description must not be blank")
+    private String description;
 }

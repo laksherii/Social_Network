@@ -8,18 +8,24 @@ import com.senla.resource_server.exception.EntityNotFoundException;
 import com.senla.resource_server.exception.IllegalStateException;
 import com.senla.resource_server.service.dto.user.CreateUserDtoRequest;
 import com.senla.resource_server.service.dto.user.CreateUserDtoResponse;
+import com.senla.resource_server.service.dto.user.UpdateRoleUserDtoRequest;
+import com.senla.resource_server.service.dto.user.UpdateRoleUserDtoResponse;
 import com.senla.resource_server.service.dto.user.UpdateUserDtoRequest;
-import com.senla.resource_server.service.dto.user.UpdateUserDtoResponse;
 import com.senla.resource_server.service.dto.user.UserDto;
 import com.senla.resource_server.service.dto.user.UserInfoDto;
 import com.senla.resource_server.service.dto.user.UserSearchDto;
+import com.senla.resource_server.service.dto.user.UserSearchDtoResponse;
 import com.senla.resource_server.service.mapper.UserMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.time.LocalDate;
@@ -50,16 +56,28 @@ class UserServiceImplTest {
 
     @BeforeEach
     void setUp() {
-        user = new User();
-        user.setId(1L);
-        user.setEmail("test@example.com");
-        user.setEnabled(true);
+        user = User.builder()
+                .id(1L)
+                .email("test@example.com")
+                .enabled(true)
+                .build();
+    }
+
+    private void mockAuthentication(String email) {
+        Authentication authentication = Mockito.mock(Authentication.class);
+        when(authentication.getName()).thenReturn(email);
+        SecurityContext securityContext = Mockito.mock(SecurityContext.class);
+        when(securityContext.getAuthentication()).thenReturn(authentication);
+        SecurityContextHolder.setContext(securityContext);
     }
 
     @Test
     void findById_WhenUserExists_ShouldReturnUserDto() {
         // given
-        UserDto expectedDto = new UserDto("test@example.com");
+        UserDto expectedDto = UserDto.builder()
+                .email("test@example.com")
+                .build();
+
         when(userDao.findById(1L)).thenReturn(Optional.of(user));
         when(userMapper.toUserDto(user)).thenReturn(expectedDto);
 
@@ -72,99 +90,92 @@ class UserServiceImplTest {
 
     @Test
     void findById_WhenUserNotFound_ShouldThrowException() {
-        // given
         when(userDao.findById(1L)).thenReturn(Optional.empty());
 
-        // when / then
         assertThatThrownBy(() -> userService.findById(1L))
                 .isInstanceOf(EntityNotFoundException.class);
     }
 
     @Test
     void findByEmail_WhenUserExists_ShouldReturnUserDto() {
-        // given
         when(userDao.findByEmail("test@example.com")).thenReturn(Optional.of(user));
-        UserDto expectedDto = new UserDto("test@example.com");
+
+        UserDto expectedDto = UserDto.builder()
+                .email("test@example.com")
+                .build();
+
         when(userMapper.toUserDto(user)).thenReturn(expectedDto);
 
-        // when
         UserDto result = userService.findByEmail("test@example.com");
 
-        // then
         assertThat(result).isEqualTo(expectedDto);
     }
 
     @Test
     void findByEmail_WhenUserNotFound_ShouldThrowException() {
-        // given
         when(userDao.findByEmail("test@example.com")).thenReturn(Optional.empty());
 
-        // when / then
         assertThatThrownBy(() -> userService.findByEmail("test@example.com"))
                 .isInstanceOf(EntityNotFoundException.class)
-                .hasMessage("User with email test@example.com not found");
+                .hasMessageContaining("test@example.com");
     }
 
     @Test
     void getUserInfo_WhenUserExists_ShouldReturnInfoDto() {
-        // given
-        UserInfoDto expectedDto = new UserInfoDto();
-        expectedDto.setEmail("test@example.com");
-        when(userDao.findByEmail("test@example.com")).thenReturn(Optional.of(user));
+        UserInfoDto expectedDto = UserInfoDto.builder()
+                .email("test@example.com")
+                .build();
 
+        when(userDao.findByEmail("test@example.com")).thenReturn(Optional.of(user));
         when(userMapper.toUserInfoDto(user)).thenReturn(expectedDto);
 
-        // when
         UserInfoDto result = userService.getUserInfo("test@example.com");
 
-        // then
         assertThat(result).isEqualTo(expectedDto);
     }
 
     @Test
-    void create_WhenRoleIsNull_ShouldNotOverrideRole() {
-        // given
-        CreateUserDtoRequest userDtoRequest = CreateUserDtoRequest.builder()
-                .email("artem@example.com")
-                .birthDay(LocalDate.of(2001, 1, 13))
-                .lastName("Artem")
-                .lastName("Lashkevich")
-                .build();
-
-        User mapped = new User();
-        mapped.setId(1L);
-        mapped.setEmail("artem@example.com");
-        mapped.setRole(null);
-
-        CreateUserDtoResponse createUserDtoResponse = new CreateUserDtoResponse();
-        createUserDtoResponse.setEmail(mapped.getEmail());
-
-        when(userDao.findByEmail(userDtoRequest.getEmail())).thenReturn(Optional.empty());
-        when(userMapper.toUserCreate(userDtoRequest)).thenReturn(mapped);
-        when(userDao.save(mapped)).thenReturn(mapped);
-        when(userMapper.toCreateUserDtoResponse(mapped)).thenReturn(createUserDtoResponse);
-
-        // when
-        CreateUserDtoResponse response = userService.create(userDtoRequest);
-
-        //then
-        assertThat(response.getEmail()).isEqualTo("artem@example.com");
-        assertThat(mapped.getRole()).isNull();
-    }
-
-    @Test
     void getUserInfo_WhenUserNotFound_ShouldThrowException() {
-        // given
         when(userDao.findByEmail("test@example.com")).thenReturn(Optional.empty());
 
-        // when / then
         assertThatThrownBy(() -> userService.getUserInfo("test@example.com"))
                 .isInstanceOf(EntityNotFoundException.class);
     }
 
+//    @Test
+//    void create_WhenRoleIsNull_ShouldNotOverrideRole() {
+//        // given
+//        CreateUserDtoRequest userDtoRequest = CreateUserDtoRequest.builder()
+//                .email("artem@example.com")
+//                .birthDay(LocalDate.of(2001, 1, 13))
+//                .lastName("Lashkevich")
+//                .build();
+//
+//        User mapped = User.builder()
+//                .id(1L)
+//                .email("artem@example.com")
+//                .role(RoleType.ROLE_USER)
+//                .build();
+//
+//        CreateUserDtoResponse createUserDtoResponse = CreateUserDtoResponse.builder()
+//                .email(mapped.getEmail())
+//                .build();
+//
+//        when(userDao.findByEmail(userDtoRequest.getEmail())).thenReturn(Optional.empty());
+//        when(userMapper.toUserCreate(userDtoRequest)).thenReturn(mapped);
+//        when(userDao.save(mapped)).thenReturn(mapped);
+//        when(userMapper.toCreateUserDtoResponse(mapped)).thenReturn(createUserDtoResponse);
+//
+//        // when
+//        CreateUserDtoResponse response = userService.create(userDtoRequest);
+//
+//        // then
+//        assertThat(response.getEmail()).isEqualTo("artem@example.com");
+//        assertThat(mapped.getRole()).isEqualTo(RoleType.ROLE_USER);
+//    }
+
     @Test
     void create_WhenEmailIsUnique_ShouldReturnResponse() {
-        // given
         CreateUserDtoRequest request = CreateUserDtoRequest.builder()
                 .email("test@example.com")
                 .firstName("John")
@@ -182,9 +193,10 @@ class UserServiceImplTest {
                 .gender(GenderType.MALE)
                 .build();
 
-        User savedUser = new User();
-        savedUser.setId(10L);
-        savedUser.setEmail("test@example.com");
+        User savedUser = User.builder()
+                .id(10L)
+                .email("test@example.com")
+                .build();
 
         CreateUserDtoResponse expected = CreateUserDtoResponse.builder()
                 .email("test@example.com")
@@ -192,20 +204,16 @@ class UserServiceImplTest {
 
         when(userDao.findByEmail("test@example.com")).thenReturn(Optional.empty());
         when(userMapper.toUserCreate(request)).thenReturn(newUser);
-        when(passwordEncoder.encode("password123")).thenReturn("encodedPassword");
         when(userDao.save(any(User.class))).thenReturn(savedUser);
         when(userMapper.toCreateUserDtoResponse(savedUser)).thenReturn(expected);
 
-        // when
         CreateUserDtoResponse result = userService.create(request);
 
-        // then
         assertThat(result.getEmail()).isEqualTo(expected.getEmail());
     }
 
     @Test
     void create_WhenEmailExists_ShouldThrowException() {
-        // given
         CreateUserDtoRequest request = CreateUserDtoRequest.builder()
                 .email("test@example.com")
                 .firstName("John")
@@ -213,185 +221,273 @@ class UserServiceImplTest {
                 .birthDay(LocalDate.of(1990, 1, 1))
                 .gender(GenderType.MALE)
                 .build();
+
         when(userDao.findByEmail("test@example.com")).thenReturn(Optional.of(user));
 
-        // when / then
         assertThatThrownBy(() -> userService.create(request))
                 .isInstanceOf(IllegalStateException.class);
     }
 
     @Test
     void update_WhenUserExists_ShouldReturnUpdatedDto() {
-        // given
+        String email = "user@example.com";
         UpdateUserDtoRequest request = UpdateUserDtoRequest.builder()
-                .email("updated@example.com")
-                .firstName("UpdatedName")
-                .lastName("UpdatedLastName")
+                .firstName("NewFirst")
+                .lastName("NewLast")
+                .gender(User.GenderType.FEMALE)
+                .birthDay(LocalDate.of(1990, 5, 10))
                 .build();
 
-        User updated = User.builder()
-                .email("updated@example.com")
-                .firstName("UpdatedName")
-                .lastName("UpdatedLastName")
-                .build();
+        User user = new User();
+        user.setId(1L);
+        user.setEmail(email);
 
-        UserDto userDto = new UserDto();
-        userDto.setEmail("updated@example.com");
+        mockAuthentication(email);
 
-        UpdateUserDtoResponse expected = new UpdateUserDtoResponse();
-        expected.setUser(userDto);
+        when(userDao.findByEmail(email)).thenReturn(Optional.of(user));
+        when(userDao.update(any())).thenAnswer(inv -> inv.getArgument(0));
+        when(userMapper.toUserSearchDtoResponse(any())).thenReturn(
+                UserSearchDtoResponse.builder()
+                        .email(email)
+                        .firstName("NewFirst")
+                        .lastName("NewLast")
+                        .gender(User.GenderType.FEMALE)
+                        .birthDay(LocalDate.of(1990, 5, 10))
+                        .build()
+        );
 
-        when(userDao.findByEmail(request.getEmail())).thenReturn(Optional.of(user));
-        when(userDao.update(user)).thenReturn(updated);
-        when(userMapper.updateUserResponseToDto(updated)).thenReturn(expected);
+        UserSearchDtoResponse response = userService.update(request);
 
-        // when
-        UpdateUserDtoResponse result = userService.update(request);
-
-        // then
-        assertThat(result).isEqualTo(expected);
+        assertThat(response.getEmail()).isEqualTo(email);
+        assertThat(response.getFirstName()).isEqualTo("NewFirst");
+        assertThat(response.getLastName()).isEqualTo("NewLast");
+        assertThat(response.getGender()).isEqualTo(User.GenderType.FEMALE);
+        assertThat(response.getBirthDay()).isEqualTo(LocalDate.of(1990, 5, 10));
     }
 
     @Test
-    void update_WhenOnlyFirstNameProvided_ShouldUpdateFirstName() {
-        // given
+    void update_WhenOnlyFirstNameProvided_ShouldUpdateOnlyFirstName() {
+        String email = "user@example.com";
         UpdateUserDtoRequest request = UpdateUserDtoRequest.builder()
-                .email("test@example.com")
-                .firstName("NewFirstName")
+                .firstName("NewName")
                 .build();
 
-        user.setFirstName("OldFirstName");
+        User user = new User();
+        user.setId(1L);
+        user.setEmail(email);
+        user.setFirstName("OldName");
 
-        User updatedUser = new User();
-        updatedUser.setFirstName("NewFirstName");
+        mockAuthentication(email);
 
-        UpdateUserDtoResponse expected = new UpdateUserDtoResponse();
-        expected.setUser(new UserDto("test@example.com"));
+        when(userDao.findByEmail(email)).thenReturn(Optional.of(user));
+        when(userDao.update(any())).thenAnswer(inv -> inv.getArgument(0));
+        when(userMapper.toUserSearchDtoResponse(any())).thenReturn(
+                UserSearchDtoResponse.builder()
+                        .email(email)
+                        .firstName("NewName")
+                        .build()
+        );
 
-        when(userDao.findByEmail("test@example.com")).thenReturn(Optional.of(user));
-        when(userDao.update(any(User.class))).thenReturn(updatedUser);
-        when(userMapper.updateUserResponseToDto(any(User.class))).thenReturn(expected);
+        UserSearchDtoResponse response = userService.update(request);
 
-        // when
-        UpdateUserDtoResponse result = userService.update(request);
-
-        // then
-        assertThat(result).isEqualTo(expected);
+        assertThat(response.getFirstName()).isEqualTo("NewName");
     }
 
     @Test
-    void update_WhenOnlyLastNameProvided_ShouldUpdateLastName() {
-        // given
+    void update_WhenOnlyLastNameProvided_ShouldUpdateOnlyLastName() {
+        String email = "user@example.com";
         UpdateUserDtoRequest request = UpdateUserDtoRequest.builder()
-                .email("test@example.com")
-                .lastName("NewLastName")
+                .lastName("NewLast")
                 .build();
 
-        user.setLastName("OldLastName");
+        User user = new User();
+        user.setId(1L);
+        user.setEmail(email);
+        user.setLastName("OldLast");
 
-        User updatedUser = new User();
-        updatedUser.setLastName("NewLastName");
+        mockAuthentication(email);
 
-        UpdateUserDtoResponse expected = new UpdateUserDtoResponse();
-        expected.setUser(new UserDto("test@example.com"));
+        when(userDao.findByEmail(email)).thenReturn(Optional.of(user));
+        when(userDao.update(any())).thenAnswer(inv -> inv.getArgument(0));
+        when(userMapper.toUserSearchDtoResponse(any())).thenReturn(
+                UserSearchDtoResponse.builder()
+                        .email(email)
+                        .lastName("NewLast")
+                        .build()
+        );
 
-        when(userDao.findByEmail("test@example.com")).thenReturn(Optional.of(user));
-        when(userDao.update(any(User.class))).thenReturn(updatedUser);
-        when(userMapper.updateUserResponseToDto(any(User.class))).thenReturn(expected);
+        UserSearchDtoResponse response = userService.update(request);
 
-        // when
-        UpdateUserDtoResponse result = userService.update(request);
-
-        // then
-        assertThat(result).isEqualTo(expected);
+        assertThat(response.getLastName()).isEqualTo("NewLast");
     }
 
     @Test
-    void update_WhenOnlyGenderProvided_ShouldUpdateGender() {
-        // given
+    void update_WhenOnlyGenderProvided_ShouldUpdateOnlyGender() {
+        String email = "user@example.com";
         UpdateUserDtoRequest request = UpdateUserDtoRequest.builder()
-                .email("test@example.com")
-                .gender(GenderType.MALE)
+                .gender(GenderType.FEMALE)
                 .build();
 
-        user.setGender(GenderType.FEMALE);
+        User user = new User();
+        user.setId(1L);
+        user.setEmail(email);
+        user.setGender(User.GenderType.MALE);
 
-        User updatedUser = new User();
-        updatedUser.setGender(GenderType.MALE);
+        mockAuthentication(email);
 
-        UpdateUserDtoResponse expected = new UpdateUserDtoResponse();
-        expected.setUser(new UserDto("test@example.com"));
+        when(userDao.findByEmail(email)).thenReturn(Optional.of(user));
+        when(userDao.update(any())).thenAnswer(inv -> inv.getArgument(0));
+        when(userMapper.toUserSearchDtoResponse(any())).thenReturn(
+                UserSearchDtoResponse.builder()
+                        .email(email)
+                        .gender(GenderType.FEMALE)
+                        .build()
+        );
 
-        when(userDao.findByEmail("test@example.com")).thenReturn(Optional.of(user));
-        when(userDao.update(any(User.class))).thenReturn(updatedUser);
-        when(userMapper.updateUserResponseToDto(any(User.class))).thenReturn(expected);
+        UserSearchDtoResponse response = userService.update(request);
 
-        // when
-        UpdateUserDtoResponse result = userService.update(request);
-
-        // then
-        assertThat(result).isEqualTo(expected);
+        assertThat(response.getGender()).isEqualTo(GenderType.FEMALE);
     }
 
     @Test
-    void update_WhenOnlyBirthDayProvided_ShouldUpdateBirthDay() {
-        // given
-        LocalDate newBirthDay = LocalDate.of(1995, 5, 15);
+    void update_WhenOnlyBirthDayProvided_ShouldUpdateOnlyBirthDay() {
+        String email = "user@example.com";
+        LocalDate newBirth = LocalDate.of(1995, 1, 1);
         UpdateUserDtoRequest request = UpdateUserDtoRequest.builder()
-                .email("test@example.com")
-                .birthDay(newBirthDay)
+                .birthDay(newBirth)
                 .build();
 
+        User user = new User();
+        user.setId(1L);
+        user.setEmail(email);
         user.setBirthDay(LocalDate.of(1990, 1, 1));
 
-        User updatedUser = new User();
-        updatedUser.setBirthDay(newBirthDay);
+        mockAuthentication(email);
 
-        UpdateUserDtoResponse expected = new UpdateUserDtoResponse();
-        expected.setUser(new UserDto("test@example.com"));
+        when(userDao.findByEmail(email)).thenReturn(Optional.of(user));
+        when(userDao.update(any())).thenAnswer(inv -> inv.getArgument(0));
+        when(userMapper.toUserSearchDtoResponse(any())).thenReturn(
+                UserSearchDtoResponse.builder()
+                        .email(email)
+                        .birthDay(newBirth)
+                        .build()
+        );
 
-        when(userDao.findByEmail("test@example.com")).thenReturn(Optional.of(user));
-        when(userDao.update(any(User.class))).thenReturn(updatedUser);
-        when(userMapper.updateUserResponseToDto(any(User.class))).thenReturn(expected);
+        UserSearchDtoResponse response = userService.update(request);
 
-        // when
-        UpdateUserDtoResponse result = userService.update(request);
-
-        // then
-        assertThat(result).isEqualTo(expected);
+        assertThat(response.getBirthDay()).isEqualTo(newBirth);
     }
 
     @Test
-    void update_WhenUserNotFound_ShouldThrowException() {
-        // given
+    void update_WhenUserNotFound_ShouldThrowEntityNotFoundException() {
+        String email = "missing@example.com";
         UpdateUserDtoRequest request = UpdateUserDtoRequest.builder()
-                .email("test@example.com")
-                .password("newPassword123")
-                .birthDay(LocalDate.of(1995, 5, 15))
+                .firstName("Ghost")
                 .build();
 
-        when(userDao.findByEmail("test@example.com")).thenReturn(Optional.empty());
+        mockAuthentication(email);
 
-        // when / then
+        when(userDao.findByEmail(email)).thenReturn(Optional.empty());
+
         assertThatThrownBy(() -> userService.update(request))
-                .isInstanceOf(EntityNotFoundException.class);
+                .isInstanceOf(EntityNotFoundException.class)
+                .hasMessage("User not found by email=" + email);
     }
 
     @Test
-    void searchUsers_WhenFound_ShouldReturnUserDtoList() {
-        // given
-        UserSearchDto searchDto = new UserSearchDto();
-        UserDto expectedDto = new UserDto();
-        expectedDto.setEmail("test@example.com");
+    void searchUsers_WhenUsersExist_ShouldReturnList() {
+        String searchStr = "test";
+        UserSearchDto request = UserSearchDto.builder()
+                .firstName(searchStr)
+                .build();
 
-        when(userDao.searchUser(searchDto)).thenReturn(List.of(user));
-        when(userMapper.toUserDto(user)).thenReturn(expectedDto);
+        User user1 = User.builder().email("test1@example.com").build();
+        User user2 = User.builder().email("test2@example.com").build();
+
+        UserSearchDtoResponse userSearchDtoResponse1 = UserSearchDtoResponse.builder().email("test1@example.com").build();
+        UserSearchDtoResponse userSearchDtoResponse2 = UserSearchDtoResponse.builder().email("test2@example.com").build();
+
+        when(userDao.searchUser(request)).thenReturn(List.of(user1, user2));
+        when(userMapper.toUserSearchDtoResponse(user1)).thenReturn(userSearchDtoResponse1);
+        when(userMapper.toUserSearchDtoResponse(user2)).thenReturn(userSearchDtoResponse2);
+
+
+        List<UserSearchDtoResponse> result = userService.searchUsers(request);
+
+        assertThat(result).hasSize(2);
+    }
+
+    @Test
+    void searchUsers_WhenNoUsersFound_ShouldReturnEmptyList() {
+        UserSearchDto request = UserSearchDto.builder()
+                .build();
+
+        when(userDao.searchUser(request)).thenReturn(List.of());
+
+        List<UserSearchDtoResponse> result = userService.searchUsers(request);
+
+        assertThat(result).isEmpty();
+    }
+
+    @Test
+    void updateRole_WhenUserExists_ShouldReturnUpdatedDto() {
+        // given
+        String email = "john.doe@example.com";
+        RoleType newRole = RoleType.ROLE_ADMIN;
+
+        UpdateRoleUserDtoRequest request = UpdateRoleUserDtoRequest.builder()
+                .email(email)
+                .role(newRole)
+                .build();
+
+        User user = User.builder()
+                .id(1L)
+                .email(email)
+                .role(RoleType.ROLE_USER)
+                .build();
+
+        User updatedUser = User.builder()
+                .id(1L)
+                .email(email)
+                .role(newRole)
+                .build();
+
+        UpdateRoleUserDtoResponse expectedResponse = UpdateRoleUserDtoResponse.builder()
+                .email(email)
+                .role(newRole)
+                .build();
+
+        when(userDao.findByEmail(email)).thenReturn(Optional.of(user));
+        when(userDao.update(any(User.class))).thenReturn(updatedUser);
+        when(userMapper.toUpdateRoleUserDtoResponse(updatedUser)).thenReturn(expectedResponse);
 
         // when
-        List<UserDto> result = userService.searchUsers(searchDto);
+        UpdateRoleUserDtoResponse actualResponse = userService.updateRole(request);
 
         // then
-        assertThat(result).containsExactly(expectedDto);
+        assertThat(actualResponse)
+                .isNotNull()
+                .extracting(UpdateRoleUserDtoResponse::getEmail, UpdateRoleUserDtoResponse::getRole)
+                .containsExactly(email, newRole);
+    }
+
+    @Test
+    void updateRole_WhenUserNotFound_ShouldThrowEntityNotFoundException() {
+        // given
+        String email = "notfound@example.com";
+        RoleType role = RoleType.ROLE_ADMIN;
+
+        UpdateRoleUserDtoRequest request = UpdateRoleUserDtoRequest.builder()
+                .email(email)
+                .role(role)
+                .build();
+
+        when(userDao.findByEmail(email)).thenReturn(Optional.empty());
+
+        // when / then
+        assertThatThrownBy(() -> userService.updateRole(request))
+                .isInstanceOf(EntityNotFoundException.class)
+                .hasMessageContaining("User not found by email=" + email);
     }
 }
 

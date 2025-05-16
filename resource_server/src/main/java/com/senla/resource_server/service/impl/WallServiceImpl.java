@@ -2,9 +2,9 @@ package com.senla.resource_server.service.impl;
 
 import com.senla.resource_server.data.dao.UserDao;
 import com.senla.resource_server.data.dao.WallDao;
+import com.senla.resource_server.data.entity.PublicMessage;
 import com.senla.resource_server.data.entity.User;
 import com.senla.resource_server.data.entity.Wall;
-import com.senla.resource_server.data.entity.WallMessage;
 import com.senla.resource_server.exception.EntityNotFoundException;
 import com.senla.resource_server.service.dto.wall.WallRequestDto;
 import com.senla.resource_server.service.dto.wall.WallResponseDto;
@@ -39,10 +39,11 @@ public class WallServiceImpl implements WallService {
 
         Wall wall = user.getWall();
 
-        WallMessage message = new WallMessage();
-        message.setWall(wall);
-        message.setSender(user);
-        message.setMessage(wallRequestDto.getMessage());
+        PublicMessage message = PublicMessage.builder()
+                .wall(wall)
+                .sender(user)
+                .content(wallRequestDto.getMessage())
+                .build();
 
         wall.getMessages().add(message);
 

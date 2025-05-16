@@ -11,15 +11,16 @@ import com.senla.resource_server.service.dto.user.CreateUserDtoResponse;
 import com.senla.resource_server.service.dto.user.UpdateRoleUserDtoRequest;
 import com.senla.resource_server.service.dto.user.UpdateRoleUserDtoResponse;
 import com.senla.resource_server.service.dto.user.UpdateUserDtoRequest;
-import com.senla.resource_server.service.dto.user.UpdateUserDtoResponse;
 import com.senla.resource_server.service.dto.user.UserDto;
 import com.senla.resource_server.service.dto.user.UserInfoDto;
 import com.senla.resource_server.service.dto.user.UserSearchDto;
+import com.senla.resource_server.service.dto.user.UserSearchDtoResponse;
 import com.senla.resource_server.service.interfaces.UserService;
 import com.senla.resource_server.service.mapper.UserMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -36,70 +37,68 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserDto findById(Long id) {
-        log.info("Fetching user by ID: {}", id);
-
+        log.info("Start fetching user by ID: {}", id);
         User byId = userDao.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("User with id " + id + " not found"));
-
-        log.info("User found: {} (ID: {})", byId.getEmail(), byId.getId());
-
+        log.info("User fetched successfully: {} (ID: {})", byId.getEmail(), byId.getId());
         return userMapper.toUserDto(byId);
     }
 
     @Override
     public UserDto findByEmail(String email) {
-        log.info("Fetching user by email: {}", email);
-
+        log.info("Start fetching user by email: {}", email);
         User user = userDao.findByEmail(email)
                 .orElseThrow(() -> new EntityNotFoundException("User with email " + email + " not found"));
-
-        log.info("User found: {} (ID: {})", user.getEmail(), user.getId());
-
+        log.info("User fetched successfully: {} (ID: {})", user.getEmail(), user.getId());
         return userMapper.toUserDto(user);
     }
 
     @Override
     public UserInfoDto getUserInfo(String email) {
-        log.info("Fetching user info by email: {}", email);
-
+        log.info("Start fetching user info by email: {}", email);
         User user = userDao.findByEmail(email)
                 .orElseThrow(() -> new EntityNotFoundException("User with email " + email + " not found"));
-
-        log.info("User info fetched: {} (ID: {})", user.getEmail(), user.getId());
-
+        log.info("User info fetched successfully: {} (ID: {})", user.getEmail(), user.getId());
         return userMapper.toUserInfoDto(user);
     }
 
     @Override
     public CreateUserDtoResponse create(CreateUserDtoRequest userDtoRequest) {
-        log.info("Creating user with email: {}", userDtoRequest.getEmail());
+        log.info("Start creating user with email: {}", userDtoRequest.getEmail());
 
         if (userDao.findByEmail(userDtoRequest.getEmail()).isPresent()) {
+            log.info("Email already exists: {}", userDtoRequest.getEmail());
             throw new IllegalStateException("Email is already exist");
         }
 
         User user = userMapper.toUserCreate(userDtoRequest);
+        log.info("Mapped DTO to User entity");
+
         user.setEnabled(true);
         user.setRole(RoleType.ROLE_USER);
 
         Wall wall = new Wall();
         user.setWall(wall);
         wall.setOwner(user);
+        log.info("Wall initialized and linked to user");
 
         User saved = userDao.save(user);
-
-        log.info("User successfully created: {} (ID: {})", saved.getEmail(), saved.getId());
+        log.info("User successfully created and saved: {} (ID: {})", saved.getEmail(), saved.getId());
 
         return userMapper.toCreateUserDtoResponse(saved);
     }
 
     @Override
-    public UpdateUserDtoResponse update(UpdateUserDtoRequest userDtoRequest) {
-        log.info("Updating user with email: {}", userDtoRequest.getEmail());
+    public UserSearchDtoResponse update(UpdateUserDtoRequest userDtoRequest) {
+        log.info("Starting update user");
 
-        User user = userDao.findByEmail(userDtoRequest.getEmail())
-                .orElseThrow(() -> new EntityNotFoundException("User not found by email=" + userDtoRequest.getEmail()));
-        log.info("User found: {} (ID: {})", user.getEmail(), user.getId());
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String email = authentication.getName();
+        log.info("Authenticated sender: {}", email);
+
+        User user = userDao.findByEmail(email)
+                .orElseThrow(() -> new EntityNotFoundException("User not found by email=" + email));
+        log.info("User found for update: {} (ID: {})", user.getEmail(), user.getId());
 
         if (userDtoRequest.getFirstName() != null) {
             user.setFirstName(userDtoRequest.getFirstName());
@@ -118,33 +117,38 @@ public class UserServiceImpl implements UserService {
         }
 
         User updatedUser = userDao.update(user);
-
         log.info("User updated successfully: {} (ID: {})", updatedUser.getEmail(), updatedUser.getId());
 
-        return userMapper.updateUserResponseToDto(updatedUser);
+        return userMapper.toUserSearchDtoResponse(updatedUser);
     }
 
     @Override
-    public List<UserDto> searchUsers(UserSearchDto userSearchDto) {
-        log.info("Searching users by criteria: {}", userSearchDto);
+    public List<UserSearchDtoResponse> searchUsers(UserSearchDto userSearchDto) {
+        log.info("Start searching users with criteria: {}", userSearchDto);
         List<User> users = userDao.searchUser(userSearchDto);
-        log.info("Found {} users matching search criteria", users.size());
+        log.info("Users found: {}", users.size());
         return users.stream()
-                .map(userMapper::toUserDto)
+                .map(userMapper::toUserSearchDtoResponse)
                 .toList();
     }
 
     @Override
     public UpdateRoleUserDtoResponse updateRole(UpdateRoleUserDtoRequest updateRoleUserDtoRequest) {
-        log.info("Updating role user with email: {}", updateRoleUserDtoRequest.getEmail());
+        log.info("Start updating role for user with email: {}", updateRoleUserDtoRequest.getEmail());
+
         User user = userDao.findByEmail(updateRoleUserDtoRequest.getEmail())
                 .orElseThrow(() -> new EntityNotFoundException("User not found by email=" + updateRoleUserDtoRequest.getEmail()));
-        log.info("User found: {} (ID: {})", user.getEmail(), user.getId());
+        log.info("User found for role update: {} (ID: {})", user.getEmail(), user.getId());
+
         user.setRole(updateRoleUserDtoRequest.getRole());
+        log.info("Role set to: {}", updateRoleUserDtoRequest.getRole());
+
         User updatedUser = userDao.update(user);
-        log.info("User updated successfully: {} (ID: {})", updatedUser.getEmail(), updatedUser.getId());
+        log.info("User role updated successfully: {} (ID: {})", updatedUser.getEmail(), updatedUser.getId());
+
         UpdateRoleUserDtoResponse updateUserDtoResponse = userMapper.toUpdateRoleUserDtoResponse(updatedUser);
-        log.info("User mapped successfully: {} (ID: {})", user.getEmail(), user.getId());
+        log.info("Mapped updated user to response DTO");
+
         return updateUserDtoResponse;
     }
 }

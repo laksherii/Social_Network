@@ -1,6 +1,7 @@
 package com.senla.resource_server.service.mapper;
 
 import com.senla.resource_server.data.entity.FriendRequest;
+import com.senla.resource_server.service.dto.friendRequest.AnswerFriendRequestDto;
 import com.senla.resource_server.service.dto.friendRequest.AnswerFriendResponseDto;
 import com.senla.resource_server.service.dto.friendRequest.SendFriendResponseDto;
 import org.mapstruct.Mapper;
@@ -13,4 +14,5 @@ public interface FriendRequestMapper {
     SendFriendResponseDto toSendFriendResponseDto(FriendRequest friendRequest);
 
     AnswerFriendResponseDto toAnswerFriendResponseDto(FriendRequest friendRequest);
+
 }

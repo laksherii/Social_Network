@@ -18,6 +18,7 @@ import lombok.Data;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.ToString;
 
 @Entity
 @Data
@@ -30,12 +31,14 @@ public class FriendRequest {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne()
     @JoinColumn(name = "sender_id", nullable = false)
+    @ToString.Exclude
     private User sender;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne()
     @JoinColumn(name = "recipient_id", nullable = false)
+    @ToString.Exclude
     private User recipient;
 
     @Enumerated(EnumType.STRING)
@@ -46,7 +49,7 @@ public class FriendRequest {
     public enum FriendRequestStatus {
         UNDEFINED,
         ACCEPTED,
-        REJECTED,
+        REJECTED
     }
 }
 

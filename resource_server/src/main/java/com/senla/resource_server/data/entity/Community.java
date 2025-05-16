@@ -40,6 +40,9 @@ public class Community {
     @Column(name = "name", nullable = false)
     private String name;
 
+    @Column(name = "description", nullable = false)
+    private String description;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "admin_id", nullable = false)
     private User admin;
@@ -53,8 +56,8 @@ public class Community {
     @Builder.Default
     private Set<User> users = new HashSet<>();
 
-    @OneToMany(mappedBy = "community", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "community", cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default
-    private List<CommunityMessage> messages = new ArrayList<>();
+    private List<PublicMessage> messages = new ArrayList<>();
 
 }

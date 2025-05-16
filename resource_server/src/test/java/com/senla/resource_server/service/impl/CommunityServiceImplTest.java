@@ -3,16 +3,19 @@ package com.senla.resource_server.service.impl;
 import com.senla.resource_server.data.dao.CommunityDao;
 import com.senla.resource_server.data.dao.UserDao;
 import com.senla.resource_server.data.entity.Community;
+import com.senla.resource_server.data.entity.PublicMessage;
 import com.senla.resource_server.data.entity.User;
 import com.senla.resource_server.exception.EntityExistException;
 import com.senla.resource_server.exception.EntityNotFoundException;
+import com.senla.resource_server.exception.UserNotAdminInGroupException;
 import com.senla.resource_server.service.dto.community.CommunityDto;
 import com.senla.resource_server.service.dto.community.CreateCommunityRequestDto;
 import com.senla.resource_server.service.dto.community.CreateCommunityResponseDto;
 import com.senla.resource_server.service.dto.community.JoinCommunityRequestDto;
 import com.senla.resource_server.service.dto.community.JoinCommunityResponseDto;
+import com.senla.resource_server.service.dto.community.SendCommunityMessageRequestDto;
+import com.senla.resource_server.service.dto.community.SendCommunityMessageResponseDto;
 import com.senla.resource_server.service.mapper.CommunityMapper;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -31,6 +34,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -96,6 +101,115 @@ class CommunityServiceImplTest {
         // when / then
         assertThatThrownBy(() -> communityService.createCommunity(requestDto))
                 .isInstanceOf(EntityNotFoundException.class);
+    }
+
+    @Test
+    void sendCommunityMessage_shouldReturnResponseDto_whenUserIsAdmin() {
+        // given
+        String email = "admin@example.com";
+        Long communityId = 1L;
+        String content = "Hello from admin";
+
+        SendCommunityMessageRequestDto requestDto = SendCommunityMessageRequestDto.builder()
+                .communityId(communityId)
+                .message(content)
+                .build();
+
+        User admin = User.builder()
+                .email(email)
+                .build();
+
+        Community community = Community.builder()
+                .id(communityId)
+                .name("Test Community")
+                .admin(admin)
+                .build();
+
+        PublicMessage message = PublicMessage.builder()
+                .id(100L)
+                .community(community)
+                .content(content)
+                .sender(admin)
+                .build();
+
+        SendCommunityMessageResponseDto expectedResponse = SendCommunityMessageResponseDto.builder()
+                .communityName("Test Community")
+                .content(content)
+                .build();
+
+        mockAuthentication(email);
+
+        // when
+        when(communityDao.findById(communityId)).thenReturn(Optional.of(community));
+        when(communityDao.sendMessage(any(PublicMessage.class))).thenReturn(message);
+        when(communityMapper.toSendCommunityMessageResponseDto(message)).thenReturn(expectedResponse);
+
+        // then
+        SendCommunityMessageResponseDto actual = communityService.sendCommunityMessage(requestDto);
+
+        assertThat(actual).isNotNull();
+        assertThat(actual.getCommunityName()).isEqualTo("Test Community");
+        assertThat(actual.getContent()).isEqualTo(content);
+
+        verify(communityDao).findById(communityId);
+        verify(communityDao).sendMessage(any(PublicMessage.class));
+        verify(communityMapper).toSendCommunityMessageResponseDto(message);
+    }
+
+    @Test
+    void sendCommunityMessage_shouldThrowUserNotAdminInGroupException_whenUserIsNotAdmin() {
+        // given
+        String email = "user@example.com";
+        Long communityId = 1L;
+
+        SendCommunityMessageRequestDto requestDto = SendCommunityMessageRequestDto.builder()
+                .communityId(communityId)
+                .message("Not allowed")
+                .build();
+
+        User actualAdmin = User.builder()
+                .email("admin@example.com")
+                .build();
+
+        Community community = Community.builder()
+                .id(communityId)
+                .admin(actualAdmin)
+                .build();
+
+        mockAuthentication(email);
+
+        // when
+        when(communityDao.findById(communityId)).thenReturn(Optional.of(community));
+
+        // then
+        assertThatThrownBy(() -> communityService.sendCommunityMessage(requestDto))
+                .isInstanceOf(UserNotAdminInGroupException.class)
+                .hasMessage("User is not admin in community");
+
+        verify(communityDao).findById(communityId);
+        verifyNoMoreInteractions(communityDao, communityMapper);
+    }
+
+    @Test
+    void sendCommunityMessage_shouldThrowEntityNotFoundException_whenCommunityDoesNotExist() {
+        // given
+        Long communityId = 99L;
+        SendCommunityMessageRequestDto requestDto = SendCommunityMessageRequestDto.builder()
+                .communityId(communityId)
+                .message("Hello?")
+                .build();
+
+        mockAuthentication(email);
+
+        when(communityDao.findById(communityId)).thenReturn(Optional.empty());
+
+        // when / then
+        assertThatThrownBy(() -> communityService.sendCommunityMessage(requestDto))
+                .isInstanceOf(EntityNotFoundException.class)
+                .hasMessage("Community with ID: 99 not found");
+
+        verify(communityDao).findById(communityId);
+        verifyNoMoreInteractions(communityDao, communityMapper);
     }
 
     @Test
@@ -220,3 +334,5 @@ class CommunityServiceImplTest {
         assertThat(result).isEmpty();
     }
 }
+
+

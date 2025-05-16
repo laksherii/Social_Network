@@ -6,10 +6,11 @@ import com.senla.resource_server.data.dao.UserDao;
 import com.senla.resource_server.data.entity.FriendRequest;
 import com.senla.resource_server.data.entity.FriendRequest.FriendRequestStatus;
 import com.senla.resource_server.data.entity.User;
+import com.senla.resource_server.exception.EntityExistException;
 import com.senla.resource_server.exception.EntityNotFoundException;
 import com.senla.resource_server.exception.IllegalArgumentException;
 import com.senla.resource_server.exception.IllegalStateException;
-import com.senla.resource_server.exception.UserNotYourFriend;
+import com.senla.resource_server.exception.UserNotYourFriendException;
 import com.senla.resource_server.service.dto.friendRequest.AnswerFriendRequestDto;
 import com.senla.resource_server.service.dto.friendRequest.AnswerFriendResponseDto;
 import com.senla.resource_server.service.dto.friendRequest.DeleteFriendRequest;
@@ -61,6 +62,15 @@ public class FriendRequestServiceImpl implements FriendRequestService {
         FriendRequest existingRequest = friendRequestDao.findBySenderAndRecipient(sender, recipient)
                 .orElse(null);
 
+        boolean alreadyFriend = recipient.getFriends().stream()
+                .map(User::getEmail)
+                .collect(Collectors.toSet())
+                .contains(sender.getEmail());
+
+        if (alreadyFriend) {
+            throw new EntityExistException("User already friend");
+        }
+
         if (existingRequest != null) {
             log.info("Existing friend request found between {} and {}", sender.getEmail(), recipient.getEmail());
             if (existingRequest.getStatus() == FriendRequestStatus.UNDEFINED) {
@@ -100,23 +110,19 @@ public class FriendRequestServiceImpl implements FriendRequestService {
 
         FriendRequestStatus status = answerRequestDto.getStatus();
         request.setStatus(status);
-        log.info("Friend request status updated to {} by {}", status, recipient.getEmail());
+
+        AnswerFriendResponseDto responseDto = friendRequestMapper.toAnswerFriendResponseDto(request);
 
         if (status == FriendRequestStatus.ACCEPTED) {
             addFriend(request);
             log.info("Users {} and {} are now friends", request.getSender().getEmail(), request.getRecipient().getEmail());
             friendRequestDao.delete(answerRequestDto.getRequestId());
             log.info("Deleted friend request from {} to {} with status {}", request.getSender().getEmail(), request.getRecipient().getEmail(), status);
-        }
-
-        if (status == FriendRequestStatus.REJECTED) {
+        } else if (status == FriendRequestStatus.REJECTED) {
             friendRequestDao.delete(answerRequestDto.getRequestId());
             log.info("Deleted friend request from {} to {} with Status {}", request.getSender().getEmail(), request.getRecipient().getEmail(), status);
         }
-
-        FriendRequest savedRequest = friendRequestDao.save(request);
-        log.info("Friend request response saved for request ID: {}", savedRequest.getId());
-        return friendRequestMapper.toAnswerFriendResponseDto(savedRequest);
+        return responseDto;
     }
 
     private void addFriend(FriendRequest request) {
@@ -125,9 +131,8 @@ public class FriendRequestServiceImpl implements FriendRequestService {
         User sender = request.getSender();
         User receiver = request.getRecipient();
         sender.getFriends().add(receiver);
-        receiver.getFriends().add(sender);
-
         userDao.save(sender);
+        receiver.getFriends().add(sender);
         userDao.save(receiver);
     }
 
@@ -149,7 +154,7 @@ public class FriendRequestServiceImpl implements FriendRequestService {
                 .collect(Collectors.toSet());
 
         if (!friends.contains(friendRequestDto.getFriendEmail())) {
-            throw new UserNotYourFriend("User wit email: " + friendRequestDto.getFriendEmail() + "not your friend ");
+            throw new UserNotYourFriendException("User wit email: " + friendRequestDto.getFriendEmail() + " not your friend ");
         }
 
         User friend = userDao.findByEmail(friendRequestDto.getFriendEmail())
@@ -159,12 +164,9 @@ public class FriendRequestServiceImpl implements FriendRequestService {
         user.getFriends().remove(friend);
         userDao.save(friend);
         log.info("User {} deleted from friend request", friend.getEmail());
-        friend.getFriends().remove(friend);
-        userDao.save(friend);
+        friend.getFriends().remove(user);
+        userDao.save(user);
         log.info("User {} deleted from friend request", friend.getEmail());
-
-        log.info("Users {} and {} are no longer friends", user.getEmail(), friend.getEmail());
-
     }
 }
 

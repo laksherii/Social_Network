@@ -1,214 +1,253 @@
-//package com.senla.resource_server.service.impl;
-//
-//import com.senla.resource_server.data.dao.PrivateMessageDao;
-//import com.senla.resource_server.data.dao.UserDao;
-//import com.senla.resource_server.data.entity.PrivateMessage;
-//import com.senla.resource_server.data.entity.User;
-//import com.senla.resource_server.exception.EntityNotFoundException;
-//import com.senla.resource_server.service.dto.message.PrivateMessageRequestDto;
-//import com.senla.resource_server.service.dto.message.PrivateMessageResponseDto;
-//import com.senla.resource_server.service.dto.user.UserDto;
-//import com.senla.resource_server.service.mapper.MessageMapper;
-//import org.junit.jupiter.api.BeforeEach;
-//import org.junit.jupiter.api.Test;
-//import org.junit.jupiter.api.extension.ExtendWith;
-//import org.mockito.InjectMocks;
-//import org.mockito.Mock;
-//import org.mockito.junit.jupiter.MockitoExtension;
-//import org.springframework.security.core.context.SecurityContext;
-//import org.springframework.security.core.context.SecurityContextHolder;
-//
-//import java.util.ArrayList;
-//import java.util.List;
-//import java.util.Optional;
-//
-//import static org.assertj.core.api.Assertions.assertThat;
-//import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
-//import static org.mockito.ArgumentMatchers.any;
-//import static org.mockito.Mockito.mock;
-//import static org.mockito.Mockito.verify;
-//import static org.mockito.Mockito.when;
-//
-//@ExtendWith(MockitoExtension.class)
-//class PrivateMessageServiceImplTest {
-//
-//    @Mock
-//    private PrivateMessageDao privateMessageDao;
-//
-//    @Mock
-//    private UserDao userDao;
-//
-//    @Mock
-//    private MessageMapper messageMapper;
-//
-//    @InjectMocks
-//    private PrivateMessageServiceImpl service;
-//
-//    private final Long senderId = 1L;
-//    private final Long recipientId = 2L;
-//
-//    private User sender;
-//    private User recipient;
-//
-//    @BeforeEach
-//    void setUp() {
-//        sender = new User();
-//        sender.setId(senderId);
-//        sender.setEmail("sender@example.com");
-//
-//        recipient = new User();
-//        recipient.setId(recipientId);
-//        recipient.setEmail("recipient@example.com");
-//
-//        UserIdAuthenticationToken authentication = mock(UserIdAuthenticationToken.class);
-//        when(authentication.getUserId()).thenReturn(senderId);
-//
-//        SecurityContext context = mock(SecurityContext.class);
-//        when(context.getAuthentication()).thenReturn(authentication);
-//        SecurityContextHolder.setContext(context);
-//    }
-//
-//    @Test
-//    void shouldSendPrivateMessageSuccessfully() {
-//        // given
-//        PrivateMessageRequestDto requestDto = new PrivateMessageRequestDto();
-//        requestDto.setRecipient(recipientId);
-//        requestDto.setMessage("Hello!");
-//
-//        PrivateMessage message = new PrivateMessage();
-//        message.setSender(sender);
-//        message.setRecipient(recipient);
-//        message.setMessage("Hello!");
-//
-//        PrivateMessage savedMessage = new PrivateMessage();
-//        savedMessage.setId(42L);
-//        savedMessage.setSender(sender);
-//        savedMessage.setRecipient(recipient);
-//        savedMessage.setMessage("Hello!");
-//
-//        PrivateMessageResponseDto expectedResponse = new PrivateMessageResponseDto();
-//        UserDto userDto = new UserDto();
-//        expectedResponse.setSender(userDto);
-//        expectedResponse.setMessage("Hello!");
-//
-//        when(userDao.findById(senderId)).thenReturn(Optional.of(sender));
-//        when(userDao.findById(recipientId)).thenReturn(Optional.of(recipient));
-//        when(privateMessageDao.save(any())).thenReturn(savedMessage);
-//        when(messageMapper.toPrivateMessageResponse(savedMessage)).thenReturn(expectedResponse);
-//
-//        // when
-//        PrivateMessageResponseDto response = service.sendPrivateMessage(requestDto);
-//
-//        // then
-//        assertThat(response.getSender()).isEqualTo(expectedResponse.getSender());
-//        assertThat(response.getMessage()).isEqualTo(expectedResponse.getMessage());
-//
-//        verify(privateMessageDao).save(any(PrivateMessage.class));
-//        verify(messageMapper).toPrivateMessageResponse(savedMessage);
-//    }
-//
-//    @Test
-//    void shouldGetMessagesByRecipientEmailSuccessfully() {
-//        // given
-//        String recipientEmail = "recipient@example.com";
-//
-//        PrivateMessage message = new PrivateMessage();
-//        message.setSender(sender);
-//        message.setRecipient(recipient);
-//        message.setMessage("Hi!");
-//
-//        List<PrivateMessage> messages = List.of(message);
-//
-//        PrivateMessageResponseDto expectedResponse = new PrivateMessageResponseDto();
-//        UserDto userDto = new UserDto();
-//        expectedResponse.setSender(userDto);
-//        expectedResponse.setMessage("Hello!");
-//
-//        when(userDao.findById(senderId)).thenReturn(Optional.of(sender));
-//        when(userDao.findByEmail(recipientEmail)).thenReturn(Optional.of(recipient));
-//        when(privateMessageDao.findBySenderAndRecipient(sender, recipient)).thenReturn(messages);
-//        when(messageMapper.toPrivateMessageResponse(message)).thenReturn(expectedResponse);
-//
-//        // when
-//        List<PrivateMessageResponseDto> result = service.getMessagesByRecipientEmail(recipientEmail);
-//
-//        // then
-//        assertThat(result).hasSize(1);
-//        assertThat(result.get(0).getSender()).isEqualTo(expectedResponse.getSender());
-//        assertThat(result.get(0).getMessage()).isEqualTo(expectedResponse.getMessage());
-//
-//        verify(privateMessageDao).findBySenderAndRecipient(sender, recipient);
-//    }
-//
-//    @Test
-//    void shouldThrowException_whenSenderNotFound_onSend() {
-//        // given
-//        PrivateMessageRequestDto requestDto = new PrivateMessageRequestDto();
-//        requestDto.setRecipient(recipientId);
-//        requestDto.setMessage("Hello!");
-//
-//        when(userDao.findById(senderId)).thenReturn(Optional.empty());
-//
-//        // when & then
-//        assertThatThrownBy(() -> service.sendPrivateMessage(requestDto))
-//                .isInstanceOf(EntityNotFoundException.class)
-//                .hasMessageContaining("User not found");
-//    }
-//
-//    @Test
-//    void shouldThrowException_whenRecipientNotFound_onSend() {
-//        // given
-//        PrivateMessageRequestDto requestDto = new PrivateMessageRequestDto();
-//        requestDto.setRecipient(recipientId);
-//        requestDto.setMessage("Hello!");
-//
-//        when(userDao.findById(senderId)).thenReturn(Optional.of(sender));
-//        when(userDao.findById(recipientId)).thenReturn(Optional.empty());
-//
-//        // when & then
-//        assertThatThrownBy(() -> service.sendPrivateMessage(requestDto))
-//                .isInstanceOf(EntityNotFoundException.class);
-//    }
-//
-//    @Test
-//    void shouldThrowException_whenSenderNotFound_onGetMessages() {
-//        // given
-//        String recipientEmail = "recipient@example.com";
-//
-//        when(userDao.findById(senderId)).thenReturn(Optional.empty());
-//
-//        // when & then
-//        assertThatThrownBy(() -> service.getMessagesByRecipientEmail(recipientEmail))
-//                .isInstanceOf(EntityNotFoundException.class);
-//    }
-//
-//    @Test
-//    void shouldThrowException_whenRecipientNotFound_onGetMessages() {
-//        // given
-//        String recipientEmail = "recipient@example.com";
-//
-//        when(userDao.findById(senderId)).thenReturn(Optional.of(sender));
-//        when(userDao.findByEmail(recipientEmail)).thenReturn(Optional.empty());
-//
-//        // when & then
-//        assertThatThrownBy(() -> service.getMessagesByRecipientEmail(recipientEmail))
-//                .isInstanceOf(EntityNotFoundException.class);
-//    }
-//
-//    @Test
-//    void shouldReturnEmptyList_whenNoMessagesFound() {
-//        // given
-//        String recipientEmail = "recipient@example.com";
-//
-//        List<PrivateMessage> messages = new ArrayList<>();
-//        when(userDao.findById(senderId)).thenReturn(Optional.of(sender));
-//        when(userDao.findByEmail(recipientEmail)).thenReturn(Optional.of(recipient));
-//        when(privateMessageDao.findBySenderAndRecipient(sender, recipient)).thenReturn(messages);
-//
-//        // when
-//        List<PrivateMessageResponseDto> result = service.getMessagesByRecipientEmail(recipientEmail);
-//
-//        // then
-//        assertThat(result).isEmpty();
-//    }
-//}
+package com.senla.resource_server.service.impl;
+
+import com.senla.resource_server.data.dao.PrivateMessageDao;
+import com.senla.resource_server.data.dao.UserDao;
+import com.senla.resource_server.data.entity.PrivateMessage;
+import com.senla.resource_server.data.entity.User;
+import com.senla.resource_server.exception.EntityNotFoundException;
+import com.senla.resource_server.service.dto.message.PrivateMessageRequestDto;
+import com.senla.resource_server.service.dto.message.PrivateMessageResponseDto;
+import com.senla.resource_server.service.dto.user.UserDto;
+import com.senla.resource_server.service.mapper.MessageMapper;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.Mockito;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
+
+import java.util.List;
+import java.util.Optional;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+@ExtendWith(MockitoExtension.class)
+class PrivateMessageServiceImplTest {
+
+    @Mock
+    private PrivateMessageDao privateMessageDao;
+
+    @Mock
+    private UserDao userDao;
+
+    @Mock
+    private MessageMapper messageMapper;
+
+    @InjectMocks
+    private PrivateMessageServiceImpl privateMessageService;
+
+    private void mockAuthentication(String email) {
+        Authentication authentication = Mockito.mock(Authentication.class);
+        when(authentication.getName()).thenReturn(email);
+        SecurityContext securityContext = Mockito.mock(SecurityContext.class);
+        when(securityContext.getAuthentication()).thenReturn(authentication);
+        SecurityContextHolder.setContext(securityContext);
+    }
+
+    @Test
+    void sendPrivateMessage_shouldSendMessageAndReturnResponse() {
+        // given
+        String senderEmail = "sender@example.com";
+        String recipientEmail = "recipient@example.com";
+        String messageContent = "Hello, test message";
+
+        mockAuthentication(senderEmail);
+
+        PrivateMessageRequestDto requestDto = PrivateMessageRequestDto.builder()
+                .recipientEmail(recipientEmail)
+                .message(messageContent)
+                .build();
+
+        User sender = User.builder().id(1L).email(senderEmail).build();
+        User recipient = User.builder().id(2L).email(recipientEmail).build();
+
+        PrivateMessage savedMessage = PrivateMessage.builder()
+                .id(100L)
+                .sender(sender)
+                .recipient(recipient)
+                .content(messageContent)
+                .build();
+
+        PrivateMessageResponseDto responseDto = PrivateMessageResponseDto.builder()
+                .sender(UserDto.builder().email(senderEmail).build())
+                .content(messageContent)
+                .build();
+
+        when(userDao.findByEmail(senderEmail)).thenReturn(Optional.of(sender));
+        when(userDao.findByEmail(recipientEmail)).thenReturn(Optional.of(recipient));
+        when(privateMessageDao.save(any(PrivateMessage.class))).thenReturn(savedMessage);
+        when(messageMapper.toPrivateMessageResponse(savedMessage)).thenReturn(responseDto);
+
+        // when
+        PrivateMessageResponseDto actualResponse = privateMessageService.sendPrivateMessage(requestDto);
+
+        // then
+        assertThat(actualResponse).isNotNull();
+        assertThat(actualResponse.getSender().getEmail()).isEqualTo(senderEmail);
+        assertThat(actualResponse.getContent()).isEqualTo(messageContent);
+
+        verify(userDao).findByEmail(senderEmail);
+        verify(userDao).findByEmail(recipientEmail);
+        verify(privateMessageDao).save(any(PrivateMessage.class));
+        verify(messageMapper).toPrivateMessageResponse(savedMessage);
+    }
+
+    @Test
+    void sendPrivateMessage_shouldThrowWhenSenderNotFound() {
+        // given
+        String senderEmail = "sender@example.com";
+        mockAuthentication(senderEmail);
+
+        PrivateMessageRequestDto requestDto = PrivateMessageRequestDto.builder()
+                .recipientEmail("recipient@example.com")
+                .message("test")
+                .build();
+
+        when(userDao.findByEmail(senderEmail)).thenReturn(Optional.empty());
+
+        // when/then
+        assertThatThrownBy(() -> privateMessageService.sendPrivateMessage(requestDto))
+                .isInstanceOf(EntityNotFoundException.class)
+                .hasMessageContaining("User not found");
+
+        verify(userDao).findByEmail(senderEmail);
+        verify(userDao, never()).findByEmail("recipient@example.com");
+        verify(privateMessageDao, never()).save(any());
+        verify(messageMapper, never()).toPrivateMessageResponse(any());
+    }
+
+    @Test
+    void sendPrivateMessage_shouldThrowWhenRecipientNotFound() {
+        // given
+        String senderEmail = "sender@example.com";
+        String recipientEmail = "recipient@example.com";
+
+        mockAuthentication(senderEmail);
+
+        PrivateMessageRequestDto requestDto = PrivateMessageRequestDto.builder()
+                .recipientEmail(recipientEmail)
+                .message("test")
+                .build();
+
+        User sender = User.builder().id(1L).email(senderEmail).build();
+
+        when(userDao.findByEmail(senderEmail)).thenReturn(Optional.of(sender));
+        when(userDao.findByEmail(recipientEmail)).thenReturn(Optional.empty());
+
+        // when/then
+        assertThatThrownBy(() -> privateMessageService.sendPrivateMessage(requestDto))
+                .isInstanceOf(EntityNotFoundException.class)
+                .hasMessageContaining("User not found");
+
+        verify(userDao).findByEmail(senderEmail);
+        verify(userDao).findByEmail(recipientEmail);
+        verify(privateMessageDao, never()).save(any());
+        verify(messageMapper, never()).toPrivateMessageResponse(any());
+    }
+
+    @Test
+    void getMessagesByRecipientEmail_shouldReturnListOfMessages() {
+        // given
+        String senderEmail = "sender@example.com";
+        String recipientEmail = "recipient@example.com";
+
+        mockAuthentication(senderEmail);
+
+        User sender = User.builder().id(1L).email(senderEmail).build();
+        User recipient = User.builder().id(2L).email(recipientEmail).build();
+
+        PrivateMessage msg1 = PrivateMessage.builder()
+                .id(10L)
+                .sender(sender)
+                .recipient(recipient)
+                .content("Hi 1")
+                .build();
+
+        PrivateMessage msg2 = PrivateMessage.builder()
+                .id(11L)
+                .sender(sender)
+                .recipient(recipient)
+                .content("Hi 2")
+                .build();
+
+        List<PrivateMessage> messages = List.of(msg1, msg2);
+
+        PrivateMessageResponseDto dto1 = PrivateMessageResponseDto.builder()
+                .sender(UserDto.builder().email(senderEmail).build())
+                .content("Hi 1")
+                .build();
+
+        PrivateMessageResponseDto dto2 = PrivateMessageResponseDto.builder()
+                .sender(UserDto.builder().email(senderEmail).build())
+                .content("Hi 2")
+                .build();
+
+        when(userDao.findByEmail(senderEmail)).thenReturn(Optional.of(sender));
+        when(userDao.findByEmail(recipientEmail)).thenReturn(Optional.of(recipient));
+        when(privateMessageDao.findBySenderAndRecipient(sender, recipient)).thenReturn(messages);
+        when(messageMapper.toPrivateMessageResponse(msg1)).thenReturn(dto1);
+        when(messageMapper.toPrivateMessageResponse(msg2)).thenReturn(dto2);
+
+        // when
+        List<PrivateMessageResponseDto> actualMessages = privateMessageService.getMessagesByRecipientEmail(recipientEmail);
+
+        // then
+        assertThat(actualMessages).hasSize(2);
+        assertThat(actualMessages).extracting(PrivateMessageResponseDto::getContent)
+                .containsExactlyInAnyOrder("Hi 1", "Hi 2");
+    }
+
+    @Test
+    void getMessagesByRecipientEmail_shouldThrowWhenSenderNotFound() {
+        // given
+        String senderEmail = "sender@example.com";
+        String recipientEmail = "recipient@example.com";
+
+        mockAuthentication(senderEmail);
+
+        when(userDao.findByEmail(senderEmail)).thenReturn(Optional.empty());
+
+        // when/then
+        assertThatThrownBy(() -> privateMessageService.getMessagesByRecipientEmail(recipientEmail))
+                .isInstanceOf(EntityNotFoundException.class)
+                .hasMessageContaining("User not found");
+
+        verify(userDao).findByEmail(senderEmail);
+        verify(userDao, never()).findByEmail(recipientEmail);
+        verify(privateMessageDao, never()).findBySenderAndRecipient(any(), any());
+        verify(messageMapper, never()).toPrivateMessageResponse(any());
+    }
+
+    @Test
+    void getMessagesByRecipientEmail_shouldThrowWhenRecipientNotFound() {
+        // given
+        String senderEmail = "sender@example.com";
+        String recipientEmail = "recipient@example.com";
+
+        mockAuthentication(senderEmail);
+
+        User sender = User.builder().id(1L).email(senderEmail).build();
+
+        when(userDao.findByEmail(senderEmail)).thenReturn(Optional.of(sender));
+        when(userDao.findByEmail(recipientEmail)).thenReturn(Optional.empty());
+
+        // when/then
+        assertThatThrownBy(() -> privateMessageService.getMessagesByRecipientEmail(recipientEmail))
+                .isInstanceOf(EntityNotFoundException.class)
+                .hasMessageContaining("User not found");
+
+        verify(userDao).findByEmail(senderEmail);
+        verify(userDao).findByEmail(recipientEmail);
+        verify(privateMessageDao, never()).findBySenderAndRecipient(any(), any());
+        verify(messageMapper, never()).toPrivateMessageResponse(any());
+    }
+}
+

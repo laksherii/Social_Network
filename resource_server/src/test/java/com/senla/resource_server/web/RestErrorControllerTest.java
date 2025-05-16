@@ -1,5 +1,7 @@
 package com.senla.resource_server.web;
 
+import com.senla.resource_server.config.JwtAuthenticationFilter;
+import com.senla.resource_server.config.JwtTokenProvider;
 import com.senla.resource_server.exception.BadRequestParamException;
 import com.senla.resource_server.exception.EntityExistException;
 import com.senla.resource_server.exception.EntityNotFoundException;
@@ -15,6 +17,7 @@ import org.springframework.http.MediaType;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authorization.AuthorizationDeniedException;
 import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -32,6 +35,12 @@ class RestErrorControllerTest {
 
     @Autowired
     private MockMvc mockMvc;
+
+    @MockitoBean
+    private JwtAuthenticationFilter jwtAuthenticationFilter;
+
+    @MockitoBean
+    private JwtTokenProvider jwtTokenProvider;
 
     @Test
     void handleAuthorizationDeniedException_ReturnsForbiddenStatus() throws Exception {

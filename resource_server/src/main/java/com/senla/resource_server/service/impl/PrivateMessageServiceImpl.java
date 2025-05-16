@@ -46,7 +46,7 @@ public class PrivateMessageServiceImpl implements PrivateMessageService {
         PrivateMessage message = new PrivateMessage();
         message.setSender(sender);
         message.setRecipient(recipient);
-        message.setMessage(privateMessageRequestDto.getMessage());
+        message.setContent(privateMessageRequestDto.getMessage());
 
         PrivateMessage savedMessage = privateMessageDao.save(message);
         log.info("Private message successfully sent from {} to {} (Message ID: {})", sender.getEmail(), recipient.getEmail(), savedMessage.getId());
@@ -58,7 +58,6 @@ public class PrivateMessageServiceImpl implements PrivateMessageService {
     public List<PrivateMessageResponseDto> getMessagesByRecipientEmail(String email) {
         log.info("Fetching messages by recipient email: {}", email);
 
-        //todo проверить
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String senderEmail = authentication.getName();
         log.info("Authenticated sender: {}", senderEmail);

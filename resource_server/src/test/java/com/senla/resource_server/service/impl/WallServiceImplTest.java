@@ -2,9 +2,9 @@ package com.senla.resource_server.service.impl;
 
 import com.senla.resource_server.data.dao.UserDao;
 import com.senla.resource_server.data.dao.WallDao;
+import com.senla.resource_server.data.entity.PublicMessage;
 import com.senla.resource_server.data.entity.User;
 import com.senla.resource_server.data.entity.Wall;
-import com.senla.resource_server.data.entity.WallMessage;
 import com.senla.resource_server.exception.EntityNotFoundException;
 import com.senla.resource_server.service.dto.message.WallMessageDto;
 import com.senla.resource_server.service.dto.user.UserDto;
@@ -71,8 +71,8 @@ class WallServiceImplTest {
         UserDto userDto = new UserDto();
         userDto.setEmail("test@example.com");
 
-        WallMessage newMessage = new WallMessage();
-        newMessage.setMessage("Hello, world!");
+        PublicMessage newMessage = new PublicMessage();
+        newMessage.setContent("Hello, world!");
         newMessage.setSender(user);
 
         Wall wallWithMessage = new Wall();
@@ -80,7 +80,7 @@ class WallServiceImplTest {
         wallWithMessage.setOwner(user);
 
         WallMessageDto wallMessageDto = new WallMessageDto();
-        wallMessageDto.setMessage("Hello, world!");
+        wallMessageDto.setContent("Hello, world!");
 
         Wall updatedWall = new Wall();
         updatedWall.setMessages(List.of(newMessage));

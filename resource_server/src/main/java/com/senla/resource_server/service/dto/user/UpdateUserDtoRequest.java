@@ -16,10 +16,6 @@ import java.time.LocalDate;
 @AllArgsConstructor
 public class UpdateUserDtoRequest {
 
-    @Email(message = "Invalid email format")
-    private String email;
-
-    private String password;
     private String firstName;
     private String lastName;
     private GenderType gender;
