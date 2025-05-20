@@ -63,7 +63,7 @@ class RestUserControllerTest {
 
         Mockito.when(userService.create(any(UserDtoRequest.class))).thenReturn(response);
 
-        mockMvc.perform(post("/user")
+        mockMvc.perform(post("/users")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isCreated())
@@ -79,7 +79,7 @@ class RestUserControllerTest {
         request.setEmail("");
         request.setPassword("123");
 
-        mockMvc.perform(post("/user")
+        mockMvc.perform(post("/users")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isBadRequest());

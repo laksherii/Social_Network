@@ -1,6 +1,5 @@
 package com.senla.resource_server.service.impl;
 
-
 import com.senla.resource_server.data.dao.FriendRequestDao;
 import com.senla.resource_server.data.dao.UserDao;
 import com.senla.resource_server.data.entity.FriendRequest;
@@ -72,10 +71,8 @@ public class FriendRequestServiceImpl implements FriendRequestService {
 
         if (status == FriendRequestStatus.ACCEPTED) {
             addFriend(request);
-            friendRequestDao.delete(answerRequestDto.getRequestId());
-        } else if (status == FriendRequestStatus.REJECTED) {
-            friendRequestDao.delete(answerRequestDto.getRequestId());
         }
+            friendRequestDao.delete(answerRequestDto.getRequestId());
 
         log.info("Friend request (ID: {}) from '{}' to '{}' was {}",
                 request.getId(),
@@ -83,8 +80,7 @@ public class FriendRequestServiceImpl implements FriendRequestService {
                 request.getRecipient().getEmail(),
                 status);
 
-        AnswerFriendResponseDto responseDto = friendRequestMapper.toAnswerFriendResponseDto(request);
-        return responseDto;
+        return friendRequestMapper.toAnswerFriendResponseDto(request);
     }
 
     private void addFriend(FriendRequest request) {

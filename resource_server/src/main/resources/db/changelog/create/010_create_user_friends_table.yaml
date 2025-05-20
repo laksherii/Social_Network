@@ -41,8 +41,14 @@ databaseChangeLog:
             onDelete: CASCADE
 
   - changeSet:
-      id: add-symmetric-unique-friend-request
-      author: Lashkevich Artem
+      id: create-symmetric-unique-index
+      author: your_name
+      preConditions:
+        - onFail: MARK_RAN
+        - not:
+          sqlCheck:
+            expectedResult: "0"
+            sql: SELECT COUNT(1) FROM pg_indexes WHERE indexname = 'uniq_friend_request_pair_symmetric'
       changes:
         - sql:
             sql: >
@@ -51,3 +57,4 @@ databaseChangeLog:
                 LEAST(sender_id, recipient_id),
                 GREATEST(sender_id, recipient_id)
               );
+  

@@ -40,13 +40,7 @@ class UserServiceImplTest {
     private UserDao userDao;
 
     @Mock
-    private PasswordEncoder passwordEncoder;
-
-    @Mock
     private UserMapper userMapper;
-
-    @Mock
-    private AuthService authService;
 
     @InjectMocks
     private UserServiceImpl userService;
@@ -223,6 +217,7 @@ class UserServiceImplTest {
     void update_WhenUserExists_ShouldReturnUpdatedDto() {
         String email = "user@example.com";
         UpdateUserDtoRequest request = UpdateUserDtoRequest.builder()
+                .email(email)
                 .firstName("NewFirst")
                 .lastName("NewLast")
                 .gender(User.GenderType.FEMALE)
@@ -233,7 +228,7 @@ class UserServiceImplTest {
         user.setId(1L);
         user.setEmail(email);
 
-        when(authService.getCurrentUser()).thenReturn(user);
+        when(userDao.findByEmail(email)).thenReturn(Optional.of(user));
         when(userDao.update(any())).thenAnswer(inv -> inv.getArgument(0));
         when(userMapper.toUserSearchDtoResponse(any())).thenReturn(
                 UserSearchDtoResponse.builder()
@@ -258,6 +253,7 @@ class UserServiceImplTest {
     void update_WhenOnlyFirstNameProvided_ShouldUpdateOnlyFirstName() {
         String email = "user@example.com";
         UpdateUserDtoRequest request = UpdateUserDtoRequest.builder()
+                .email(email)
                 .firstName("NewName")
                 .build();
 
@@ -266,7 +262,7 @@ class UserServiceImplTest {
         user.setEmail(email);
         user.setFirstName("OldName");
 
-        when(authService.getCurrentUser()).thenReturn(user);
+        when(userDao.findByEmail(email)).thenReturn(Optional.of(user));
         when(userDao.update(any())).thenAnswer(inv -> inv.getArgument(0));
         when(userMapper.toUserSearchDtoResponse(any())).thenReturn(
                 UserSearchDtoResponse.builder()
@@ -284,6 +280,7 @@ class UserServiceImplTest {
     void update_WhenOnlyLastNameProvided_ShouldUpdateOnlyLastName() {
         String email = "user@example.com";
         UpdateUserDtoRequest request = UpdateUserDtoRequest.builder()
+                .email(email)
                 .lastName("NewLast")
                 .build();
 
@@ -292,7 +289,7 @@ class UserServiceImplTest {
         user.setEmail(email);
         user.setLastName("OldLast");
 
-        when(authService.getCurrentUser()).thenReturn(user);
+        when(userDao.findByEmail(email)).thenReturn(Optional.of(user));
         when(userDao.update(any())).thenAnswer(inv -> inv.getArgument(0));
         when(userMapper.toUserSearchDtoResponse(any())).thenReturn(
                 UserSearchDtoResponse.builder()
@@ -310,6 +307,7 @@ class UserServiceImplTest {
     void update_WhenOnlyGenderProvided_ShouldUpdateOnlyGender() {
         String email = "user@example.com";
         UpdateUserDtoRequest request = UpdateUserDtoRequest.builder()
+                .email(email)
                 .gender(GenderType.FEMALE)
                 .build();
 
@@ -318,7 +316,7 @@ class UserServiceImplTest {
         user.setEmail(email);
         user.setGender(User.GenderType.MALE);
 
-        when(authService.getCurrentUser()).thenReturn(user);
+        when(userDao.findByEmail(email)).thenReturn(Optional.of(user));
         when(userDao.update(any())).thenAnswer(inv -> inv.getArgument(0));
         when(userMapper.toUserSearchDtoResponse(any())).thenReturn(
                 UserSearchDtoResponse.builder()
@@ -337,6 +335,7 @@ class UserServiceImplTest {
         String email = "user@example.com";
         LocalDate newBirth = LocalDate.of(1995, 1, 1);
         UpdateUserDtoRequest request = UpdateUserDtoRequest.builder()
+                .email(email)
                 .birthDay(newBirth)
                 .build();
 
@@ -345,7 +344,7 @@ class UserServiceImplTest {
         user.setEmail(email);
         user.setBirthDay(LocalDate.of(1990, 1, 1));
 
-        when(authService.getCurrentUser()).thenReturn(user);
+        when(userDao.findByEmail(email)).thenReturn(Optional.of(user));
         when(userDao.update(any())).thenAnswer(inv -> inv.getArgument(0));
         when(userMapper.toUserSearchDtoResponse(any())).thenReturn(
                 UserSearchDtoResponse.builder()

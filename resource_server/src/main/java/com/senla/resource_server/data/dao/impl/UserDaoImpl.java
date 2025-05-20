@@ -69,17 +69,6 @@ public class UserDaoImpl implements UserDao {
 
     @Override
     public User update(User user) {
-        String jpql = """
-                    select u
-                    from User u
-                      left join fetch u.wall
-                    where u.id = :id
-                """;
-        User result = entityManager.createQuery(jpql, User.class)
-                .setParameter("id", user.getId())
-                .getSingleResult();
-
-        entityManager.detach(result);
         User updatedUser = entityManager.merge(user);
         log.info("User updated with ID: {}", user.getId());
         return updatedUser;

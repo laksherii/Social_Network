@@ -40,7 +40,6 @@ public class GroupChatServiceImpl implements GroupChatService {
         Set<User> users = groupDto.getUserEmails().stream()
                 .map(userDao::findByEmail)
                 .filter(Optional::isPresent)
-                .distinct()
                 .map(Optional::get)
                 .collect(Collectors.toSet());
 

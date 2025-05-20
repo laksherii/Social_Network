@@ -79,7 +79,7 @@ class RestMessageControllerTest {
                 .willReturn(messages);
 
         // When
-        var result = mockMvc.perform(get("/message/private")
+        var result = mockMvc.perform(get("/messages/private")
                 .param("email", validEmail)
                 .contentType(MediaType.APPLICATION_JSON));
 
@@ -100,7 +100,7 @@ class RestMessageControllerTest {
                 .willReturn(response);
 
         // When
-        var result = mockMvc.perform(post("/message/private")
+        var result = mockMvc.perform(post("/messages/private")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request)));
 
@@ -119,7 +119,7 @@ class RestMessageControllerTest {
                 .build();
 
         // When
-        var result = mockMvc.perform(post("/message/private")
+        var result = mockMvc.perform(post("/messages/private")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(invalidRequest)));
 
@@ -137,7 +137,7 @@ class RestMessageControllerTest {
                 .build();
 
         // When
-        var result = mockMvc.perform(post("/message/private")
+        var result = mockMvc.perform(post("/messages/private")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(invalidRequest)));
 
@@ -160,7 +160,7 @@ class RestMessageControllerTest {
 
         when(publicMessageService.sendCommunityMessage(any())).thenReturn(responseDto);
 
-        mockMvc.perform(post("/message/community")
+        mockMvc.perform(post("/messages/communities")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(requestDto)))
                 .andExpect(status().isOk())
@@ -185,7 +185,7 @@ class RestMessageControllerTest {
 
         when(publicMessageService.sendGroupChatMessage(any())).thenReturn(responseDto);
 
-        mockMvc.perform(post("/message/group-chat")
+        mockMvc.perform(post("/messages/group-chats")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(requestDto)))
                 .andExpect(status().isOk())
@@ -209,7 +209,7 @@ class RestMessageControllerTest {
 
         when(publicMessageService.sendWallMessage(any())).thenReturn(responseDto);
 
-        mockMvc.perform(post("/message/wall")
+        mockMvc.perform(post("/messages/walls")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(requestDto)))
                 .andExpect(status().isOk())
@@ -227,7 +227,7 @@ class RestMessageControllerTest {
                 .message(" ")
                 .build();
 
-        mockMvc.perform(post("/message/community")
+        mockMvc.perform(post("/messages/communities")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(requestDto)))
                 .andExpect(status().isBadRequest());
@@ -241,7 +241,7 @@ class RestMessageControllerTest {
                 .content("Hello group")
                 .build();
 
-        mockMvc.perform(post("/message/group-chat")
+        mockMvc.perform(post("/messages/group-chats")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(requestDto)))
                 .andExpect(status().isBadRequest());
@@ -255,7 +255,7 @@ class RestMessageControllerTest {
                 .content(" ")
                 .build();
 
-        mockMvc.perform(post("/message/group-chat")
+        mockMvc.perform(post("/messages/group-chats")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(requestDto)))
                 .andExpect(status().isBadRequest());
@@ -269,7 +269,7 @@ class RestMessageControllerTest {
                 .message(longMessage)
                 .build();
 
-        mockMvc.perform(post("/message/wall")
+        mockMvc.perform(post("/messages/walls")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(requestDto)))
                 .andExpect(status().isBadRequest());

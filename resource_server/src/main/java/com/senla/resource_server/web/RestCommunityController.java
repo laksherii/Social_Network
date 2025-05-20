@@ -29,7 +29,7 @@ import java.util.List;
 @RestController
 @Validated
 @RequiredArgsConstructor
-@RequestMapping("/community")
+@RequestMapping("/communities")
 public class RestCommunityController {
 
     private final CommunityService communityService;

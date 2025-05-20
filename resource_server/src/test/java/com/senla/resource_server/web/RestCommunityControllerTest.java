@@ -51,7 +51,7 @@ class RestCommunityControllerTest {
 
         given(communityService.createCommunity(any())).willReturn(response);
 
-        mockMvc.perform(post("/community")
+        mockMvc.perform(post("/communities")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isCreated())
@@ -63,7 +63,7 @@ class RestCommunityControllerTest {
     void createCommunity_InvalidRequest_ReturnsBadRequest() throws Exception {
         CreateCommunityRequestDto invalidRequest = new CreateCommunityRequestDto("", "");
 
-        mockMvc.perform(post("/community")
+        mockMvc.perform(post("/communities")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(invalidRequest)))
                 .andExpect(status().isBadRequest());
@@ -81,7 +81,7 @@ class RestCommunityControllerTest {
 
         given(communityService.joinCommunity(any())).willReturn(response);
 
-        mockMvc.perform(put("/community")
+        mockMvc.perform(put("/communities")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
@@ -96,7 +96,7 @@ class RestCommunityControllerTest {
         given(communityService.joinCommunity(any()))
                 .willThrow(new EntityNotFoundException("Community not found"));
 
-        mockMvc.perform(put("/community")
+        mockMvc.perform(put("/communities")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isNotFound());
@@ -113,7 +113,7 @@ class RestCommunityControllerTest {
 
         given(communityService.findCommunity(1L)).willReturn(response);
 
-        mockMvc.perform(get("/community/1"))
+        mockMvc.perform(get("/communities/1"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.communityName").value("Devs"))
                 .andExpect(jsonPath("$.messages", hasSize(1)));
@@ -125,7 +125,7 @@ class RestCommunityControllerTest {
         given(communityService.findCommunity(999L))
                 .willThrow(new EntityNotFoundException("Not community found"));
 
-        mockMvc.perform(get("/community/999"))
+        mockMvc.perform(get("/communities/999"))
                 .andExpect(status().isNotFound());
     }
 
@@ -139,7 +139,7 @@ class RestCommunityControllerTest {
 
         given(communityService.getAllCommunities(1, 2)).willReturn(communities);
 
-        mockMvc.perform(get("/community")
+        mockMvc.perform(get("/communities")
                         .param("page", "1")
                         .param("size", "2"))
                 .andExpect(status().isOk())

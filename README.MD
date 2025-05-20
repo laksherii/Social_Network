@@ -36,10 +36,10 @@ bash /path/to/script/buildApp.sh
 
 #### Registration procedure in the system:
 
-1. To register in the resource-server: POST http://localhost:8080/user (Request body: email, firstName, lastName, birthDay, gender)
+1. To register in the resource-server: POST http://localhost:8080/users (Request body: email, firstName, lastName, birthDay, gender)
    By default, registration in the resource-server is carried out with the role of ROLE_USER.
-2. To register in the auth-server: POST http://localhost:9000/user (Request body: email, password, firstName, lastName, birthDay, gender)
-3. For get a JWT token in postman: POST http://localhost:9000/login (Request body: email, password)
+2. To register in the auth-server: POST http://localhost:9000/users (Request body: email, password, firstName, lastName, birthDay, gender)
+3. For get a JWT token in postman: POST http://localhost:9000/auth/login (Request body: email, password)
 
 #### Credentials of registered users:
 

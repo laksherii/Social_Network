@@ -36,7 +36,7 @@ import java.util.List;
 @Slf4j
 @RestController
 @Validated
-@RequestMapping("/user")
+@RequestMapping("/users")
 @RequiredArgsConstructor
 public class RestUserController {
 

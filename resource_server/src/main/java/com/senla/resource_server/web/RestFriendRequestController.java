@@ -22,7 +22,7 @@ import org.springframework.web.bind.annotation.RestController;
 @Slf4j
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/friend-request")
+@RequestMapping("/friend-requests")
 public class RestFriendRequestController {
 
     private final FriendRequestService friendRequestService;

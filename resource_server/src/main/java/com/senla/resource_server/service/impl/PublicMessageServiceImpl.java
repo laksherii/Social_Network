@@ -35,7 +35,11 @@ public class PublicMessageServiceImpl implements PublicMessageService {
         User user = authService.getCurrentUser();
         Community community = accessControlService.verifyUserIsCommunityAdmin(requestDto.getCommunityId(), user);
 
-        PublicMessage message = buildMessageForCommunity(requestDto, community, user);
+        PublicMessage message = PublicMessage.builder()
+                .community(community)
+                .content(requestDto.getMessage())
+                .sender(user)
+                .build();
         PublicMessage savedMessage = publicMessageDao.save(message);
 
         log.info("Successfully sent community message by user: {}, messageId: {}", user.getEmail(), savedMessage.getId());
@@ -47,7 +51,12 @@ public class PublicMessageServiceImpl implements PublicMessageService {
         User user = authService.getCurrentUser();
         GroupChat groupChat = accessControlService.verifyUserIsGroupChatMember(requestDto.getGroupId(), user);
 
-        PublicMessage message = buildMessageForGroupChat(requestDto, groupChat, user);
+        PublicMessage message = PublicMessage.builder()
+                .groupChat(groupChat)
+                .content(requestDto.getContent())
+                .sender(user)
+                .build();
+
         PublicMessage savedMessage = publicMessageDao.save(message);
 
         log.info("Successfully sent group chat message by user: {}, messageId: {}", user.getEmail(), savedMessage.getId());
@@ -59,34 +68,15 @@ public class PublicMessageServiceImpl implements PublicMessageService {
         User user = authService.getCurrentUser();
         Wall wall = user.getWall();
 
-        PublicMessage message = buildMessageForWall(requestDto, wall, user);
+        PublicMessage message = PublicMessage.builder()
+                .wall(wall)
+                .content(requestDto.getMessage())
+                .sender(user)
+                .build();
+
         PublicMessage savedMessage = publicMessageDao.save(message);
 
         log.info("Successfully sent wall message by user: {}, messageId: {}", user.getEmail(), savedMessage.getId());
         return messageMapper.toWallMessageResponse(savedMessage);
-    }
-
-    private PublicMessage buildMessageForCommunity(SendCommunityMessageRequestDto dto, Community community, User sender) {
-        return PublicMessage.builder()
-                .community(community)
-                .content(dto.getMessage())
-                .sender(sender)
-                .build();
-    }
-
-    private PublicMessage buildMessageForGroupChat(GroupChatMessageRequestDto dto, GroupChat groupChat, User sender) {
-        return PublicMessage.builder()
-                .groupChat(groupChat)
-                .content(dto.getContent())
-                .sender(sender)
-                .build();
-    }
-
-    private PublicMessage buildMessageForWall(WallRequestDto dto, Wall wall, User sender) {
-        return PublicMessage.builder()
-                .wall(wall)
-                .content(dto.getMessage())
-                .sender(sender)
-                .build();
     }
 }

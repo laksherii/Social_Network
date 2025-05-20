@@ -62,7 +62,7 @@ class RestGroupChatControllerTest {
         given(groupService.create(any(CreateGroupChatRequestDto.class))).willReturn(response);
 
         // When & Then
-        mockMvc.perform(post("/group-chat")
+        mockMvc.perform(post("/group-chats")
                         .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
@@ -82,7 +82,7 @@ class RestGroupChatControllerTest {
         );
 
         // When & Then
-        mockMvc.perform(post("/group-chat")
+        mockMvc.perform(post("/group-chats")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(invalidRequest)))
                 .andExpect(status().isBadRequest());
@@ -110,7 +110,7 @@ class RestGroupChatControllerTest {
         given(groupService.findById(groupId)).willReturn(response);
 
         // When & Then
-        mockMvc.perform(get("/group-chat/{id}", groupId))
+        mockMvc.perform(get("/group-chats/{id}", groupId))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.name").value("Dev Team"))
                 .andExpect(jsonPath("$.messages.length()").value(2));
@@ -124,7 +124,7 @@ class RestGroupChatControllerTest {
         given(groupService.findById(invalidId)).willThrow(new EntityNotFoundException("Group not found"));
 
         // When & Then
-        mockMvc.perform(get("/group-chat/{id}", invalidId))
+        mockMvc.perform(get("/group-chats/{id}", invalidId))
                 .andExpect(status().isNotFound());
     }
 }

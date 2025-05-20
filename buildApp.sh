@@ -7,11 +7,11 @@ echo "JAR assembly"
 cd "$(dirname "$0")"
 
 cd auth_server
-./mvnw clean package -DskipTests
+./mvnw clean package -Dmaven.test.failure.ignore=true
 cd ..
 
 cd resource_server
-./mvnw clean package -DskipTests
+./mvnw clean package -Dmaven.test.failure.ignore=true
 cd ..
 
 echo "Starting Docker Compose"

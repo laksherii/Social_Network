@@ -25,6 +25,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 
 @Slf4j
 @Service
@@ -84,7 +85,8 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserSearchDtoResponse update(UpdateUserDtoRequest userDtoRequest) {
-        User user = authService.getCurrentUser();
+        User user = userDao.findByEmail(userDtoRequest.getEmail())
+                .orElseThrow(() -> new EntityNotFoundException("User not found with email " + userDtoRequest.getEmail()));
 
         if (userDtoRequest.getFirstName() != null) {
             user.setFirstName(userDtoRequest.getFirstName());

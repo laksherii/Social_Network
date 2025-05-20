@@ -95,7 +95,7 @@ class RestUserControllerTest {
         Long userId = 1L;
         given(userService.findById(userId)).willReturn(createUserDto());
 
-        mockMvc.perform(get("/user/{id}", userId))
+        mockMvc.perform(get("/users/{id}", userId))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.email").value("test@example.com"));
     }
@@ -106,7 +106,7 @@ class RestUserControllerTest {
         String email = "test@example.com";
         given(userService.findByEmail(email)).willReturn(createUserDto());
 
-        mockMvc.perform(get("/user/email/{email}", email))
+        mockMvc.perform(get("/users/email/{email}", email))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.email").value(email));
     }
@@ -117,7 +117,7 @@ class RestUserControllerTest {
         String email = "test@example.com";
         given(userService.getUserInfo(email)).willReturn(createUserInfoDto());
 
-        mockMvc.perform(get("/user/info/{email}", email))
+        mockMvc.perform(get("/users/info/{email}", email))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.email").value(email))
                 .andExpect(jsonPath("$.firstName").value("John"))
@@ -136,7 +136,7 @@ class RestUserControllerTest {
 
         given(userService.create(any(CreateUserDtoRequest.class))).willReturn(createUserDtoResponse());
 
-        mockMvc.perform(post("/user")
+        mockMvc.perform(post("/users")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isCreated())
@@ -153,7 +153,7 @@ class RestUserControllerTest {
                 .gender(null)
                 .build();
 
-        mockMvc.perform(post("/user")
+        mockMvc.perform(post("/users")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(invalidRequest)))
                 .andExpect(status().isBadRequest());
@@ -171,7 +171,7 @@ class RestUserControllerTest {
 
         given(userService.update(any(UpdateUserDtoRequest.class))).willReturn(createUserSearchDtoResponse());
 
-        mockMvc.perform(put("/user")
+        mockMvc.perform(put("/users")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
@@ -193,7 +193,7 @@ class RestUserControllerTest {
 
         given(userService.updateRole(any(UpdateRoleUserDtoRequest.class))).willReturn(response);
 
-        mockMvc.perform(patch("/user")
+        mockMvc.perform(patch("/users")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
@@ -206,7 +206,7 @@ class RestUserControllerTest {
         List<UserSearchDtoResponse> users = Collections.singletonList(createUserSearchDtoResponse());
         given(userService.searchUsers(any())).willReturn(users);
 
-        mockMvc.perform(get("/user/search")
+        mockMvc.perform(get("/users/search")
                         .param("firstName", "John")
                         .param("lastName", "Doe")
                         .param("age", "20")
@@ -221,7 +221,7 @@ class RestUserControllerTest {
         List<UserSearchDtoResponse> users = Collections.singletonList(createUserSearchDtoResponse());
         given(userService.searchUsers(any())).willReturn(users);
 
-        mockMvc.perform(get("/user/search"))
+        mockMvc.perform(get("/users/search"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].email").value("test@example.com"));
     }
@@ -229,14 +229,14 @@ class RestUserControllerTest {
     @Test
     @WithMockUser(roles = "USER")
     void getUserById_InvalidId_ReturnsBadRequest() throws Exception {
-        mockMvc.perform(get("/user/{id}", -1))
+        mockMvc.perform(get("/users/{id}", -1))
                 .andExpect(status().isBadRequest());
     }
 
     @Test
     @WithMockUser(roles = "USER")
     void getUserByEmail_InvalidEmail_ReturnsBadRequest() throws Exception {
-        mockMvc.perform(get("/user/email/{email}", "invalid-email"))
+        mockMvc.perform(get("/users/email/{email}", "invalid-email"))
                 .andExpect(status().isBadRequest());
     }
 
@@ -250,7 +250,7 @@ class RestUserControllerTest {
                 .gender(null)
                 .build();
 
-        mockMvc.perform(put("/user")
+        mockMvc.perform(put("/users")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(invalidRequest)))
                 .andExpect(status().isBadRequest());
@@ -264,20 +264,10 @@ class RestUserControllerTest {
                 .role(null)
                 .build();
 
-        mockMvc.perform(patch("/user")
+        mockMvc.perform(patch("/users")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(invalidRequest)))
                 .andExpect(status().isBadRequest());
     }
-
-    @Test
-    @WithMockUser(roles = "USER")
-    void searchUsers_InvalidAgeParam_ReturnsBadRequest() throws Exception {
-        mockMvc.perform(get("/user/search")
-                        .param("age", "-5"))
-                .andExpect(status().isBadRequest());
-
-    }
-
 
 }

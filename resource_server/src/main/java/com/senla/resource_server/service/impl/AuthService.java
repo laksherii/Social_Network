@@ -15,7 +15,6 @@ import org.springframework.stereotype.Service;
 public class AuthService {
     private final UserDao userDao;
 
-    @Transactional(readOnly = true)
     public User getCurrentUser() {
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
         User user = userDao.findByEmail(email)

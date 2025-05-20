@@ -22,9 +22,6 @@ public class UserDaoImplTest extends BaseIntegrationTest {
     @Autowired
     private UserDaoImpl dao;
 
-    @Autowired
-    private PasswordEncoder passwordEncoder;
-
     @Test
     @Sql(value = "classpath:userDao/truncate_table.sql", executionPhase = ExecutionPhase.BEFORE_TEST_METHOD)
     @Sql(value = "classpath:userDao/insert_user.sql", executionPhase = ExecutionPhase.BEFORE_TEST_METHOD)
@@ -55,7 +52,7 @@ public class UserDaoImplTest extends BaseIntegrationTest {
 
         User testUser = User.builder()
                 .email("jane.smith@example.com")
-                .password(passwordEncoder.encode("password"))
+                .password("password")
                 .firstName("Jane")
                 .lastName("Smith")
                 .birthDay(LocalDate.of(1992, 8, 20))

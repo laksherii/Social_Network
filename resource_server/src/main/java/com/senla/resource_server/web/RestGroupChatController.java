@@ -23,7 +23,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @Validated
 @RequiredArgsConstructor
-@RequestMapping("/group-chat")
+@RequestMapping("/group-chats")
 public class RestGroupChatController {
 
     private final GroupChatService groupService;

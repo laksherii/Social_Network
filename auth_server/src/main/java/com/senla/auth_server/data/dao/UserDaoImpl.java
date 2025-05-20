@@ -23,6 +23,7 @@ public class UserDaoImpl implements UserDao {
                 select u
                 from User u
                 where u.email = :email
+                and u.enabled = true
             """;
         List<User> users = entityManager.createQuery(jpql, User.class)
                 .setParameter("email", email)

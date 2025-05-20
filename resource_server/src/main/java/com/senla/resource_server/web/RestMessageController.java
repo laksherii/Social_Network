@@ -31,14 +31,14 @@ import java.util.List;
 @RestController
 @Validated
 @RequiredArgsConstructor
-@RequestMapping("/message")
+@RequestMapping("/messages")
 public class RestMessageController {
 
     private final PrivateMessageService privateMessageService;
     private final PublicMessageService publicMessageService;
 
     @PreAuthorize("hasAnyRole('ADMIN', 'USER', 'MODERATOR')")
-    @PostMapping("/community")
+    @PostMapping("/communities")
     @ResponseStatus(HttpStatus.OK)
     public SendCommunityMessageResponseDto sendCommunityMessage(@Valid @RequestBody SendCommunityMessageRequestDto requestDto) {
         SendCommunityMessageResponseDto response = publicMessageService.sendCommunityMessage(requestDto);
@@ -47,7 +47,7 @@ public class RestMessageController {
     }
 
     @PreAuthorize("hasAnyRole('ADMIN', 'USER', 'MODERATOR')")
-    @PostMapping("/group-chat")
+    @PostMapping("/group-chats")
     @ResponseStatus(HttpStatus.OK)
     public GroupChatMessageResponseDto sendGroupChatMessage(@Valid @RequestBody GroupChatMessageRequestDto requestDto) {
         GroupChatMessageResponseDto response = publicMessageService.sendGroupChatMessage(requestDto);
@@ -56,7 +56,7 @@ public class RestMessageController {
     }
 
     @PreAuthorize("hasAnyRole('ADMIN', 'USER', 'MODERATOR')")
-    @PostMapping("/wall")
+    @PostMapping("/walls")
     @ResponseStatus(HttpStatus.OK)
     public WallResponseDto sendWallMessage(@Valid @RequestBody WallRequestDto requestDto) {
         WallResponseDto response = publicMessageService.sendWallMessage(requestDto);

@@ -53,7 +53,7 @@ class RestFriendRequestControllerTest {
         given(friendRequestService.sendFriendRequest(any())).willReturn(response);
 
         // When & Then
-        mockMvc.perform(post("/friend-request")
+        mockMvc.perform(post("/friend-requests")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isCreated())
@@ -68,7 +68,7 @@ class RestFriendRequestControllerTest {
         SendFriendRequestDto invalidRequest = new SendFriendRequestDto("invalid-email");
 
         // When & Then
-        mockMvc.perform(post("/friend-request")
+        mockMvc.perform(post("/friend-requests")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(invalidRequest)))
                 .andExpect(status().isBadRequest());
@@ -85,7 +85,7 @@ class RestFriendRequestControllerTest {
         given(friendRequestService.respondToFriendRequest(any())).willReturn(response);
 
         // When & Then
-        mockMvc.perform(put("/friend-request")
+        mockMvc.perform(put("/friend-requests")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
@@ -104,7 +104,7 @@ class RestFriendRequestControllerTest {
         given(friendRequestService.respondToFriendRequest(any())).willReturn(response);
 
         // When & Then
-        mockMvc.perform(put("/friend-request")
+        mockMvc.perform(put("/friend-requests")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
@@ -118,7 +118,7 @@ class RestFriendRequestControllerTest {
         String invalidJson = "{\"requestId\": 1}";
 
         // When & Then
-        mockMvc.perform(put("/friend-request")
+        mockMvc.perform(put("/friend-requests")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(invalidJson))
                 .andExpect(status().isBadRequest());
@@ -132,7 +132,7 @@ class RestFriendRequestControllerTest {
         doNothing().when(friendRequestService).deleteFriend(any());
 
         // When & Then
-        mockMvc.perform(delete("/friend-request")
+        mockMvc.perform(delete("/friend-requests")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isNoContent());
@@ -145,7 +145,7 @@ class RestFriendRequestControllerTest {
         DeleteFriendRequest invalidRequest = new DeleteFriendRequest("invalid-email");
 
         // When & Then
-        mockMvc.perform(delete("/friend-request")
+        mockMvc.perform(delete("/friend-requests")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(invalidRequest)))
                 .andExpect(status().isBadRequest());
