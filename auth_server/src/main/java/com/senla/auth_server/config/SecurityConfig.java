@@ -44,7 +44,7 @@ public class SecurityConfig {
                 .sessionManagement(cus -> cus.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/auth/login", "/auth/token").permitAll()
-                        .requestMatchers(HttpMethod.POST, "/user/**").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/users/**").permitAll()
                         .anyRequest().authenticated()
                 )
                 .exceptionHandling(e -> e
