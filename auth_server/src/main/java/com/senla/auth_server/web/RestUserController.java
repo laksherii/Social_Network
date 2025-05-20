@@ -24,7 +24,6 @@ public class RestUserController {
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public UserDtoResponse createUser(@Valid @RequestBody UserDtoRequest createUserDtoRequest) {
-        log.info("Creating new user with email: {}", createUserDtoRequest.getEmail());
         UserDtoResponse response = userService.create(createUserDtoRequest);
         log.info("Successfully created new user with email: {}", createUserDtoRequest.getEmail());
         return response;

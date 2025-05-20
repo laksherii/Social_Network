@@ -1,0 +1,48 @@
+databaseChangeLog:
+  - changeSet:
+      id: 016-1-insert-friend-request-1-4
+      author: Lashkevich Artem
+      preConditions:
+        - onFail: MARK_RAN
+        - sqlCheck:
+            expectedResult: "0"
+            sql: "SELECT COUNT(*) FROM friend_request WHERE sender_id = 1 AND recipient_id = 4"
+      changes:
+        - insert:
+            tableName: friend_request
+            columns:
+              - column: { name: sender_id, value: "1" }
+              - column: { name: recipient_id, value: "4" }
+              - column: { name: status, value: "UNDEFINED" }
+
+  - changeSet:
+      id: 016-2-insert-friend-request-2-5
+      author: Lashkevich Artem
+      preConditions:
+        - onFail: MARK_RAN
+        - sqlCheck:
+            expectedResult: "0"
+            sql: "SELECT COUNT(*) FROM friend_request WHERE sender_id = 2 AND recipient_id = 4"
+      changes:
+        - insert:
+            tableName: friend_request
+            columns:
+              - column: { name: sender_id, value: "2" }
+              - column: { name: recipient_id, value: "4" }
+              - column: { name: status, value: "UNDEFINED" }
+
+  - changeSet:
+      id: 016-3-insert-friend-request-3-6
+      author: Lashkevich Artem
+      preConditions:
+        - onFail: MARK_RAN
+        - sqlCheck:
+            expectedResult: "0"
+            sql: "SELECT COUNT(*) FROM friend_request WHERE sender_id = 3 AND recipient_id = 5"
+      changes:
+        - insert:
+            tableName: friend_request
+            columns:
+              - column: { name: sender_id, value: "3" }
+              - column: { name: recipient_id, value: "5" }
+              - column: { name: status, value: "UNDEFINED" }

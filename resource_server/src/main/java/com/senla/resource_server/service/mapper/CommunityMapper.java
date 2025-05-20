@@ -1,11 +1,9 @@
 package com.senla.resource_server.service.mapper;
 
 import com.senla.resource_server.data.entity.Community;
-import com.senla.resource_server.data.entity.PublicMessage;
 import com.senla.resource_server.service.dto.community.CommunityDto;
 import com.senla.resource_server.service.dto.community.CreateCommunityResponseDto;
 import com.senla.resource_server.service.dto.community.JoinCommunityResponseDto;
-import com.senla.resource_server.service.dto.community.SendCommunityMessageResponseDto;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingConstants.ComponentModel;
@@ -23,6 +21,4 @@ public interface CommunityMapper {
 
     CommunityDto toCommunityDto(Community community);
 
-    @Mapping(target = "communityName", source = "community.name")
-    SendCommunityMessageResponseDto toSendCommunityMessageResponseDto(PublicMessage publicMessage);
 }

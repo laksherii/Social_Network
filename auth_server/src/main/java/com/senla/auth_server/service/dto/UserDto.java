@@ -11,6 +11,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class UserDto {
+
     @NotBlank(message = "Email must not be null")
     private String email;
 }

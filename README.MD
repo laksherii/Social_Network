@@ -12,7 +12,7 @@
 
 ![microservice interaction scheme](images/application-schema.png)
 
-##### There two microservices (auth-service and resource-server), each of which works with a one database.
+##### There two microservices (auth-service and resource-server), each of which works with a separate database.
 
 ##### The authorization server is in charge of issuing receive a JWT token for users registered in the system.
 
@@ -26,7 +26,8 @@ Java, Spring Boot, PostgresSQL, Liquibase, Docker
 
 #### How to run:
 
-1. Go to the root of the application and run the buildApp.sh script
+1. Go to the root of the application and run the buildApp.sh script with command:
+bash /path/to/script/buildApp.sh
 
 #### Ports exposed:
 
@@ -35,23 +36,14 @@ Java, Spring Boot, PostgresSQL, Liquibase, Docker
 
 #### Registration procedure in the system:
 
-1. To register in the system: POST http://localhost:8080/user (Request body: email, password, firstName, lastName, birthDay, gender)
-   By default, registration in the system is carried out with the role of ROLE_USER.
-2. For get a JWT token in postman, select the Oauth2.0 authentication type
-   and specify the following parameters:
-   - Header Prefix - Bearer
-   - Grant type - Authorization Code
-   - Callback URL - https://oauth.pstmn.io/v1/callback
-   - Auth URL - http://localhost:9000/oauth2/authorize
-   - Access Token URL -http://localhost:9000/oauth2/token
-   - Client ID - oidc_client,  
-   - Client Secret - secret,  
-   - Scope - openid profile,  
-   - Client Authentication - Send as Basic Auth header
+1. To register in the resource-server: POST http://localhost:8080/user (Request body: email, firstName, lastName, birthDay, gender)
+   By default, registration in the resource-server is carried out with the role of ROLE_USER.
+2. To register in the auth-server: POST http://localhost:9000/user (Request body: email, password, firstName, lastName, birthDay, gender)
+3. For get a JWT token in postman: POST http://localhost:9000/login (Request body: email, password)
 
 #### Credentials of registered users:
 
-1. ADMIN - email: elizabeth@example.com, password: elizabeth
+1. ADMIN - email: admin@example.com, password: administrator
 2. USER - email: christopher@example.com, password: christopher
 3. MODERATOR - email: victoria@example.com, password: victoria
 

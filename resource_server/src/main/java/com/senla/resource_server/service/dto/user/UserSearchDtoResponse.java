@@ -1,12 +1,9 @@
 package com.senla.resource_server.service.dto.user;
 
-import com.senla.resource_server.data.entity.User;
+import com.senla.resource_server.data.entity.User.GenderType;
 import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.Max;
-import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Positive;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -33,6 +30,6 @@ public class UserSearchDtoResponse {
     private LocalDate birthDay;
 
     @NotNull(message = "Gender must not be null")
-    private User.GenderType gender;
+    private GenderType gender;
 
 }

@@ -2,6 +2,7 @@ package com.senla.resource_server.service.dto.message;
 
 import com.senla.resource_server.service.dto.user.UserDto;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -14,7 +15,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class GroupChatMessageDto {
 
-    @NotBlank(message = "Sender must not be blank")
+    @NotNull(message = "Sender must not be null")
     private UserDto sender;
 
     @NotBlank(message = "Message content must not be blank")

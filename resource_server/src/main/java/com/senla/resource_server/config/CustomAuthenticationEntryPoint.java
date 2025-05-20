@@ -1,6 +1,8 @@
 package com.senla.resource_server.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.senla.resource_server.service.dto.ErrorDto;
+import com.senla.resource_server.service.dto.ErrorDto.ErrorStatus;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -21,6 +23,6 @@ public class CustomAuthenticationEntryPoint implements AuthenticationEntryPoint 
         res.setContentType("application/json;charset=UTF-8");
         res.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
 
-        res.getWriter().write(mapper.writeValueAsString(authException.getMessage()));
+        res.getWriter().write(mapper.writeValueAsString(new ErrorDto(ErrorStatus.CLIENT_ERROR,"Authentication required")));
     }
 }

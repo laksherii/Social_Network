@@ -1,7 +1,5 @@
 package com.senla.resource_server.web;
 
-import com.senla.resource_server.config.JwtAuthenticationFilter;
-import com.senla.resource_server.config.JwtTokenProvider;
 import com.senla.resource_server.exception.BadRequestParamException;
 import com.senla.resource_server.exception.EntityExistException;
 import com.senla.resource_server.exception.EntityNotFoundException;
@@ -9,7 +7,16 @@ import com.senla.resource_server.exception.IllegalArgumentException;
 import com.senla.resource_server.exception.IllegalStateException;
 import com.senla.resource_server.exception.UserNotAdminInGroupException;
 import com.senla.resource_server.exception.UserNotInGroupChatException;
+import com.senla.resource_server.exception.UserNotYourFriendException;
+import jakarta.validation.ConstraintViolation;
+import jakarta.validation.ConstraintViolationException;
+import jakarta.validation.Path;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotEmpty;
+import lombok.Getter;
+import lombok.Setter;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.context.annotation.Import;
@@ -17,30 +24,28 @@ import org.springframework.http.MediaType;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authorization.AuthorizationDeniedException;
 import org.springframework.security.test.context.support.WithMockUser;
-import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.Set;
+
+import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(controllers = RestErrorController.class)
-@Import(RestErrorControllerTest.TestController.class)
+@Import({TestConfig.class, RestErrorControllerTest.TestController.class})
 @WithMockUser(username = "test@example.com", roles = "ADMIN")
 class RestErrorControllerTest {
 
     @Autowired
     private MockMvc mockMvc;
-
-    @MockitoBean
-    private JwtAuthenticationFilter jwtAuthenticationFilter;
-
-    @MockitoBean
-    private JwtTokenProvider jwtTokenProvider;
 
     @Test
     void handleAuthorizationDeniedException_ReturnsForbiddenStatus() throws Exception {
@@ -117,10 +122,36 @@ class RestErrorControllerTest {
     @Test
     void handleBadCredentialsException_ReturnsBadRequestStatus() throws Exception {
         mockMvc.perform(get("/test/bad-credentials")
-                        .content(MediaType.APPLICATION_JSON_VALUE))
+                        .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isUnauthorized())
                 .andExpect(jsonPath("$.errorStatus").value("CLIENT_ERROR"))
                 .andExpect(jsonPath("$.errorMessage").value("Bad credentials"));
+    }
+
+    @Test
+    void handleMethodArgumentNotValidException_ReturnsBadRequest() throws Exception {
+        String json = "{\"fieldName\":\"\"}";
+        mockMvc.perform(post("/test/method-not-valid")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(json))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void handleConstraintViolationException_ReturnsBadRequestStatus() throws Exception {
+        mockMvc.perform(get("/test/violation")
+                        .content(MediaType.APPLICATION_JSON_VALUE))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$[0]").value("field1: must not be empty"));
+    }
+
+    @Test
+    void handleUserNotYourFriendException_ReturnsForbiddenStatus() throws Exception {
+        mockMvc.perform(get("/test/user-not-friend")
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.errorStatus").value("CLIENT_ERROR"))
+                .andExpect(jsonPath("$.errorMessage").value("User not your friend"));
     }
 
     @Test
@@ -181,10 +212,38 @@ class RestErrorControllerTest {
             throw new BadCredentialsException("Bad credentials");
         }
 
+        @GetMapping("/user-not-friend")
+        public void throwUserNotYourFriend() {
+            throw new UserNotYourFriendException("User not your friend");
+        }
+
+        @PostMapping("/method-not-valid")
+        public void throwMethodArgumentNotValid(@Valid @RequestBody TestDto dto) {
+        }
+
+        @GetMapping("/violation")
+        public void throwConstraintViolation() {
+            ConstraintViolation<?> violation = Mockito.mock(ConstraintViolation.class);
+            Path path = Mockito.mock(Path.class);
+
+            when(violation.getMessage()).thenReturn("must not be empty");
+            when(violation.getPropertyPath()).thenReturn(path);
+            when(path.toString()).thenReturn("field1");
+
+            throw new ConstraintViolationException(Set.of(violation));
+        }
+
         @GetMapping("/generic-error")
         public void throwGenericError() {
             throw new RuntimeException("Unexpected error");
         }
+    }
+
+    @Setter
+    @Getter
+    public static class TestDto {
+        @NotEmpty(message = "The field must not be empty")
+        private String fieldName;
 
     }
 }

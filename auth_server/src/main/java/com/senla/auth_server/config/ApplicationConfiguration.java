@@ -15,7 +15,6 @@ import org.springframework.orm.jpa.JpaTransactionManager;
 import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
 import org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
-import org.springframework.web.client.RestClient;
 
 import javax.sql.DataSource;
 import java.util.Properties;
@@ -40,10 +39,17 @@ public class ApplicationConfiguration {
     @Value("${spring.datasource.hikari.maximum-pool-size}")
     private int poolSize;
 
-    @Bean
-    public RestClient.Builder restClientBuilder() {
-        return RestClient.builder();
-    }
+    @Value("${hibernate.dialect}")
+    private String dialect;
+
+    @Value("${hibernate.show_sql}")
+    private String showSql;
+
+    @Value("${hibernate.format_sql}")
+    private String formatSql;
+
+    @Value("${hibernate.hbm2ddl.auto}")
+    private String hbm2ddlAuto;
 
     @Bean
     public ObjectMapper objectMapper() {
@@ -77,20 +83,16 @@ public class ApplicationConfiguration {
 
     private Properties hibernateProperties() {
         Properties properties = new Properties();
-        properties.setProperty("hibernate.dialect", "org.hibernate.dialect.PostgreSQLDialect");
-        properties.setProperty("hibernate.show_sql", "true");
-        properties.setProperty("hibernate.format_sql", "true");
-        properties.setProperty("hibernate.hbm2ddl.auto", "update");
+        properties.setProperty("hibernate.dialect", dialect);
+        properties.setProperty("hibernate.show_sql", showSql);
+        properties.setProperty("hibernate.format_sql", formatSql);
+        properties.setProperty("hibernate.hbm2ddl.auto", hbm2ddlAuto);
         return properties;
     }
 
     @Bean
     public JpaTransactionManager transactionManager(EntityManagerFactory entityManagerFactory) {
         return new JpaTransactionManager(entityManagerFactory);
-    }
-    @Bean
-    public RestClient restClient() {
-        return restClientBuilder().build();
     }
 }
 

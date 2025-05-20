@@ -5,14 +5,14 @@ import com.senla.resource_server.service.dto.community.CreateCommunityRequestDto
 import com.senla.resource_server.service.dto.community.CreateCommunityResponseDto;
 import com.senla.resource_server.service.dto.community.JoinCommunityRequestDto;
 import com.senla.resource_server.service.dto.community.JoinCommunityResponseDto;
-import com.senla.resource_server.service.impl.CommunityServiceImpl;
+import com.senla.resource_server.service.interfaces.CommunityService;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -27,17 +27,17 @@ import java.util.List;
 
 @Slf4j
 @RestController
+@Validated
 @RequiredArgsConstructor
 @RequestMapping("/community")
 public class RestCommunityController {
 
-    private final CommunityServiceImpl communityService;
+    private final CommunityService communityService;
 
     @PreAuthorize("hasAnyRole('ADMIN', 'USER', 'MODERATOR')")
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public CreateCommunityResponseDto createCommunity(@Valid @RequestBody CreateCommunityRequestDto createDto) {
-        log.info("Creating community with name: {}", createDto.getName());
         CreateCommunityResponseDto response = communityService.createCommunity(createDto);
         log.info("Community created with name: {}", response.getCommunityName());
         return response;
@@ -47,9 +47,6 @@ public class RestCommunityController {
     @PutMapping
     @ResponseStatus(HttpStatus.OK)
     public JoinCommunityResponseDto joinCommunity(@Valid @RequestBody JoinCommunityRequestDto joinDto) {
-        log.info("User with email {} attempting to join community ID: {}",
-                SecurityContextHolder.getContext().getAuthentication().getName(),
-                joinDto.getCommunityId());
         JoinCommunityResponseDto response = communityService.joinCommunity(joinDto);
         log.info("User joined community with ID: {}", joinDto.getCommunityId());
         return response;
@@ -58,8 +55,7 @@ public class RestCommunityController {
     @PreAuthorize("hasAnyRole('ADMIN', 'USER', 'MODERATOR')")
     @GetMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
-    public JoinCommunityResponseDto getCommunity(@PathVariable Long id) {
-        log.info("Fetching community with ID: {}", id);
+    public JoinCommunityResponseDto getCommunity(@PathVariable @Positive Long id) {
         JoinCommunityResponseDto response = communityService.findCommunity(id);
         log.info("Found community with ID: {}", id);
         return response;
@@ -69,11 +65,11 @@ public class RestCommunityController {
     @GetMapping
     @ResponseStatus(HttpStatus.OK)
     public List<CommunityDto> getAllCommunities(
-            @RequestParam Integer page,
-            @RequestParam Integer size) {
-        log.info("Fetching all communities with page: {} and size: {}", page, size);
+            @RequestParam @Positive Integer page,
+            @RequestParam @Positive Integer size) {
         List<CommunityDto> communities = communityService.getAllCommunities(page, size);
         log.info("Found {} communities", communities.size());
         return communities;
     }
+
 }

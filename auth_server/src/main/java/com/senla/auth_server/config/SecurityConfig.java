@@ -3,7 +3,7 @@ package com.senla.auth_server.config;
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.interfaces.JWTVerifier;
-import com.senla.auth_server.service.impl.CustomUserDetailsService;
+import com.senla.auth_server.service.impl.JdbcUserDetailsService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -27,7 +27,7 @@ import org.springframework.security.web.SecurityFilterChain;
 @RequiredArgsConstructor
 public class SecurityConfig {
 
-    private final CustomAuthenticationEntryPoint customAuthenticationEntryPoint;
+    private final JwtAuthenticationEntryPoint customAuthenticationEntryPoint;
 
     @Bean
     public Algorithm jwtAlgorithm(@Value("${jwt.secretKey}") String secretKey) {
@@ -65,7 +65,7 @@ public class SecurityConfig {
     }
 
     @Bean
-    public DaoAuthenticationProvider authenticationProvider(CustomUserDetailsService customUserDetailsService,
+    public DaoAuthenticationProvider authenticationProvider(JdbcUserDetailsService customUserDetailsService,
                                                             PasswordEncoder passwordEncoder) {
         DaoAuthenticationProvider provider = new DaoAuthenticationProvider();
         provider.setUserDetailsService(customUserDetailsService);

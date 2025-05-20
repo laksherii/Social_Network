@@ -33,6 +33,18 @@ public class ApplicationConfiguration {
     @Value("${spring.datasource.hikari.maximum-pool-size}")
     private int poolSize;
 
+    @Value("${hibernate.dialect}")
+    private String dialect;
+
+    @Value("${hibernate.show_sql}")
+    private String showSql;
+
+    @Value("${hibernate.format_sql}")
+    private String formatSql;
+
+    @Value("${hibernate.hbm2ddl.auto}")
+    private String hbm2ddlAuto;
+
     @Bean
     public DataSource dataSource() {
         HikariConfig config = new HikariConfig();
@@ -56,10 +68,10 @@ public class ApplicationConfiguration {
 
     private Properties hibernateProperties() {
         Properties properties = new Properties();
-        properties.setProperty("hibernate.dialect", "org.hibernate.dialect.PostgreSQLDialect");
-        properties.setProperty("hibernate.show_sql", "true");
-        properties.setProperty("hibernate.format_sql", "true");
-        properties.setProperty("hibernate.hbm2ddl.auto", "update");
+        properties.setProperty("hibernate.dialect", dialect);
+        properties.setProperty("hibernate.show_sql", showSql);
+        properties.setProperty("hibernate.format_sql", formatSql);
+        properties.setProperty("hibernate.hbm2ddl.auto", hbm2ddlAuto);
         return properties;
     }
 

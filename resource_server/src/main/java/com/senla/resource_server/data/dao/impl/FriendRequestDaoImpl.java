@@ -20,7 +20,6 @@ public class FriendRequestDaoImpl implements FriendRequestDao {
 
     @Override
     public FriendRequest save(FriendRequest request) {
-        log.info("Saving friend request from {} to {}", request.getSender().getEmail(), request.getRecipient().getEmail());
         entityManager.persist(request);
         log.info("Successfully saved friend request from {} to {}", request.getSender().getEmail(), request.getRecipient().getEmail());
         return request;
@@ -28,7 +27,6 @@ public class FriendRequestDaoImpl implements FriendRequestDao {
 
     @Override
     public Optional<FriendRequest> findById(Long id) {
-        log.info("Finding friend request by ID: {}", id);
         FriendRequest request = entityManager.find(FriendRequest.class, id);
         log.info("Friend request found with ID: {}", id);
         return Optional.ofNullable(request);
@@ -36,15 +34,12 @@ public class FriendRequestDaoImpl implements FriendRequestDao {
 
     @Override
     public Optional<FriendRequest> findBySenderAndRecipient(User sender, User recipient) {
-        log.info("Finding friend request from {} to {}", sender.getEmail(), recipient.getEmail());
         String query = "SELECT fr FROM FriendRequest fr WHERE fr.sender = :sender AND fr.recipient = :recipient";
         List<FriendRequest> result = entityManager.createQuery(query, FriendRequest.class)
                 .setParameter("sender", sender)
                 .setParameter("recipient", recipient)
                 .getResultList();
-        if (result.isEmpty()) {
-            log.warn("No friend request found from {} to {}", sender.getEmail(), recipient.getEmail());
-        } else {
+        if (!result.isEmpty()) {
             log.info("Friend request found from {} to {}", sender.getEmail(), recipient.getEmail());
         }
         return result.stream().findFirst();
@@ -52,7 +47,6 @@ public class FriendRequestDaoImpl implements FriendRequestDao {
 
     @Override
     public void delete(Long id) {
-        log.info("Deleting friend request with ID: {}", id);
         FriendRequest request = entityManager.find(FriendRequest.class, id);
         entityManager.remove(request);
         log.info("Deleted friend request from {} to {}", request.getSender().getEmail(), request.getRecipient().getEmail());

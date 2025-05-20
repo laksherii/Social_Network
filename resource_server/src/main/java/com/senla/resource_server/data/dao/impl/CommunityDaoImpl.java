@@ -2,7 +2,6 @@ package com.senla.resource_server.data.dao.impl;
 
 import com.senla.resource_server.data.dao.CommunityDao;
 import com.senla.resource_server.data.entity.Community;
-import com.senla.resource_server.data.entity.PublicMessage;
 import com.senla.resource_server.util.PaginationUtil;
 import com.senla.resource_server.util.PaginationUtil.Pagination;
 import jakarta.persistence.EntityManager;
@@ -26,7 +25,6 @@ public class CommunityDaoImpl implements CommunityDao {
 
     @Override
     public Community save(Community community) {
-        log.info("Saving community with ID {}", community.getId());
         entityManager.persist(community);
         log.info("Successfully saved community with ID {}", community.getId());
         return community;
@@ -34,7 +32,6 @@ public class CommunityDaoImpl implements CommunityDao {
 
     @Override
     public Optional<Community> findById(Long id) {
-        log.info("Finding community with ID {}", id);
         Community community = entityManager.find(Community.class, id);
         log.info("Successfully found community with ID {}", id);
         return Optional.ofNullable(community);
@@ -42,7 +39,6 @@ public class CommunityDaoImpl implements CommunityDao {
 
     @Override
     public List<Community> findAll(Integer page, Integer size) {
-        log.info("Fetching all communities with pagination, page: {}, size: {}", page, size);
         Pagination pagination = paginationUtil.calculate(page, size);
 
         String query = "SELECT c FROM Community c ORDER BY c.id";
@@ -53,14 +49,6 @@ public class CommunityDaoImpl implements CommunityDao {
 
         log.info("Fetched {} communities", communities.size());
         return communities;
-    }
-
-    @Override
-    public PublicMessage sendMessage(PublicMessage publicMessage) {
-        log.info("Sending public message with ID {}", publicMessage.getId());
-        entityManager.persist(publicMessage);
-        log.info("Successfully sent public message with ID {}", publicMessage.getId());
-        return publicMessage;
     }
 }
 

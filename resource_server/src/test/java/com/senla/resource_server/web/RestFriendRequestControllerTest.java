@@ -8,16 +8,20 @@ import com.senla.resource_server.service.dto.friendRequest.DeleteFriendRequest;
 import com.senla.resource_server.service.dto.friendRequest.SendFriendRequestDto;
 import com.senla.resource_server.service.dto.friendRequest.SendFriendResponseDto;
 import com.senla.resource_server.service.dto.user.UserDto;
-import com.senla.resource_server.service.impl.FriendRequestServiceImpl;
+import com.senla.resource_server.service.interfaces.FriendRequestService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
+import static org.hamcrest.Matchers.hasSize;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.doNothing;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -26,65 +30,125 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(RestFriendRequestController.class)
-@WithMockUser
+@Import(TestConfig.class)
 class RestFriendRequestControllerTest {
 
     @Autowired
     private MockMvc mockMvc;
 
     @MockitoBean
-    private FriendRequestServiceImpl friendRequestService;
+    private FriendRequestService friendRequestService;
 
     @Autowired
     private ObjectMapper objectMapper;
 
     @Test
-    void sendFriendRequest_shouldReturnCreated() throws Exception {
+    @WithMockUser(roles = "USER")
+    void sendFriendRequest_ValidRequest_ReturnsCreated() throws Exception {
         // Given
-        SendFriendRequestDto requestDto = new SendFriendRequestDto("receiver@example.com");
-        SendFriendResponseDto responseDto = new SendFriendResponseDto(new UserDto(), FriendRequestStatus.UNDEFINED);
+        SendFriendRequestDto request = new SendFriendRequestDto("friend@example.com");
+        UserDto userDto = UserDto.builder().email("friend@example.com").build();
+        SendFriendResponseDto response = new SendFriendResponseDto(userDto, FriendRequestStatus.UNDEFINED);
 
-        given(friendRequestService.sendFriendRequest(requestDto)).willReturn(responseDto);
+        given(friendRequestService.sendFriendRequest(any())).willReturn(response);
 
-        // When / Then
+        // When & Then
         mockMvc.perform(post("/friend-request")
-                        .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(requestDto)))
+                        .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.status").value(FriendRequestStatus.UNDEFINED.toString()))
-                .andReturn().getResponse().getContentAsString();
-
+                .andExpect(jsonPath("$.recipient.email").value("friend@example.com"))
+                .andExpect(jsonPath("$.status").value(FriendRequestStatus.UNDEFINED.toString()));
     }
 
     @Test
-    void responseFriendRequest_shouldReturnOk() throws Exception {
+    @WithMockUser(roles = "USER")
+    void sendFriendRequest_InvalidEmail_ReturnsBadRequest() throws Exception {
         // Given
-        AnswerFriendRequestDto requestDto = new AnswerFriendRequestDto(1L, FriendRequestStatus.ACCEPTED);
-        AnswerFriendResponseDto responseDto = new AnswerFriendResponseDto(new UserDto(),FriendRequestStatus.ACCEPTED);
+        SendFriendRequestDto invalidRequest = new SendFriendRequestDto("invalid-email");
 
-        given(friendRequestService.respondToFriendRequest(requestDto)).willReturn(responseDto);
+        // When & Then
+        mockMvc.perform(post("/friend-request")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(invalidRequest)))
+                .andExpect(status().isBadRequest());
+    }
 
-        // When / Then
+    @Test
+    @WithMockUser(roles = "USER")
+    void responseFriendRequest_Accept_ReturnsOk() throws Exception {
+        // Given
+        AnswerFriendRequestDto request = new AnswerFriendRequestDto(1L, FriendRequestStatus.ACCEPTED);
+        UserDto userDto = UserDto.builder().email("sender@example.com").build();
+        AnswerFriendResponseDto response = new AnswerFriendResponseDto(userDto, FriendRequestStatus.ACCEPTED);
+
+        given(friendRequestService.respondToFriendRequest(any())).willReturn(response);
+
+        // When & Then
         mockMvc.perform(put("/friend-request")
-                        .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(requestDto)))
+                        .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.status").value(FriendRequestStatus.ACCEPTED.toString()))
-                .andReturn().getResponse().getContentAsString();
+                .andExpect(jsonPath("$.sender.email").value("sender@example.com"))
+                .andExpect(jsonPath("$.status").value("ACCEPTED"));
     }
 
     @Test
-    void deleteFriend_shouldReturnNoContent() throws Exception {
+    @WithMockUser(roles = "USER")
+    void responseFriendRequest_Reject_ReturnsOk() throws Exception {
         // Given
-        DeleteFriendRequest requestDto = new DeleteFriendRequest("friend@example.com");
+        AnswerFriendRequestDto request = new AnswerFriendRequestDto(1L, FriendRequestStatus.REJECTED);
+        UserDto userDto = UserDto.builder().email("sender@example.com").build();
+        AnswerFriendResponseDto response = new AnswerFriendResponseDto(userDto, FriendRequestStatus.REJECTED);
 
-        // When / Then
-        mockMvc.perform(delete("/friend-request")
-                        .with(csrf())
+        given(friendRequestService.respondToFriendRequest(any())).willReturn(response);
+
+        // When & Then
+        mockMvc.perform(put("/friend-request")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(requestDto)))
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.status").value("REJECTED"));
+    }
+
+    @Test
+    @WithMockUser(roles = "USER")
+    void responseFriendRequest_MissingStatus_ReturnsBadRequest() throws Exception {
+        // Given
+        String invalidJson = "{\"requestId\": 1}";
+
+        // When & Then
+        mockMvc.perform(put("/friend-request")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(invalidJson))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    @WithMockUser(roles = "USER")
+    void deleteFriend_ValidRequest_ReturnsNoContent() throws Exception {
+        // Given
+        DeleteFriendRequest request = new DeleteFriendRequest("friend@example.com");
+        doNothing().when(friendRequestService).deleteFriend(any());
+
+        // When & Then
+        mockMvc.perform(delete("/friend-request")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isNoContent());
     }
+
+    @Test
+    @WithMockUser(roles = "USER")
+    void deleteFriend_InvalidEmail_ReturnsBadRequest() throws Exception {
+        // Given
+        DeleteFriendRequest invalidRequest = new DeleteFriendRequest("invalid-email");
+
+        // When & Then
+        mockMvc.perform(delete("/friend-request")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(invalidRequest)))
+                .andExpect(status().isBadRequest());
+    }
+
 }

@@ -5,9 +5,6 @@ import com.senla.resource_server.data.dao.UserDao;
 import com.senla.resource_server.data.entity.FriendRequest;
 import com.senla.resource_server.data.entity.FriendRequest.FriendRequestStatus;
 import com.senla.resource_server.data.entity.User;
-import com.senla.resource_server.exception.EntityExistException;
-import com.senla.resource_server.exception.EntityNotFoundException;
-import com.senla.resource_server.exception.IllegalArgumentException;
 import com.senla.resource_server.exception.IllegalStateException;
 import com.senla.resource_server.exception.UserNotYourFriendException;
 import com.senla.resource_server.service.dto.friendRequest.AnswerFriendRequestDto;
@@ -17,14 +14,12 @@ import com.senla.resource_server.service.dto.friendRequest.SendFriendRequestDto;
 import com.senla.resource_server.service.dto.friendRequest.SendFriendResponseDto;
 import com.senla.resource_server.service.dto.user.UserDto;
 import com.senla.resource_server.service.mapper.FriendRequestMapper;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContext;
-import org.springframework.security.core.context.SecurityContextHolder;
 
 import java.util.HashSet;
 import java.util.Optional;
@@ -33,523 +28,226 @@ import java.util.Set;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-public final class FriendRequestServiceImplTest {
+class FriendRequestServiceImplTest {
 
-    @Mock
-    private UserDao userDao;
+    @InjectMocks
+    private FriendRequestServiceImpl friendRequestService;
 
     @Mock
     private FriendRequestDao friendRequestDao;
 
     @Mock
+    private UserDao userDao;
+
+    @Mock
+    private AuthService authService;
+
+    @Mock
     private FriendRequestMapper friendRequestMapper;
 
-    @InjectMocks
-    private FriendRequestServiceImpl friendRequestService;
+    @Mock
+    private FriendValidationService friendValidationService;
 
-    private void mockAuthentication(String email) {
-        Authentication auth = mock(Authentication.class);
-        when(auth.getName()).thenReturn(email);
-        SecurityContext context = mock(SecurityContext.class);
-        when(context.getAuthentication()).thenReturn(auth);
-        SecurityContextHolder.setContext(context);
+    private User sender;
+    private User recipient;
+
+    @BeforeEach
+    void setUp() {
+        sender = new User();
+        sender.setId(1L);
+        sender.setEmail("sender@example.com");
+
+        recipient = new User();
+        recipient.setId(2L);
+        recipient.setEmail("recipient@example.com");
     }
 
     @Test
     void sendFriendRequest_WhenRequestIsValid_ShouldReturnSendFriendResponseDto() {
         // given
-        SendFriendRequestDto requestDto = new SendFriendRequestDto();
-        requestDto.setReceiverEmail("receiver@example.com");
+        SendFriendRequestDto dto = new SendFriendRequestDto("recipient@example.com");
+        SendFriendResponseDto expectedResponse = SendFriendResponseDto.builder()
+                .recipient(UserDto.builder().email("recipient@example.com").build())
+                .status(FriendRequestStatus.UNDEFINED)
+                .build();
 
-        User sender = new User();
-        sender.setEmail("sender@example.com");
-
-        User recipient = new User();
-        recipient.setEmail("receiver@example.com");
-
-        FriendRequest friendRequest = new FriendRequest();
-        friendRequest.setSender(sender);
-        friendRequest.setRecipient(recipient);
-        friendRequest.setStatus(FriendRequestStatus.UNDEFINED);
-
-        SendFriendResponseDto responseDto = new SendFriendResponseDto();
-        responseDto.setStatus(FriendRequestStatus.UNDEFINED);
-
-        mockAuthentication(sender.getEmail());
-
-        when(userDao.findByEmail("sender@example.com")).thenReturn(Optional.of(sender));
-        when(userDao.findByEmail("receiver@example.com")).thenReturn(Optional.of(recipient));
+        when(authService.getCurrentUser()).thenReturn(sender);
+        when(userDao.findByEmail("recipient@example.com")).thenReturn(Optional.of(recipient));
         when(friendRequestDao.findBySenderAndRecipient(sender, recipient)).thenReturn(Optional.empty());
-        when(friendRequestDao.save(any(FriendRequest.class))).thenReturn(friendRequest);
-        when(friendRequestMapper.toSendFriendResponseDto(friendRequest)).thenReturn(responseDto);
+        when(friendRequestDao.save(any(FriendRequest.class))).thenAnswer(invocation -> invocation.getArgument(0));
+        when(friendRequestMapper.toSendFriendResponseDto(any(FriendRequest.class))).thenReturn(expectedResponse);
 
         // when
-        SendFriendResponseDto result = friendRequestService.sendFriendRequest(requestDto);
+        SendFriendResponseDto actualResponse = friendRequestService.sendFriendRequest(dto);
 
         // then
-        assertThat(result.getStatus()).isEqualTo(FriendRequestStatus.UNDEFINED);
+        assertThat(actualResponse).isEqualTo(expectedResponse);
+        assertThat(actualResponse.getStatus()).isEqualTo(expectedResponse.getStatus());
+
     }
 
     @Test
-    void sendFriendRequest_WhenSenderEqualsReceiver_ShouldThrowIllegalArgumentException() {
+    void respondToFriendRequest_WhenAccepted_ShouldAddEachOtherAsFriends() {
         // given
-        SendFriendRequestDto requestDto = new SendFriendRequestDto();
-        requestDto.setReceiverEmail("sender@example.com");
+        Long requestId = 1L;
+        FriendRequest request = new FriendRequest();
+        request.setId(requestId);
+        request.setSender(sender);
+        request.setRecipient(recipient);
+        request.setStatus(FriendRequestStatus.UNDEFINED);
 
-        mockAuthentication(requestDto.getReceiverEmail());
+        AnswerFriendRequestDto dto = new AnswerFriendRequestDto(requestId, FriendRequestStatus.ACCEPTED);
+        AnswerFriendResponseDto expectedResponse = new AnswerFriendResponseDto(
+                UserDto.builder().email(sender.getEmail()).build(),
+                FriendRequestStatus.ACCEPTED
+        );
 
-        // when / then
-        assertThatThrownBy(() -> friendRequestService.sendFriendRequest(requestDto))
-                .isInstanceOf(IllegalArgumentException.class);
+        when(friendRequestDao.findById(requestId)).thenReturn(Optional.of(request));
+        when(authService.getCurrentUser()).thenReturn(recipient);
+        when(friendRequestMapper.toAnswerFriendResponseDto(request)).thenReturn(expectedResponse);
+
+        // when
+        AnswerFriendResponseDto actualResponse = friendRequestService.respondToFriendRequest(dto);
+
+        // then
+        assertThat(sender.getFriends()).contains(recipient);
+        assertThat(recipient.getFriends()).contains(sender);
+        assertThat(actualResponse).isEqualTo(expectedResponse);
     }
 
     @Test
-    void sendFriendRequest_WhenSenderNotFound_ShouldThrowEntityNotFoundException() {
+    void respondToFriendRequest_WhenRejected_ShouldNotAddAsFriends() {
         // given
-        SendFriendRequestDto requestDto = new SendFriendRequestDto();
-        requestDto.setReceiverEmail("receiver@example.com");
+        Long requestId = 2L;
+        FriendRequest request = new FriendRequest();
+        request.setId(requestId);
+        request.setSender(sender);
+        request.setRecipient(recipient);
+        request.setStatus(FriendRequestStatus.UNDEFINED);
 
-        User sender = new User();
-        sender.setEmail("sender@example.com");
+        AnswerFriendRequestDto dto = new AnswerFriendRequestDto(requestId, FriendRequestStatus.REJECTED);
+        AnswerFriendResponseDto expectedResponse = new AnswerFriendResponseDto(
+                UserDto.builder().email(sender.getEmail()).build(),
+                FriendRequestStatus.REJECTED
+        );
 
-        mockAuthentication(sender.getEmail());
+        when(friendRequestDao.findById(requestId)).thenReturn(Optional.of(request));
+        when(authService.getCurrentUser()).thenReturn(recipient);
+        when(friendRequestMapper.toAnswerFriendResponseDto(request)).thenReturn(expectedResponse);
 
-        when(userDao.findByEmail(sender.getEmail())).thenReturn(Optional.empty());
+        // when
+        AnswerFriendResponseDto actualResponse = friendRequestService.respondToFriendRequest(dto);
 
-        // when / then
-        assertThatThrownBy(() -> friendRequestService.sendFriendRequest(requestDto))
-                .isInstanceOf(EntityNotFoundException.class);
+        // then
+        assertThat(sender.getFriends()).doesNotContain(recipient);
+        assertThat(recipient.getFriends()).doesNotContain(sender);
+        assertThat(actualResponse).isEqualTo(expectedResponse);
     }
 
     @Test
-    void sendFriendRequest_WhenRecipientNotFound_ShouldThrowEntityNotFoundException() {
+    void respondToFriendRequest_WhenUserIsNotRecipient_ShouldThrowIllegalStateException() {
         // given
-        SendFriendRequestDto requestDto = new SendFriendRequestDto();
-        requestDto.setReceiverEmail("receiver@example.com");
+        Long requestId = 3L;
+        FriendRequest request = new FriendRequest();
+        request.setId(requestId);
+        request.setSender(sender);
+        request.setRecipient(recipient);
+        request.setStatus(FriendRequestStatus.UNDEFINED);
 
-        User sender = new User();
-        sender.setEmail("sender@example.com");
+        User anotherUser = new User();
+        anotherUser.setId(99L);
+        anotherUser.setEmail("not_recipient@example.com");
 
-        mockAuthentication(sender.getEmail());
+        AnswerFriendRequestDto dto = new AnswerFriendRequestDto(requestId, FriendRequestStatus.ACCEPTED);
 
-        when(userDao.findByEmail("sender@example.com")).thenReturn(Optional.of(sender));
-        when(userDao.findByEmail("receiver@example.com")).thenReturn(Optional.empty());
+        when(friendRequestDao.findById(requestId)).thenReturn(Optional.of(request));
+        when(authService.getCurrentUser()).thenReturn(anotherUser);
 
         // when / then
-        assertThatThrownBy(() -> friendRequestService.sendFriendRequest(requestDto))
-                .isInstanceOf(EntityNotFoundException.class);
-    }
-
-    @Test
-    void sendFriendRequest_WhenRequestAlreadySent_ShouldThrowIllegalStateException() {
-        // given
-        SendFriendRequestDto requestDto = new SendFriendRequestDto();
-        requestDto.setReceiverEmail("receiver@example.com");
-
-        User sender = new User();
-        sender.setEmail("sender@example.com");
-
-        User recipient = new User();
-        recipient.setEmail("receiver@example.com");
-
-        FriendRequest existingRequest = new FriendRequest();
-        existingRequest.setSender(sender);
-        existingRequest.setRecipient(recipient);
-        existingRequest.setStatus(FriendRequestStatus.UNDEFINED);
-
-        mockAuthentication(sender.getEmail());
-
-        when(userDao.findByEmail("sender@example.com")).thenReturn(Optional.of(sender));
-        when(userDao.findByEmail("receiver@example.com")).thenReturn(Optional.of(recipient));
-        when(friendRequestDao.findBySenderAndRecipient(sender, recipient)).thenReturn(Optional.of(existingRequest));
-
-        // when / then
-        assertThatThrownBy(() -> friendRequestService.sendFriendRequest(requestDto))
+        assertThatThrownBy(() -> friendRequestService.respondToFriendRequest(dto))
                 .isInstanceOf(IllegalStateException.class);
     }
 
     @Test
-    void shouldThrowExceptionIfRequestAlreadySent() {
+    void respondToFriendRequest_WhenStatusIsUndefined_ShouldNotDeleteOrAddFriend() {
         // given
-        User sender = new User();
-        sender.setEmail("sender@example.com");
+        Long requestId = 4L;
+        FriendRequest request = new FriendRequest();
+        request.setId(requestId);
+        request.setSender(sender);
+        request.setRecipient(recipient);
+        request.setStatus(FriendRequestStatus.UNDEFINED);
 
-        User recipient = new User();
-        recipient.setEmail("receiver@example.com");
+        AnswerFriendRequestDto dto = new AnswerFriendRequestDto(requestId, FriendRequestStatus.UNDEFINED);
 
-        mockAuthentication(sender.getEmail());
-
-        FriendRequest existing = FriendRequest.builder()
-                .sender(sender)
-                .recipient(recipient)
-                .status(FriendRequestStatus.UNDEFINED).build();
-
-        SendFriendRequestDto requestDto = new SendFriendRequestDto();
-        requestDto.setReceiverEmail(recipient.getEmail());
-
-        when(userDao.findByEmail(sender.getEmail())).thenReturn(Optional.of(sender));
-        when(userDao.findByEmail(recipient.getEmail())).thenReturn(Optional.of(recipient));
-        when(friendRequestDao.findBySenderAndRecipient(sender, recipient)).thenReturn(Optional.ofNullable(existing));
-
-        // when + then
-        assertThatThrownBy(() -> friendRequestService.sendFriendRequest(requestDto))
-                .isInstanceOf(IllegalStateException.class);
-    }
-
-    @Test
-    void sendFriendRequest_shouldAllowNewRequest_whenExistingRequestStatusIsNotUndefined() {
-        // given
-        String senderEmail = "sender@example.com";
-        String recipientEmail = "recipientDto@example.com";
-
-        SendFriendRequestDto requestDto = SendFriendRequestDto.builder()
-                .receiverEmail(recipientEmail)
-                .build();
-
-        User sender = User.builder()
-                .email(senderEmail)
-                .build();
-
-        User recipient = User.builder()
-                .email(recipientEmail)
-                .build();
-
-        UserDto recipientDto = UserDto.builder()
-                .email(recipientEmail)
-                .build();
-
-        FriendRequest existingRequest = FriendRequest.builder()
-                .sender(sender)
-                .recipient(recipient)
-                .status(FriendRequestStatus.ACCEPTED) // статус не UNDEFINED
-                .build();
-
-        FriendRequest savedRequest = FriendRequest.builder()
-                .id(1L)
-                .sender(sender)
-                .recipient(recipient)
+        AnswerFriendResponseDto expectedResponse = AnswerFriendResponseDto.builder()
+                .sender(UserDto.builder()
+                        .email(sender.getEmail())
+                        .build())
                 .status(FriendRequestStatus.UNDEFINED)
                 .build();
 
-        SendFriendResponseDto responseDto = SendFriendResponseDto.builder()
-                .recipient(recipientDto)
-                .build();
-
-        when(userDao.findByEmail(senderEmail)).thenReturn(Optional.of(sender));
-        when(userDao.findByEmail(recipientEmail)).thenReturn(Optional.of(recipient));
-        when(friendRequestDao.findBySenderAndRecipient(sender, recipient)).thenReturn(Optional.of(existingRequest));
-        when(friendRequestDao.save(any(FriendRequest.class))).thenReturn(savedRequest);
-        when(friendRequestMapper.toSendFriendResponseDto(savedRequest)).thenReturn(responseDto);
+        when(friendRequestDao.findById(requestId)).thenReturn(Optional.of(request));
+        when(authService.getCurrentUser()).thenReturn(recipient);
+        when(friendRequestMapper.toAnswerFriendResponseDto(request)).thenReturn(expectedResponse);
 
         // when
-        SendFriendResponseDto actualResponse = friendRequestService.sendFriendRequest(requestDto);
+        AnswerFriendResponseDto responseDto = friendRequestService.respondToFriendRequest(dto);
 
         // then
-        assertThat(actualResponse).isNotNull();
-        assertThat(actualResponse.getRecipient().getEmail()).isEqualTo(savedRequest.getRecipient().getEmail());
+        assertThat(sender.getFriends()).doesNotContain(recipient);
+        assertThat(recipient.getFriends()).doesNotContain(sender);
+        assertThat(responseDto.getStatus()).isEqualTo(FriendRequestStatus.UNDEFINED);
+        assertThat(responseDto.getSender().getEmail()).isEqualTo(sender.getEmail());
     }
 
     @Test
-    void sendFriendRequest_ShouldThrow_WhenAlreadyFriends() {
-        SendFriendRequestDto requestDto = new SendFriendRequestDto("friend@example.com");
-
-        User sender = new User();
-        sender.setEmail("sender@example.com");
-
-        User recipient = new User();
-        recipient.setEmail("friend@example.com");
-        recipient.setFriends(Set.of(sender));
-
-        mockAuthentication(sender.getEmail());
-
-        when(userDao.findByEmail("sender@example.com")).thenReturn(Optional.of(sender));
-        when(userDao.findByEmail("friend@example.com")).thenReturn(Optional.of(recipient));
-
-        assertThatThrownBy(() -> friendRequestService.sendFriendRequest(requestDto))
-                .isInstanceOf(EntityExistException.class)
-                .hasMessage("User already friend");
-    }
-
-    @Test
-    void respondToFriendRequest_shouldAcceptRequestAndAddFriendWhenStatusAccepted() {
-        // Given
-        Long requestId = 1L;
-        AnswerFriendRequestDto requestDto = new AnswerFriendRequestDto(requestId, FriendRequestStatus.ACCEPTED);
-
-        User sender = new User();
-        sender.setEmail("sender@example.com");
-
-        User recipient = new User();
-        recipient.setEmail("recipient@example.com");
-
-        FriendRequest friendRequest = new FriendRequest();
-        friendRequest.setSender(sender);
-        friendRequest.setRecipient(recipient);
-        friendRequest.setStatus(FriendRequestStatus.UNDEFINED);
-
-        mockAuthentication(recipient.getEmail());
-
-        AnswerFriendResponseDto expectedResponse = new AnswerFriendResponseDto();
-
-        when(friendRequestDao.findById(requestId)).thenReturn(Optional.of(friendRequest));
-        when(userDao.findByEmail("recipient@example.com")).thenReturn(Optional.of(recipient));
-        when(friendRequestMapper.toAnswerFriendResponseDto(friendRequest)).thenReturn(expectedResponse);
-
-        // When
-        AnswerFriendResponseDto response = friendRequestService.respondToFriendRequest(requestDto);
-
-        // Then
-        assertThat(response).isEqualTo(expectedResponse);
-        assertThat(friendRequest.getStatus()).isEqualTo(FriendRequestStatus.ACCEPTED);
-        verify(friendRequestDao).delete(requestId);
-    }
-
-
-    @Test
-    void respondToFriendRequest_shouldRejectRequestWhenStatusRejected() {
-        // Given
-        Long requestId = 1L;
-        AnswerFriendRequestDto requestDto = new AnswerFriendRequestDto(requestId, FriendRequestStatus.REJECTED);
-
-        User sender = new User();
-        sender.setEmail("sender@example.com");
-
-        User recipient = new User();
-        recipient.setEmail("recipient@example.com");
-
-        FriendRequest friendRequest = new FriendRequest();
-        friendRequest.setSender(sender);
-        friendRequest.setRecipient(recipient);
-        friendRequest.setStatus(FriendRequestStatus.UNDEFINED);
-
-        mockAuthentication(recipient.getEmail());
-
-        AnswerFriendResponseDto expectedResponse = new AnswerFriendResponseDto();
-
-        when(friendRequestDao.findById(requestId)).thenReturn(Optional.of(friendRequest));
-        when(userDao.findByEmail("recipient@example.com")).thenReturn(Optional.of(recipient));
-        when(friendRequestMapper.toAnswerFriendResponseDto(friendRequest)).thenReturn(expectedResponse);
-
-        // When
-        AnswerFriendResponseDto response = friendRequestService.respondToFriendRequest(requestDto);
-
-        // Then
-        assertThat(response).isEqualTo(expectedResponse);
-        assertThat(friendRequest.getStatus()).isEqualTo(FriendRequestStatus.REJECTED);
-        verify(friendRequestDao).delete(requestId);
-        verify(friendRequestMapper).toAnswerFriendResponseDto(friendRequest);
-    }
-
-
-    @Test
-    void respondToFriendRequest_shouldThrowExceptionWhenRequestNotFound() {
-        // Given
-        Long requestId = 1L;
-        AnswerFriendRequestDto requestDto = new AnswerFriendRequestDto(requestId, FriendRequestStatus.ACCEPTED);
-
-        when(friendRequestDao.findById(requestId)).thenReturn(Optional.empty());
-
-        // When / Then
-        assertThatThrownBy(() -> friendRequestService.respondToFriendRequest(requestDto))
-                .isInstanceOf(EntityNotFoundException.class)
-                .hasMessage("Request not found");
-    }
-
-    @Test
-    void respondToFriendRequest_shouldThrowExceptionWhenUserNotFound() {
-        // Given
-        Long requestId = 1L;
-        AnswerFriendRequestDto requestDto = new AnswerFriendRequestDto(requestId, FriendRequestStatus.ACCEPTED);
-
-        User sender = User.builder().email("sender@example.com").build();
-        User recipient = User.builder().email("recipient@example.com").build();
-
-        FriendRequest friendRequest = new FriendRequest();
-        friendRequest.setSender(sender);
-        friendRequest.setRecipient(recipient);
-
-        mockAuthentication("sender@example.com");
-
-        when(friendRequestDao.findById(requestId)).thenReturn(Optional.of(friendRequest));
-        when(userDao.findByEmail("sender@example.com")).thenReturn(Optional.empty());
-
-        // When / Then
-        assertThatThrownBy(() -> friendRequestService.respondToFriendRequest(requestDto))
-                .isInstanceOf(EntityNotFoundException.class)
-                .hasMessage("Not found User");
-    }
-
-    @Test
-    void respondToFriendRequest_shouldThrowExceptionWhenUserNotAuthorized() {
-        // Given
-        Long requestId = 1L;
-        AnswerFriendRequestDto requestDto = new AnswerFriendRequestDto(requestId, FriendRequestStatus.ACCEPTED);
-
-        User sender = new User();
-        sender.setEmail("sender@example.com");
-
-        User recipient = new User();
-        recipient.setEmail("recipient@example.com");
-
-        FriendRequest friendRequest = new FriendRequest();
-        friendRequest.setSender(sender);
-        friendRequest.setRecipient(recipient);
-
-        mockAuthentication("unauthorized@example.com");
-
-        User unauthorizedUser = new User();
-        unauthorizedUser.setEmail("unauthorized@example.com");
-
-        when(friendRequestDao.findById(requestId)).thenReturn(Optional.of(friendRequest));
-        when(userDao.findByEmail("unauthorized@example.com")).thenReturn(Optional.of(unauthorizedUser));
-
-        // When / Then
-        assertThatThrownBy(() -> friendRequestService.respondToFriendRequest(requestDto))
-                .isInstanceOf(IllegalStateException.class)
-                .hasMessage("The request has already been processed or the user is not authorised to process the request");
-    }
-
-    @Test
-    void respondToFriendRequest_shouldNotDeleteRequestWhenStatusUndefined() {
-        // Given
-        Long requestId = 1L;
-        AnswerFriendRequestDto requestDto = new AnswerFriendRequestDto(requestId, FriendRequestStatus.UNDEFINED);
-
-        User sender = User.builder()
-                .email("sender@example.com")
-                .build();
-
-        User recipient = User.builder()
-                .email("recipient@example.com")
-                .build();
-
-        mockAuthentication("recipient@example.com");
-
-        FriendRequest friendRequest = FriendRequest.builder()
-                .sender(sender)
-                .recipient(recipient)
-                .status(FriendRequestStatus.UNDEFINED)
-                .build();
-
-        AnswerFriendResponseDto expectedResponse = new AnswerFriendResponseDto();
-
-        when(friendRequestDao.findById(requestId)).thenReturn(Optional.of(friendRequest));
-        when(userDao.findByEmail("recipient@example.com")).thenReturn(Optional.of(recipient));
-        when(friendRequestMapper.toAnswerFriendResponseDto(friendRequest)).thenReturn(expectedResponse);
-
-        // When
-        AnswerFriendResponseDto response = friendRequestService.respondToFriendRequest(requestDto);
-
-        // Then
-        assertThat(response).isEqualTo(expectedResponse);
-        assertThat(friendRequest.getStatus()).isEqualTo(FriendRequestStatus.UNDEFINED);
-        verify(friendRequestDao, never()).delete(anyLong());
-    }
-
-
-    @Test
-    void deleteFriend_ShouldDeleteSuccessfully_WhenUsersAreFriends() {
+    void deleteFriend_WhenUserIsFriend_ShouldRemoveFriendSuccessfully() {
         // given
-        String userEmail = "user@example.com";
-        String friendEmail = "friend@example.com";
 
-        User user = User.builder()
-                .email(userEmail)
-                .build();
-
-        User friend = User.builder()
-                .email(friendEmail)
-                .build();
-
-        user.setFriends(new HashSet<>(Set.of(friend)));
-        friend.setFriends(new HashSet<>(Set.of(user)));
+        sender.setFriends(new HashSet<>(Set.of(recipient)));
+        recipient.setFriends(new HashSet<>(Set.of(sender)));
 
         DeleteFriendRequest request = DeleteFriendRequest.builder()
-                .friendEmail(friendEmail)
+                .friendEmail(recipient.getEmail())
                 .build();
 
-        mockAuthentication(userEmail);
-
-        when(userDao.findByEmail(userEmail)).thenReturn(Optional.of(user));
-        when(userDao.findByEmail(friendEmail)).thenReturn(Optional.of(friend));
+        when(authService.getCurrentUser()).thenReturn(sender);
+        when(userDao.findByEmail(recipient.getEmail())).thenReturn(Optional.of(recipient));
 
         // when
         friendRequestService.deleteFriend(request);
 
         // then
-        assertThat(user.getFriends()).doesNotContain(friend);
-        assertThat(friend.getFriends()).doesNotContain(user);
+        assertThat(sender.getFriends()).doesNotContain(recipient);
+        assertThat(recipient.getFriends()).doesNotContain(sender);
 
-        verify(userDao).save(user);
-        verify(userDao).save(friend);
-    }
-
-
-    @Test
-    void deleteFriend_ShouldThrow_WhenUserNotFound() {
-        // given
-        when(userDao.findByEmail("user@example.com")).thenReturn(Optional.empty());
-
-        DeleteFriendRequest request = new DeleteFriendRequest();
-        request.setFriendEmail("friend@example.com");
-
-        mockAuthentication("user@example.com");
-
-        // when / then
-        assertThatThrownBy(() -> friendRequestService.deleteFriend(request))
-                .isInstanceOf(EntityNotFoundException.class)
-                .hasMessage("Not found User");
+        verify(userDao).save(sender);
+        verify(userDao).save(recipient);
     }
 
     @Test
-    void deleteFriend_ShouldThrow_WhenFriendNotFound() {
+    void deleteFriend_WhenUserIsNotFriend_ShouldThrowException() {
         // given
-        String userEmail = "user@example.com";
-        String friendEmail = "friend@example.com";
-
-        User user = User.builder()
-                .email(userEmail)
-                .friends(Set.of(User.builder().email(friendEmail).build()))
-                .build();
-        mockAuthentication(userEmail);
-
-        when(userDao.findByEmail(userEmail)).thenReturn(Optional.of(user));
-        when(userDao.findByEmail(friendEmail)).thenReturn(Optional.empty());
-
-        DeleteFriendRequest request = new DeleteFriendRequest();
-        request.setFriendEmail(friendEmail);
-
-        // when / then
-        assertThatThrownBy(() -> friendRequestService.deleteFriend(request))
-                .isInstanceOf(EntityNotFoundException.class);
-    }
-
-    @Test
-    void deleteFriend_ShouldThrow_WhenFriendIsNotInUserFriendsList() {
-        // given
-        String userEmail = "user@example.com";
-        String friendEmail = "friend@example.com";
-
+        String friendEmail = "stranger@example.com";
         User user = new User();
-        user.setEmail(userEmail);
-        user.setFriends(new HashSet<>());
+        user.setEmail("user@example.com");
 
-        mockAuthentication(user.getEmail());
+        DeleteFriendRequest request = new DeleteFriendRequest(friendEmail);
 
-        when(userDao.findByEmail(userEmail)).thenReturn(Optional.of(user));
-
-        DeleteFriendRequest request = new DeleteFriendRequest();
-        request.setFriendEmail(friendEmail);
+        when(authService.getCurrentUser()).thenReturn(user);
 
         // when / then
         assertThatThrownBy(() -> friendRequestService.deleteFriend(request))
-                .isInstanceOf(UserNotYourFriendException.class);
+                .isInstanceOf(UserNotYourFriendException.class)
+                .hasMessageContaining(friendEmail);
+
+        verify(userDao, never()).save(any());
     }
+
 }

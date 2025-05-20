@@ -24,20 +24,24 @@ public class UserDaoImpl implements UserDao {
     @Override
     public Optional<User> findById(Long id) {
         String jpql = """
-                    select u
-                    from User u
-                      left join fetch u.wall
-                    where u.id = :id
-                """;
+                select u
+                from User u
+                  left join fetch u.wall
+                where u.id = :id
+            """;
         List<User> users = entityManager.createQuery(jpql, User.class)
                 .setParameter("id", id)
                 .getResultList();
+
+        if (!users.isEmpty()) {
+            log.info("User found with id: {}", id);
+        }
+
         return users.isEmpty() ? Optional.empty() : users.stream().findFirst();
     }
 
     @Override
     public User save(User user) {
-        log.info("Saving user with email: {}", user.getEmail());
         entityManager.persist(user);
         log.info("User saved with email: {}", user.getEmail());
         return user;
@@ -46,20 +50,25 @@ public class UserDaoImpl implements UserDao {
     @Override
     public Optional<User> findByEmail(String email) {
         String jpql = """
-                    select u
-                    from User u
-                      left join fetch u.wall
-                    where u.email = :email
-                """;
+                select u
+                from User u
+                  left join fetch u.wall
+                where u.email = :email
+            """;
         List<User> users = entityManager.createQuery(jpql, User.class)
                 .setParameter("email", email)
                 .getResultList();
+
+        if (!users.isEmpty()) {
+            log.info("User found with email: {}", email);
+        }
+
         return users.isEmpty() ? Optional.empty() : users.stream().findFirst();
     }
 
+
     @Override
     public User update(User user) {
-        log.info("Updating user with ID: {}", user.getId());
         String jpql = """
                     select u
                     from User u
@@ -78,7 +87,6 @@ public class UserDaoImpl implements UserDao {
 
     @Override
     public List<User> searchUser(UserSearchDto userSearchDto) {
-        log.info("Searching for users with criteria: {}", userSearchDto);
         StringBuilder jpql = new StringBuilder("SELECT u FROM User u LEFT JOIN FETCH u.wall WHERE 1=1");
         Map<String, Object> parameters = new HashMap<>();
 

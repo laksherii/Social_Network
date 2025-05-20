@@ -19,7 +19,6 @@ public class PrivateMessageDaoImpl implements PrivateMessageDao {
 
     @Override
     public PrivateMessage save(PrivateMessage message) {
-        log.info("Saving private message with ID: {}", message.getId());
         entityManager.persist(message);
         log.info("Successfully saved private message with ID: {}", message.getId());
         return message;
@@ -27,17 +26,17 @@ public class PrivateMessageDaoImpl implements PrivateMessageDao {
 
     @Override
     public List<PrivateMessage> findBySenderAndRecipient(User sender, User recipient) {
-        log.info("Fetching private messages for sender with ID: {} and recipient with ID: {}", sender.getId(), recipient.getId());
         List<PrivateMessage> messages = entityManager.createQuery("""
-            SELECT m FROM PrivateMessage m
-            WHERE m.recipient = :recipient
-            AND m.sender = :sender
-            ORDER BY m.id DESC
-            """, PrivateMessage.class)
+        SELECT m FROM PrivateMessage m
+        WHERE (m.sender = :sender AND m.recipient = :recipient)
+           OR (m.sender = :recipient AND m.recipient = :sender)
+        ORDER BY m.id DESC
+        """, PrivateMessage.class)
                 .setParameter("sender", sender)
                 .setParameter("recipient", recipient)
                 .getResultList();
-        log.info("Found {} private messages for sender with ID: {} and recipient with ID: {}", messages.size(), sender.getId(), recipient.getId());
+
+        log.info("Found {} private messages between users with IDs: {} and {}", messages.size(), sender.getId(), recipient.getId());
         return messages;
     }
 }

@@ -5,7 +5,7 @@ import com.senla.resource_server.service.dto.friendRequest.AnswerFriendResponseD
 import com.senla.resource_server.service.dto.friendRequest.DeleteFriendRequest;
 import com.senla.resource_server.service.dto.friendRequest.SendFriendRequestDto;
 import com.senla.resource_server.service.dto.friendRequest.SendFriendResponseDto;
-import com.senla.resource_server.service.impl.FriendRequestServiceImpl;
+import com.senla.resource_server.service.interfaces.FriendRequestService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -25,13 +25,12 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/friend-request")
 public class RestFriendRequestController {
 
-    private final FriendRequestServiceImpl friendRequestService;
+    private final FriendRequestService friendRequestService;
 
     @PreAuthorize("hasAnyRole('ADMIN', 'USER', 'MODERATOR')")
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public SendFriendResponseDto sendFriendRequest(@Valid @RequestBody SendFriendRequestDto friendRequestDto) {
-        log.info("User send friend request to user with Email {}", friendRequestDto.getReceiverEmail());
         SendFriendResponseDto response = friendRequestService.sendFriendRequest(friendRequestDto);
         log.info("Successfully sent friend request to user with Email {}", friendRequestDto.getReceiverEmail());
         return response;
@@ -41,7 +40,6 @@ public class RestFriendRequestController {
     @PutMapping
     @ResponseStatus(HttpStatus.OK)
     public AnswerFriendResponseDto responseFriendRequest(@Valid @RequestBody AnswerFriendRequestDto friendRequestDto) {
-        log.info("User is responding to a friend request with ID {}", friendRequestDto.getRequestId());
         AnswerFriendResponseDto response = friendRequestService.respondToFriendRequest(friendRequestDto);
         log.info("Successfully responded to friend request with ID {}", friendRequestDto.getRequestId());
         return response;
@@ -51,7 +49,6 @@ public class RestFriendRequestController {
     @DeleteMapping
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteFriend(@Valid @RequestBody DeleteFriendRequest deleteFriendRequest) {
-        log.info("User is deleting a friend with Email {}", deleteFriendRequest.getFriendEmail());
         friendRequestService.deleteFriend(deleteFriendRequest);
         log.info("Successfully deleted friend with Email {}", deleteFriendRequest.getFriendEmail());
     }

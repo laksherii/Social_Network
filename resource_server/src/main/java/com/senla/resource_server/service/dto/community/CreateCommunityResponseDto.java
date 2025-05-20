@@ -14,5 +14,4 @@ public class CreateCommunityResponseDto {
 
     @NotBlank(message = "Community name must not be blank")
     private String communityName;
-
 }

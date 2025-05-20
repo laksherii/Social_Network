@@ -13,11 +13,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContext;
-import org.springframework.security.core.context.SecurityContextHolder;
 
 import java.util.List;
 import java.util.Optional;
@@ -41,16 +37,11 @@ class PrivateMessageServiceImplTest {
     @Mock
     private MessageMapper messageMapper;
 
+    @Mock
+    private AuthService authService;
+
     @InjectMocks
     private PrivateMessageServiceImpl privateMessageService;
-
-    private void mockAuthentication(String email) {
-        Authentication authentication = Mockito.mock(Authentication.class);
-        when(authentication.getName()).thenReturn(email);
-        SecurityContext securityContext = Mockito.mock(SecurityContext.class);
-        when(securityContext.getAuthentication()).thenReturn(authentication);
-        SecurityContextHolder.setContext(securityContext);
-    }
 
     @Test
     void sendPrivateMessage_shouldSendMessageAndReturnResponse() {
@@ -58,8 +49,6 @@ class PrivateMessageServiceImplTest {
         String senderEmail = "sender@example.com";
         String recipientEmail = "recipient@example.com";
         String messageContent = "Hello, test message";
-
-        mockAuthentication(senderEmail);
 
         PrivateMessageRequestDto requestDto = PrivateMessageRequestDto.builder()
                 .recipientEmail(recipientEmail)
@@ -81,7 +70,7 @@ class PrivateMessageServiceImplTest {
                 .content(messageContent)
                 .build();
 
-        when(userDao.findByEmail(senderEmail)).thenReturn(Optional.of(sender));
+        when(authService.getCurrentUser()).thenReturn(sender);
         when(userDao.findByEmail(recipientEmail)).thenReturn(Optional.of(recipient));
         when(privateMessageDao.save(any(PrivateMessage.class))).thenReturn(savedMessage);
         when(messageMapper.toPrivateMessageResponse(savedMessage)).thenReturn(responseDto);
@@ -94,34 +83,9 @@ class PrivateMessageServiceImplTest {
         assertThat(actualResponse.getSender().getEmail()).isEqualTo(senderEmail);
         assertThat(actualResponse.getContent()).isEqualTo(messageContent);
 
-        verify(userDao).findByEmail(senderEmail);
         verify(userDao).findByEmail(recipientEmail);
         verify(privateMessageDao).save(any(PrivateMessage.class));
         verify(messageMapper).toPrivateMessageResponse(savedMessage);
-    }
-
-    @Test
-    void sendPrivateMessage_shouldThrowWhenSenderNotFound() {
-        // given
-        String senderEmail = "sender@example.com";
-        mockAuthentication(senderEmail);
-
-        PrivateMessageRequestDto requestDto = PrivateMessageRequestDto.builder()
-                .recipientEmail("recipient@example.com")
-                .message("test")
-                .build();
-
-        when(userDao.findByEmail(senderEmail)).thenReturn(Optional.empty());
-
-        // when/then
-        assertThatThrownBy(() -> privateMessageService.sendPrivateMessage(requestDto))
-                .isInstanceOf(EntityNotFoundException.class)
-                .hasMessageContaining("User not found");
-
-        verify(userDao).findByEmail(senderEmail);
-        verify(userDao, never()).findByEmail("recipient@example.com");
-        verify(privateMessageDao, never()).save(any());
-        verify(messageMapper, never()).toPrivateMessageResponse(any());
     }
 
     @Test
@@ -130,8 +94,6 @@ class PrivateMessageServiceImplTest {
         String senderEmail = "sender@example.com";
         String recipientEmail = "recipient@example.com";
 
-        mockAuthentication(senderEmail);
-
         PrivateMessageRequestDto requestDto = PrivateMessageRequestDto.builder()
                 .recipientEmail(recipientEmail)
                 .message("test")
@@ -139,7 +101,7 @@ class PrivateMessageServiceImplTest {
 
         User sender = User.builder().id(1L).email(senderEmail).build();
 
-        when(userDao.findByEmail(senderEmail)).thenReturn(Optional.of(sender));
+        when(authService.getCurrentUser()).thenReturn(sender);
         when(userDao.findByEmail(recipientEmail)).thenReturn(Optional.empty());
 
         // when/then
@@ -147,8 +109,6 @@ class PrivateMessageServiceImplTest {
                 .isInstanceOf(EntityNotFoundException.class)
                 .hasMessageContaining("User not found");
 
-        verify(userDao).findByEmail(senderEmail);
-        verify(userDao).findByEmail(recipientEmail);
         verify(privateMessageDao, never()).save(any());
         verify(messageMapper, never()).toPrivateMessageResponse(any());
     }
@@ -159,7 +119,6 @@ class PrivateMessageServiceImplTest {
         String senderEmail = "sender@example.com";
         String recipientEmail = "recipient@example.com";
 
-        mockAuthentication(senderEmail);
 
         User sender = User.builder().id(1L).email(senderEmail).build();
         User recipient = User.builder().id(2L).email(recipientEmail).build();
@@ -190,7 +149,7 @@ class PrivateMessageServiceImplTest {
                 .content("Hi 2")
                 .build();
 
-        when(userDao.findByEmail(senderEmail)).thenReturn(Optional.of(sender));
+        when(authService.getCurrentUser()).thenReturn(sender);
         when(userDao.findByEmail(recipientEmail)).thenReturn(Optional.of(recipient));
         when(privateMessageDao.findBySenderAndRecipient(sender, recipient)).thenReturn(messages);
         when(messageMapper.toPrivateMessageResponse(msg1)).thenReturn(dto1);
@@ -206,37 +165,14 @@ class PrivateMessageServiceImplTest {
     }
 
     @Test
-    void getMessagesByRecipientEmail_shouldThrowWhenSenderNotFound() {
-        // given
-        String senderEmail = "sender@example.com";
-        String recipientEmail = "recipient@example.com";
-
-        mockAuthentication(senderEmail);
-
-        when(userDao.findByEmail(senderEmail)).thenReturn(Optional.empty());
-
-        // when/then
-        assertThatThrownBy(() -> privateMessageService.getMessagesByRecipientEmail(recipientEmail))
-                .isInstanceOf(EntityNotFoundException.class)
-                .hasMessageContaining("User not found");
-
-        verify(userDao).findByEmail(senderEmail);
-        verify(userDao, never()).findByEmail(recipientEmail);
-        verify(privateMessageDao, never()).findBySenderAndRecipient(any(), any());
-        verify(messageMapper, never()).toPrivateMessageResponse(any());
-    }
-
-    @Test
     void getMessagesByRecipientEmail_shouldThrowWhenRecipientNotFound() {
         // given
         String senderEmail = "sender@example.com";
         String recipientEmail = "recipient@example.com";
 
-        mockAuthentication(senderEmail);
-
         User sender = User.builder().id(1L).email(senderEmail).build();
 
-        when(userDao.findByEmail(senderEmail)).thenReturn(Optional.of(sender));
+        when(authService.getCurrentUser()).thenReturn(sender);
         when(userDao.findByEmail(recipientEmail)).thenReturn(Optional.empty());
 
         // when/then
@@ -244,7 +180,6 @@ class PrivateMessageServiceImplTest {
                 .isInstanceOf(EntityNotFoundException.class)
                 .hasMessageContaining("User not found");
 
-        verify(userDao).findByEmail(senderEmail);
         verify(userDao).findByEmail(recipientEmail);
         verify(privateMessageDao, never()).findBySenderAndRecipient(any(), any());
         verify(messageMapper, never()).toPrivateMessageResponse(any());

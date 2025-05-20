@@ -16,6 +16,9 @@ import java.time.LocalDate;
 @AllArgsConstructor
 public class UpdateUserDtoRequest {
 
+    @Email
+    private String email;
+
     private String firstName;
     private String lastName;
     private GenderType gender;

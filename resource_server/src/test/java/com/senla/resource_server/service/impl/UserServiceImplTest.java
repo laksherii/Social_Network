@@ -4,8 +4,8 @@ import com.senla.resource_server.data.dao.UserDao;
 import com.senla.resource_server.data.entity.User;
 import com.senla.resource_server.data.entity.User.GenderType;
 import com.senla.resource_server.data.entity.User.RoleType;
+import com.senla.resource_server.exception.EntityExistException;
 import com.senla.resource_server.exception.EntityNotFoundException;
-import com.senla.resource_server.exception.IllegalStateException;
 import com.senla.resource_server.service.dto.user.CreateUserDtoRequest;
 import com.senla.resource_server.service.dto.user.CreateUserDtoResponse;
 import com.senla.resource_server.service.dto.user.UpdateRoleUserDtoRequest;
@@ -21,11 +21,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContext;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.time.LocalDate;
@@ -49,6 +45,9 @@ class UserServiceImplTest {
     @Mock
     private UserMapper userMapper;
 
+    @Mock
+    private AuthService authService;
+
     @InjectMocks
     private UserServiceImpl userService;
 
@@ -61,14 +60,6 @@ class UserServiceImplTest {
                 .email("test@example.com")
                 .enabled(true)
                 .build();
-    }
-
-    private void mockAuthentication(String email) {
-        Authentication authentication = Mockito.mock(Authentication.class);
-        when(authentication.getName()).thenReturn(email);
-        SecurityContext securityContext = Mockito.mock(SecurityContext.class);
-        when(securityContext.getAuthentication()).thenReturn(authentication);
-        SecurityContextHolder.setContext(securityContext);
     }
 
     @Test
@@ -142,37 +133,37 @@ class UserServiceImplTest {
                 .isInstanceOf(EntityNotFoundException.class);
     }
 
-//    @Test
-//    void create_WhenRoleIsNull_ShouldNotOverrideRole() {
-//        // given
-//        CreateUserDtoRequest userDtoRequest = CreateUserDtoRequest.builder()
-//                .email("artem@example.com")
-//                .birthDay(LocalDate.of(2001, 1, 13))
-//                .lastName("Lashkevich")
-//                .build();
-//
-//        User mapped = User.builder()
-//                .id(1L)
-//                .email("artem@example.com")
-//                .role(RoleType.ROLE_USER)
-//                .build();
-//
-//        CreateUserDtoResponse createUserDtoResponse = CreateUserDtoResponse.builder()
-//                .email(mapped.getEmail())
-//                .build();
-//
-//        when(userDao.findByEmail(userDtoRequest.getEmail())).thenReturn(Optional.empty());
-//        when(userMapper.toUserCreate(userDtoRequest)).thenReturn(mapped);
-//        when(userDao.save(mapped)).thenReturn(mapped);
-//        when(userMapper.toCreateUserDtoResponse(mapped)).thenReturn(createUserDtoResponse);
-//
-//        // when
-//        CreateUserDtoResponse response = userService.create(userDtoRequest);
-//
-//        // then
-//        assertThat(response.getEmail()).isEqualTo("artem@example.com");
-//        assertThat(mapped.getRole()).isEqualTo(RoleType.ROLE_USER);
-//    }
+    @Test
+    void create_WhenRoleIsNull_ShouldNotOverrideRole() {
+        // given
+        CreateUserDtoRequest userDtoRequest = CreateUserDtoRequest.builder()
+                .email("artem@example.com")
+                .birthDay(LocalDate.of(2001, 1, 13))
+                .lastName("Lashkevich")
+                .build();
+
+        User mapped = User.builder()
+                .id(1L)
+                .email("artem@example.com")
+                .role(RoleType.ROLE_USER)
+                .build();
+
+        CreateUserDtoResponse createUserDtoResponse = CreateUserDtoResponse.builder()
+                .email(mapped.getEmail())
+                .build();
+
+        when(userDao.findByEmail(userDtoRequest.getEmail())).thenReturn(Optional.empty());
+        when(userMapper.toUserCreate(userDtoRequest)).thenReturn(mapped);
+        when(userDao.save(mapped)).thenReturn(mapped);
+        when(userMapper.toCreateUserDtoResponse(mapped)).thenReturn(createUserDtoResponse);
+
+        // when
+        CreateUserDtoResponse response = userService.create(userDtoRequest);
+
+        // then
+        assertThat(response.getEmail()).isEqualTo("artem@example.com");
+        assertThat(mapped.getRole()).isEqualTo(RoleType.ROLE_USER);
+    }
 
     @Test
     void create_WhenEmailIsUnique_ShouldReturnResponse() {
@@ -225,7 +216,7 @@ class UserServiceImplTest {
         when(userDao.findByEmail("test@example.com")).thenReturn(Optional.of(user));
 
         assertThatThrownBy(() -> userService.create(request))
-                .isInstanceOf(IllegalStateException.class);
+                .isInstanceOf(EntityExistException.class);
     }
 
     @Test
@@ -242,9 +233,7 @@ class UserServiceImplTest {
         user.setId(1L);
         user.setEmail(email);
 
-        mockAuthentication(email);
-
-        when(userDao.findByEmail(email)).thenReturn(Optional.of(user));
+        when(authService.getCurrentUser()).thenReturn(user);
         when(userDao.update(any())).thenAnswer(inv -> inv.getArgument(0));
         when(userMapper.toUserSearchDtoResponse(any())).thenReturn(
                 UserSearchDtoResponse.builder()
@@ -277,9 +266,7 @@ class UserServiceImplTest {
         user.setEmail(email);
         user.setFirstName("OldName");
 
-        mockAuthentication(email);
-
-        when(userDao.findByEmail(email)).thenReturn(Optional.of(user));
+        when(authService.getCurrentUser()).thenReturn(user);
         when(userDao.update(any())).thenAnswer(inv -> inv.getArgument(0));
         when(userMapper.toUserSearchDtoResponse(any())).thenReturn(
                 UserSearchDtoResponse.builder()
@@ -305,9 +292,7 @@ class UserServiceImplTest {
         user.setEmail(email);
         user.setLastName("OldLast");
 
-        mockAuthentication(email);
-
-        when(userDao.findByEmail(email)).thenReturn(Optional.of(user));
+        when(authService.getCurrentUser()).thenReturn(user);
         when(userDao.update(any())).thenAnswer(inv -> inv.getArgument(0));
         when(userMapper.toUserSearchDtoResponse(any())).thenReturn(
                 UserSearchDtoResponse.builder()
@@ -333,9 +318,7 @@ class UserServiceImplTest {
         user.setEmail(email);
         user.setGender(User.GenderType.MALE);
 
-        mockAuthentication(email);
-
-        when(userDao.findByEmail(email)).thenReturn(Optional.of(user));
+        when(authService.getCurrentUser()).thenReturn(user);
         when(userDao.update(any())).thenAnswer(inv -> inv.getArgument(0));
         when(userMapper.toUserSearchDtoResponse(any())).thenReturn(
                 UserSearchDtoResponse.builder()
@@ -362,9 +345,7 @@ class UserServiceImplTest {
         user.setEmail(email);
         user.setBirthDay(LocalDate.of(1990, 1, 1));
 
-        mockAuthentication(email);
-
-        when(userDao.findByEmail(email)).thenReturn(Optional.of(user));
+        when(authService.getCurrentUser()).thenReturn(user);
         when(userDao.update(any())).thenAnswer(inv -> inv.getArgument(0));
         when(userMapper.toUserSearchDtoResponse(any())).thenReturn(
                 UserSearchDtoResponse.builder()
@@ -376,22 +357,6 @@ class UserServiceImplTest {
         UserSearchDtoResponse response = userService.update(request);
 
         assertThat(response.getBirthDay()).isEqualTo(newBirth);
-    }
-
-    @Test
-    void update_WhenUserNotFound_ShouldThrowEntityNotFoundException() {
-        String email = "missing@example.com";
-        UpdateUserDtoRequest request = UpdateUserDtoRequest.builder()
-                .firstName("Ghost")
-                .build();
-
-        mockAuthentication(email);
-
-        when(userDao.findByEmail(email)).thenReturn(Optional.empty());
-
-        assertThatThrownBy(() -> userService.update(request))
-                .isInstanceOf(EntityNotFoundException.class)
-                .hasMessage("User not found by email=" + email);
     }
 
     @Test
