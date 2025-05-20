@@ -19,16 +19,12 @@ public class GroupChatDaoImpl implements GroupChatDao {
     @Override
     public Optional<GroupChat> findById(Long id) {
         GroupChat groupChat = entityManager.find(GroupChat.class, id);
-        if (groupChat != null) {
-            log.info("Group chat found with ID: {}", id);
-        }
         return Optional.ofNullable(groupChat);
     }
 
     @Override
     public GroupChat save(GroupChat groupChat) {
         entityManager.persist(groupChat);
-        log.info("Successfully saved group chat with name: {}", groupChat.getName());
         return groupChat;
     }
 }

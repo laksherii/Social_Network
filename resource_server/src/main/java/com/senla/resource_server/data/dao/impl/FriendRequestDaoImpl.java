@@ -21,14 +21,12 @@ public class FriendRequestDaoImpl implements FriendRequestDao {
     @Override
     public FriendRequest save(FriendRequest request) {
         entityManager.persist(request);
-        log.info("Successfully saved friend request from {} to {}", request.getSender().getEmail(), request.getRecipient().getEmail());
         return request;
     }
 
     @Override
     public Optional<FriendRequest> findById(Long id) {
         FriendRequest request = entityManager.find(FriendRequest.class, id);
-        log.info("Friend request found with ID: {}", id);
         return Optional.ofNullable(request);
     }
 
@@ -39,9 +37,6 @@ public class FriendRequestDaoImpl implements FriendRequestDao {
                 .setParameter("sender", sender)
                 .setParameter("recipient", recipient)
                 .getResultList();
-        if (!result.isEmpty()) {
-            log.info("Friend request found from {} to {}", sender.getEmail(), recipient.getEmail());
-        }
         return result.stream().findFirst();
     }
 
@@ -49,6 +44,5 @@ public class FriendRequestDaoImpl implements FriendRequestDao {
     public void delete(Long id) {
         FriendRequest request = entityManager.find(FriendRequest.class, id);
         entityManager.remove(request);
-        log.info("Deleted friend request from {} to {}", request.getSender().getEmail(), request.getRecipient().getEmail());
     }
 }

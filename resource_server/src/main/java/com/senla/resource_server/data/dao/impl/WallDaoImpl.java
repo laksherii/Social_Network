@@ -17,7 +17,6 @@ public class WallDaoImpl implements WallDao {
     @Override
     public Wall save(Wall wall) {
         entityManager.persist(wall);
-        log.info("Wall saved for user with email: {}", wall.getOwner().getEmail());
         return wall;
     }
 }

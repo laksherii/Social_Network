@@ -26,14 +26,12 @@ public class CommunityDaoImpl implements CommunityDao {
     @Override
     public Community save(Community community) {
         entityManager.persist(community);
-        log.info("Successfully saved community with ID {}", community.getId());
         return community;
     }
 
     @Override
     public Optional<Community> findById(Long id) {
         Community community = entityManager.find(Community.class, id);
-        log.info("Successfully found community with ID {}", id);
         return Optional.ofNullable(community);
     }
 
@@ -42,13 +40,11 @@ public class CommunityDaoImpl implements CommunityDao {
         Pagination pagination = paginationUtil.calculate(page, size);
 
         String query = "SELECT c FROM Community c ORDER BY c.id";
-        List<Community> communities = entityManager.createQuery(query, Community.class)
+
+        return entityManager.createQuery(query, Community.class)
                 .setFirstResult((int) pagination.offset())
                 .setMaxResults(pagination.limit())
                 .getResultList();
-
-        log.info("Fetched {} communities", communities.size());
-        return communities;
     }
 }
 

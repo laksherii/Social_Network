@@ -17,7 +17,6 @@ public class PublicMessageDaoImpl implements PublicMessageDao {
     @Override
     public PublicMessage save(PublicMessage message) {
         entityManager.persist(message);
-        log.info("Successfully saved public message with ID: {}", message.getId());
         return message;
     }
 }

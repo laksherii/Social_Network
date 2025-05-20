@@ -33,17 +33,12 @@ public class UserDaoImpl implements UserDao {
                 .setParameter("id", id)
                 .getResultList();
 
-        if (!users.isEmpty()) {
-            log.info("User found with id: {}", id);
-        }
-
         return users.isEmpty() ? Optional.empty() : users.stream().findFirst();
     }
 
     @Override
     public User save(User user) {
         entityManager.persist(user);
-        log.info("User saved with email: {}", user.getEmail());
         return user;
     }
 
@@ -59,19 +54,13 @@ public class UserDaoImpl implements UserDao {
                 .setParameter("email", email)
                 .getResultList();
 
-        if (!users.isEmpty()) {
-            log.info("User found with email: {}", email);
-        }
-
         return users.isEmpty() ? Optional.empty() : users.stream().findFirst();
     }
 
 
     @Override
     public User update(User user) {
-        User updatedUser = entityManager.merge(user);
-        log.info("User updated with ID: {}", user.getId());
-        return updatedUser;
+        return entityManager.merge(user);
     }
 
     @Override
@@ -115,9 +104,7 @@ public class UserDaoImpl implements UserDao {
             query.setParameter(entry.getKey(), entry.getValue());
         }
 
-        List<User> result = query.getResultList();
-        log.info("Found {} users matching the search criteria.", result.size());
-        return result;
+        return query.getResultList();
     }
 }
 

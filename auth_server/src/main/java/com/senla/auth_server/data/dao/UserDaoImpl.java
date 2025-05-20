@@ -32,7 +32,6 @@ public class UserDaoImpl implements UserDao {
         if (users.isEmpty()) {
             return Optional.empty();
         } else {
-            log.info("User found with email: {}", email);
             return users.stream().findFirst();
         }
     }
@@ -40,7 +39,6 @@ public class UserDaoImpl implements UserDao {
     @Override
     public User save(User user) {
         entityManager.persist(user);
-        log.info("User successfully saved: id={}, email={}", user.getId(), user.getEmail());
         return user;
     }
 }
