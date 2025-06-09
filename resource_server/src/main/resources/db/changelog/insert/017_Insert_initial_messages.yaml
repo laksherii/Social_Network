@@ -1,0 +1,190 @@
+databaseChangeLog:
+  - changeSet:
+      id: 011-101
+      author: Lashkevich Artem
+      preConditions:
+        - onFail: MARK_RAN
+        - sqlCheck:
+            expectedResult: 0
+            sql: SELECT COUNT(*) FROM messages WHERE id = 101
+      changes:
+        - insert:
+            tableName: messages
+            columns:
+              - column: { name: id, value: "101" }
+              - column: { name: sender_id, value: "1" }
+              - column: { name: content, value: "Привет! Как твои дела?" }
+              - column:
+                  name: created_at
+                  valueComputed: "TIMESTAMP WITH TIME ZONE '2025-05-14T02:15:00+03:00'"
+
+  - changeSet:
+      id: 011-102
+      author: Lashkevich Artem
+      preConditions:
+        - onFail: MARK_RAN
+        - sqlCheck:
+            expectedResult: 0
+            sql: SELECT COUNT(*) FROM messages WHERE id = 102
+      changes:
+        - insert:
+            tableName: messages
+            columns:
+              - column: { name: id, value: "102" }
+              - column: { name: sender_id, value: "2" }
+              - column: { name: content, value: "Срочно: проверь почту, там важное письмо." }
+              - column:
+                  name: created_at
+                  valueComputed: "TIMESTAMP WITH TIME ZONE '2025-05-14T03:15:00+03:00'"
+
+  - changeSet:
+      id: 011-103
+      author: Lashkevich Artem
+      preConditions:
+        - onFail: MARK_RAN
+        - sqlCheck:
+            expectedResult: 0
+            sql: SELECT COUNT(*) FROM messages WHERE id = 103
+      changes:
+        - insert:
+            tableName: messages
+            columns:
+              - column: { name: id, value: "103" }
+              - column: { name: sender_id, value: "3" }
+              - column: { name: content, value: "Не забудь о встрече завтра в 10:00." }
+              - column:
+                  name: created_at
+                  valueComputed: "TIMESTAMP WITH TIME ZONE '2025-05-14T04:15:00+03:00'"
+
+  - changeSet:
+      id: 011-104
+      author: Lashkevich Artem
+      preConditions:
+        - onFail: MARK_RAN
+        - sqlCheck:
+            expectedResult: 0
+            sql: SELECT COUNT(*) FROM messages WHERE id = 104
+      changes:
+        - insert:
+            tableName: messages
+            columns:
+              - column: { name: id, value: "104" }
+              - column: { name: sender_id, value: "4" }
+              - column: { name: content, value: "Можешь позвонить мне сегодня вечером?" }
+              - column:
+                  name: created_at
+                  valueComputed: "TIMESTAMP WITH TIME ZONE '2025-05-14T05:15:00+03:00'"
+
+  - changeSet:
+      id: 011-105
+      author: Lashkevich Artem
+      preConditions:
+        - onFail: MARK_RAN
+        - sqlCheck:
+            expectedResult: 0
+            sql: SELECT COUNT(*) FROM messages WHERE id = 105
+      changes:
+        - insert:
+            tableName: messages
+            columns:
+              - column: { name: id, value: "105" }
+              - column: { name: sender_id, value: "1" }
+              - column: { name: content, value: "Коллеги, сбор в конференц-зале в 15:00." }
+              - column:
+                  name: created_at
+                  valueComputed: "TIMESTAMP WITH TIME ZONE '2025-05-14T06:15:00+03:00'"
+
+  - changeSet:
+      id: 011-106
+      author: Lashkevich Artem
+      preConditions:
+        - onFail: MARK_RAN
+        - sqlCheck:
+            expectedResult: 0
+            sql: SELECT COUNT(*) FROM messages WHERE id = 106
+      changes:
+        - insert:
+            tableName: messages
+            columns:
+              - column: { name: id, value: "106" }
+              - column: { name: sender_id, value: "2" }
+              - column: { name: content, value: "Напоминаю про дедлайн по проекту завтра." }
+              - column:
+                  name: created_at
+                  valueComputed: "TIMESTAMP WITH TIME ZONE '2025-05-14T07:15:00+03:00'"
+
+  - changeSet:
+      id: 011-107
+      author: Lashkevich Artem
+      preConditions:
+        - onFail: MARK_RAN
+        - sqlCheck:
+            expectedResult: 0
+            sql: SELECT COUNT(*) FROM messages WHERE id = 107
+      changes:
+        - insert:
+            tableName: messages
+            columns:
+              - column: { name: id, value: "107" }
+              - column: { name: sender_id, value: "3" }
+              - column: { name: content, value: "Кто будет представлять нашу группу на форуме?" }
+              - column:
+                  name: created_at
+                  valueComputed: "TIMESTAMP WITH TIME ZONE '2025-05-14T08:15:00+03:00'"
+
+  - changeSet:
+      id: 011-108
+      author: Lashkevich Artem
+      preConditions:
+        - onFail: MARK_RAN
+        - sqlCheck:
+            expectedResult: 0
+            sql: SELECT COUNT(*) FROM messages WHERE id = 108
+      changes:
+        - insert:
+            tableName: messages
+            columns:
+              - column: { name: id, value: "108" }
+              - column: { name: sender_id, value: "2" }
+              - column: { name: content, value: "Новость сообщества: вышло обновление версии 2.1." }
+              - column:
+                  name: created_at
+                  valueComputed: "TIMESTAMP WITH TIME ZONE '2025-05-14T09:15:00+03:00'"
+
+  - changeSet:
+      id: 011-109
+      author: Lashkevich Artem
+      preConditions:
+        - onFail: MARK_RAN
+        - sqlCheck:
+            expectedResult: 0
+            sql: SELECT COUNT(*) FROM messages WHERE id = 109
+      changes:
+        - insert:
+            tableName: messages
+            columns:
+              - column: { name: id, value: "109" }
+              - column: { name: sender_id, value: "3" }
+              - column: { name: content, value: "Обсуждаем стратегию на следующий месяц." }
+              - column:
+                  name: created_at
+                  valueComputed: "TIMESTAMP WITH TIME ZONE '2025-05-14T10:15:00+03:00'"
+
+  - changeSet:
+      id: 011-110
+      author: Lashkevich Artem
+      preConditions:
+        - onFail: MARK_RAN
+        - sqlCheck:
+            expectedResult: 0
+            sql: SELECT COUNT(*) FROM messages WHERE id = 110
+      changes:
+        - insert:
+            tableName: messages
+            columns:
+              - column: { name: id, value: "110" }
+              - column: { name: sender_id, value: "4" }
+              - column: { name: content, value: "Как прошли ваши выходные? Поделитесь впечатлениями." }
+              - column:
+                  name: created_at
+                  valueComputed: "TIMESTAMP WITH TIME ZONE '2025-05-14T11:15:00+03:00'"

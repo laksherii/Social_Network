@@ -1,0 +1,54 @@
+databaseChangeLog:
+  - changeSet:
+      id: create-friend-request-table
+      author: Lashkevich Artem
+      preConditions:
+        - onFail: MARK_RAN
+        - not:
+            - tableExists:
+                tableName: friend_request
+      changes:
+        - createTable:
+            tableName: friend_request
+            columns:
+              - column:
+                  name: id
+                  type: BIGINT
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    primaryKeyName: pk_friend_request
+              - column:
+                  name: sender_id
+                  type: BIGINT
+                  constraints:
+                    nullable: false
+              - column:
+                  name: recipient_id
+                  type: BIGINT
+                  constraints:
+                    nullable: false
+              - column:
+                  name: status
+                  type: VARCHAR(100)
+                  constraints:
+                    nullable: false
+
+        - addForeignKeyConstraint:
+            baseTableName: friend_request
+            baseColumnNames: sender_id
+            constraintName: fk_friend_request_sender
+            referencedTableName: users
+            referencedColumnNames: id
+
+        - addForeignKeyConstraint:
+            baseTableName: friend_request
+            baseColumnNames: recipient_id
+            constraintName: fk_friend_request_recipient
+            referencedTableName: users
+            referencedColumnNames: id
+
+        - addUniqueConstraint:
+            tableName: friend_request
+            columnNames: sender_id, recipient_id
+            constraintName: uk_friend_request_pair

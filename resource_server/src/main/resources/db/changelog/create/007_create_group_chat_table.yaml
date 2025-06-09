@@ -1,0 +1,24 @@
+databaseChangeLog:
+  - changeSet:
+      id: 007-create-group-chat-table
+      author: Lashkevich Artem
+      preConditions:
+        - onFail: MARK_RAN
+        - not:
+            - tableExists:
+                tableName: group_chat
+      changes:
+        - createTable:
+            tableName: group_chat
+            columns:
+              - column:
+                  name: id
+                  type: BIGINT
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+              - column:
+                  name: name
+                  type: VARCHAR(100)
+                  constraints:
+                    nullable: false

@@ -1,0 +1,29 @@
+databaseChangeLog:
+  - changeSet:
+      id: 002-create-wall-table
+      author: Lashkevich Artem
+      preConditions:
+        - onFail: MARK_RAN
+        - not:
+            - tableExists:
+                tableName: wall
+      changes:
+        - createTable:
+            tableName: wall
+            columns:
+              - column:
+                  name: id
+                  type: BIGINT
+                  constraints:
+                    primaryKey: true
+                    primaryKeyName: pk_wall
+                  autoIncrement: true
+              - column:
+                  name: user_id
+                  type: BIGINT
+                  constraints:
+                    nullable: false
+                    foreignKeyName: fk_wall_user
+                    references: users(id)
+                    referencedTableName: users
+                    referencedColumnNames: id

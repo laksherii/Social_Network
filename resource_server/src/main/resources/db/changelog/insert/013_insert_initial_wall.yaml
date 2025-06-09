@@ -1,0 +1,85 @@
+databaseChangeLog:
+  - changeSet:
+      id: 015-1-insert-wall-admin
+      author: Lashkevich Artem
+      preConditions:
+        - onFail: MARK_RAN
+        - sqlCheck:
+            expectedResult: "1"
+            sql: "SELECT COUNT(*) FROM users WHERE email = 'admin@example.com'"
+        - sqlCheck:
+            expectedResult: "0"
+            sql: "SELECT COUNT(*) FROM wall w JOIN users u ON w.user_id = u.id WHERE u.email = 'admin@example.com'"
+      changes:
+        - sql:
+            sql: |
+              INSERT INTO wall (user_id)
+              SELECT id FROM users WHERE email = 'admin@example.com';
+
+  - changeSet:
+      id: 015-3-insert-wall-christopher
+      author: Lashkevich Artem
+      preConditions:
+        - onFail: MARK_RAN
+        - sqlCheck:
+            expectedResult: "1"
+            sql: "SELECT COUNT(*) FROM users WHERE email = 'christopher@example.com'"
+        - sqlCheck:
+            expectedResult: "0"
+            sql: "SELECT COUNT(*) FROM wall w JOIN users u ON w.user_id = u.id WHERE u.email = 'christopher@example.com'"
+      changes:
+        - sql:
+            sql: |
+              INSERT INTO wall (user_id)
+              SELECT id FROM users WHERE email = 'christopher@example.com';
+
+  - changeSet:
+      id: 015-4-insert-wall-victoria
+      author: Lashkevich Artem
+      preConditions:
+        - onFail: MARK_RAN
+        - sqlCheck:
+            expectedResult: "1"
+            sql: "SELECT COUNT(*) FROM users WHERE email = 'victoria@example.com'"
+        - sqlCheck:
+            expectedResult: "0"
+            sql: "SELECT COUNT(*) FROM wall w JOIN users u ON w.user_id = u.id WHERE u.email = 'victoria@example.com'"
+      changes:
+        - sql:
+            sql: |
+              INSERT INTO wall (user_id)
+              SELECT id FROM users WHERE email = 'victoria@example.com';
+
+  - changeSet:
+      id: 015-5-insert-wall-benjamin
+      author: Lashkevich Artem
+      preConditions:
+        - onFail: MARK_RAN
+        - sqlCheck:
+            expectedResult: "1"
+            sql: "SELECT COUNT(*) FROM users WHERE email = 'benjamin@example.com'"
+        - sqlCheck:
+            expectedResult: "0"
+            sql: "SELECT COUNT(*) FROM wall w JOIN users u ON w.user_id = u.id WHERE u.email = 'benjamin@example.com'"
+      changes:
+        - sql:
+            sql: |
+              INSERT INTO wall (user_id)
+              SELECT id FROM users WHERE email = 'benjamin@example.com';
+
+  - changeSet:
+      id: 015-6-insert-wall-natalie
+      author: Lashkevich Artem
+      preConditions:
+        - onFail: MARK_RAN
+        - sqlCheck:
+            expectedResult: "1"
+            sql: "SELECT COUNT(*) FROM users WHERE email = 'natalie@example.com'"
+        - sqlCheck:
+            expectedResult: "0"
+            sql: "SELECT COUNT(*) FROM wall w JOIN users u ON w.user_id = u.id WHERE u.email = 'natalie@example.com'"
+      changes:
+        - sql:
+            sql: |
+              INSERT INTO wall (user_id)
+              SELECT id FROM users WHERE email = 'natalie@example.com';

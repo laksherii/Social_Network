@@ -1,0 +1,701 @@
+{
+	"info": {
+		"_postman_id": "2c177059-c4f1-4f22-83aa-88faf14744b4",
+		"name": "Social_Network",
+		"description": "# 🚀 Get started here\n\nThis template guides you through CRUD operations (GET, POST, PUT, DELETE), variables, and tests.\n\n## 🔖 **How to use this template**\n\n#### **Step 1: Send requests**\n\nRESTful APIs allow you to perform CRUD operations using the POST, GET, PUT, and DELETE HTTP methods.\n\nThis collection contains each of these [request](https://learning.postman.com/docs/sending-requests/requests/) types. Open each request and click \"Send\" to see what happens.\n\n#### **Step 2: View responses**\n\nObserve the response tab for status code (200 OK), response time, and size.\n\n#### **Step 3: Send new Body data**\n\nUpdate or add new data in \"Body\" in the POST request. Typically, Body data is also used in PUT request.\n\n```\n{\n    \"name\": \"Add your name in the body\"\n}\n\n ```\n\n#### **Step 4: Update the variable**\n\nVariables enable you to store and reuse values in Postman. We have created a [variable](https://learning.postman.com/docs/sending-requests/variables/) called `base_url` with the sample request [https://postman-api-learner.glitch.me](https://postman-api-learner.glitch.me). Replace it with your API endpoint to customize this collection.\n\n#### **Step 5: Add tests in the \"Scripts\" tab**\n\nAdding tests to your requests can help you confirm that your API is working as expected. You can write test scripts in JavaScript and view the output in the \"Test Results\" tab.\n\n<img src=\"https://content.pstmn.io/fa30ea0a-373d-4545-a668-e7b283cca343/aW1hZ2UucG5n\" width=\"2162\" height=\"1530\">\n\n## 💪 Pro tips\n\n- Use folders to group related requests and organize the collection.\n    \n- Add more [scripts](https://learning.postman.com/docs/writing-scripts/intro-to-scripts/) to verify if the API works as expected and execute workflows.\n    \n\n## 💡Related templates\n\n[API testing basics](https://go.postman.co/redirect/workspace?type=personal&collectionTemplateId=e9a37a28-055b-49cd-8c7e-97494a21eb54&sourceTemplateId=ddb19591-3097-41cf-82af-c84273e56719)  \n[API documentation](https://go.postman.co/redirect/workspace?type=personal&collectionTemplateId=e9c28f47-1253-44af-a2f3-20dce4da1f18&sourceTemplateId=ddb19591-3097-41cf-82af-c84273e56719)  \n[Authorization methods](https://go.postman.co/redirect/workspace?type=personal&collectionTemplateId=31a9a6ed-4cdf-4ced-984c-d12c9aec1c27&sourceTemplateId=ddb19591-3097-41cf-82af-c84273e56719)",
+		"schema": "https://schema.getpostman.com/json/collection/v2.0.0/collection.json",
+		"_exporter_id": "32532524"
+	},
+	"item": [
+		{
+			"name": "user",
+			"item": [
+				{
+					"name": "userById",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": {
+								"token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJhZG1pbkBleGFtcGxlLmNvbSIsImlhdCI6MTc0NzU4NTk0NiwiZXhwIjoxNzQ3NTg5NTQ2fQ.b_-GV6y3YlJzgO1x8MAaZcFTUOE4bqcJBH8PBUww1s8"
+							}
+						},
+						"method": "GET",
+						"header": [],
+						"url": "http://localhost:8080/users/1",
+						"description": "This is a GET request and it is used to \"get\" data from an endpoint. There is no request body for a GET request, but you can use query parameters to help specify the resource you want data on (e.g., in this request, we have `id=1`).\n\nA successful GET response will have a `200 OK` status, and should include some kind of response body - for example, HTML web content or JSON data."
+					},
+					"response": []
+				},
+				{
+					"name": "update-user",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Successful PUT request\", function () {",
+									"    pm.expect(pm.response.code).to.be.oneOf([200, 201, 204]);",
+									"});",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "oauth2",
+							"oauth2": {
+								"useBrowser": false,
+								"clientId": "oidc_client",
+								"tokenName": "Test OIDC",
+								"scope": "openid profile",
+								"refreshTokenUrl": "http://localhost:9000/oauth2/token",
+								"clientSecret": "secret",
+								"accessTokenUrl": "http://localhost:9000/oauth2/token",
+								"authUrl": "http://localhost:9000/oauth2/authorize",
+								"redirect_uri": "https://oauth.pstmn.io/v1/callback",
+								"addTokenTo": "header"
+							}
+						},
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"pep@example.com\",\n  \"firstName\": \"Иван\",\n  \"lastName\": \"Иванов\",\n  \"password\": \"qwertyqz\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "http://localhost:8080/user",
+						"description": "This is a PUT request and it is used to overwrite an existing piece of data. For instance, after you create an entity with a POST request, you may want to modify that later. You can do that using a PUT request. You typically identify the entity being updated by including an identifier in the URL (eg. `id=1`).\n\nA successful PUT request typically returns a `200 OK`, `201 Created`, or `204 No Content` response code."
+					},
+					"response": []
+				},
+				{
+					"name": "userByEmail",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": {
+								"token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJhZG1pbkBleGFtcGxlLmNvbSIsImlhdCI6MTc0NzU4NTk0NiwiZXhwIjoxNzQ3NTg5NTQ2fQ.b_-GV6y3YlJzgO1x8MAaZcFTUOE4bqcJBH8PBUww1s8"
+							}
+						},
+						"method": "GET",
+						"header": [],
+						"url": "http://localhost:8080/users/email/natalie@example.com"
+					},
+					"response": []
+				},
+				{
+					"name": "search-user",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": {
+								"token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJjaHJpc3RvcGhlckBleGFtcGxlLmNvbSIsImlhdCI6MTc0NzczODcyNSwiZXhwIjoxNzQ3NzQyMzI1fQ.8j5Joj-mXexo51dZwRtaTnAgmtu2kihlFMfXDXrXK-I"
+							}
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8080/users/search?firstName=&lastName=&age=&gender=",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"users",
+								"search"
+							],
+							"query": [
+								{
+									"key": "firstName",
+									"value": ""
+								},
+								{
+									"key": "lastName",
+									"value": ""
+								},
+								{
+									"key": "age",
+									"value": ""
+								},
+								{
+									"key": "gender",
+									"value": ""
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "user-info",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": {
+								"token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJhZG1pbkBleGFtcGxlLmNvbSIsImlhdCI6MTc0Nzc0MDg3OCwiZXhwIjoxNzQ3NzQ0NDc4fQ.Bk1Zz5eULrGHl3D_90_Oy4ZtKAjbINLPv5wRMPd26DE"
+							}
+						},
+						"method": "GET",
+						"header": [],
+						"url": "http://localhost:8080/users/info/admin@example.com"
+					},
+					"response": []
+				},
+				{
+					"name": "update-role",
+					"protocolProfileBehavior": {
+						"disabledSystemHeaders": {
+							"content-type": true
+						}
+					},
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": {
+								"token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJhZG1pbkBleGFtcGxlLmNvbSIsImlhdCI6MTc0NzczODQ3MSwiZXhwIjoxNzQ3NzQyMDcxfQ.BKujqWcCy-9tTht4V8maKMvph_D871mq0RyxCw-jqh4"
+							}
+						},
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"email\": \"natalie@example.com\",\r\n    \"role\": \"ROLE_ADMIN\"\r\n}"
+						},
+						"url": "http://localhost:8080/users"
+					},
+					"response": []
+				},
+				{
+					"name": "user",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"email\": \"lashkevich@gmail.com\",\r\n  \"firstName\": \"Lash\",\r\n  \"lastName\": \"Art\",\r\n  \"birthDay\": \"2001-02-05\",\r\n  \"gender\": \"MALE\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "http://localhost:8080/users"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "message",
+			"item": [
+				{
+					"name": "private",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": {
+								"token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJhZG1pbkBleGFtcGxlLmNvbSIsImlhdCI6MTc0Nzc0MDE4MCwiZXhwIjoxNzQ3NzQzNzgwfQ.0vfM0ltC5traDbrzidARln3HQq0O2P1Z0RD4O9bqS_4"
+							}
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"recipientEmail\": \"christopher@example.com\",\r\n    \"message\": \"Siiiiiiiiiiiiii\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "http://localhost:8080/messages/private"
+					},
+					"response": []
+				},
+				{
+					"name": "get-private-message",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": {
+								"token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJhZG1pbkBleGFtcGxlLmNvbSIsImlhdCI6MTc0Nzc0MDg3OCwiZXhwIjoxNzQ3NzQ0NDc4fQ.Bk1Zz5eULrGHl3D_90_Oy4ZtKAjbINLPv5wRMPd26DE"
+							}
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8080/messages/private?email=christopher@example.com",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"messages",
+								"private"
+							],
+							"query": [
+								{
+									"key": "email",
+									"value": "christopher@example.com"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "group-chat-message",
+					"request": {
+						"auth": {
+							"type": "oauth2",
+							"oauth2": {
+								"useBrowser": false,
+								"clientId": "oidc_client",
+								"tokenName": "Test OIDC",
+								"scope": "openid profile",
+								"refreshTokenUrl": "http://localhost:9000/oauth2/token",
+								"clientSecret": "secret",
+								"accessTokenUrl": "http://localhost:9000/oauth2/token",
+								"authUrl": "http://localhost:9000/oauth2/authorize",
+								"redirect_uri": "https://oauth.pstmn.io/v1/callback",
+								"addTokenTo": "header"
+							}
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"groupId\":8,\r\n    \"message\":\"Hala Madrid\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "http://localhost:8080/message/group-chat"
+					},
+					"response": []
+				},
+				{
+					"name": "community-message",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": {
+								"token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJhZG1pbkBleGFtcGxlLmNvbSIsImlhdCI6MTc0Nzc0MDg3OCwiZXhwIjoxNzQ3NzQ0NDc4fQ.Bk1Zz5eULrGHl3D_90_Oy4ZtKAjbINLPv5wRMPd26DE"
+							}
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"communityId\": 1,\r\n    \"message\": \"Hala Madrid Nada Mas Nada Mas\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "http://localhost:8080/messages/communities"
+					},
+					"response": []
+				},
+				{
+					"name": "send-wall-message",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": {
+								"token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJhZG1pbkBleGFtcGxlLmNvbSIsImlhdCI6MTc0Nzc0MDg3OCwiZXhwIjoxNzQ3NzQ0NDc4fQ.Bk1Zz5eULrGHl3D_90_Oy4ZtKAjbINLPv5wRMPd26DE"
+							}
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"message\": \"Test message on Wall\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "http://localhost:8080/messages/walls"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "friend_request",
+			"item": [
+				{
+					"name": "friend-request",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": {
+								"token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJhZG1pbkBleGFtcGxlLmNvbSIsImlhdCI6MTc0Nzc0Mzg4NiwiZXhwIjoxNzQ3NzQ3NDg2fQ.MCYOGAx5YqsBGjApzhlIh9DcTtEpsjZfKyt9Ol_OW00"
+							}
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"receiverEmail\":\"christopher@example.com\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "http://localhost:8080/friend-requests"
+					},
+					"response": []
+				},
+				{
+					"name": "answer-friend-request",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": {
+								"token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJjaHJpc3RvcGhlckBleGFtcGxlLmNvbSIsImlhdCI6MTc0Nzc0NDYwMCwiZXhwIjoxNzQ3NzQ4MjAwfQ.sitkHH4AmLkXSo255Bh3KWOq-1ygtggVsY6ojyckiMI"
+							}
+						},
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"requestId\": 4,\r\n    \"status\": \"ACCEPTED\" \r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "http://localhost:8080/friend-requests"
+					},
+					"response": []
+				},
+				{
+					"name": "delete-friend",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": {
+								"token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJjaHJpc3RvcGhlckBleGFtcGxlLmNvbSIsImlhdCI6MTc0Nzc0NDYwMCwiZXhwIjoxNzQ3NzQ4MjAwfQ.sitkHH4AmLkXSo255Bh3KWOq-1ygtggVsY6ojyckiMI"
+							}
+						},
+						"method": "DELETE",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"friendEmail\": \"admin@example.com\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "http://localhost:8080/friend-requests"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "group_chat",
+			"item": [
+				{
+					"name": "group-chat",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": {
+								"token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJhZG1pbkBleGFtcGxlLmNvbSIsImlhdCI6MTc0NzU4NTk0NiwiZXhwIjoxNzQ3NTg5NTQ2fQ.b_-GV6y3YlJzgO1x8MAaZcFTUOE4bqcJBH8PBUww1s8"
+							}
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"name\": \"Man City\",\r\n  \"userEmails\": [\"christopher@example.com\", \"victoria@example.com\", \"benjamin@example.com\"]\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "http://localhost:8080/group-chats"
+					},
+					"response": []
+				},
+				{
+					"name": "get-group-chat-messge",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": {
+								"token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJhZG1pbkBleGFtcGxlLmNvbSIsImlhdCI6MTc0Nzc0MDg3OCwiZXhwIjoxNzQ3NzQ0NDc4fQ.Bk1Zz5eULrGHl3D_90_Oy4ZtKAjbINLPv5wRMPd26DE"
+							}
+						},
+						"method": "GET",
+						"header": [],
+						"url": "http://localhost:8080/group-chats/1"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "community",
+			"item": [
+				{
+					"name": "createCommunity",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": {
+								"token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJhZG1pbkBleGFtcGxlLmNvbSIsImlhdCI6MTc0NzU4NzcwMSwiZXhwIjoxNzQ3NTkxMzAxfQ.6d6EYay-z24CUavBleEd7GitO5euEz1rekU4xvN4gH8"
+							}
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"name\": \"Cristiano Ronaldo\",\r\n    \"description\":\"The most famous player in history footbal\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "http://localhost:8080/communities"
+					},
+					"response": []
+				},
+				{
+					"name": "join-community",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": {
+								"token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJhZG1pbkBleGFtcGxlLmNvbSIsImlhdCI6MTc0Nzc0Mzg4NiwiZXhwIjoxNzQ3NzQ3NDg2fQ.MCYOGAx5YqsBGjApzhlIh9DcTtEpsjZfKyt9Ol_OW00"
+							}
+						},
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"communityId\": 3\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "http://localhost:8080/communities"
+					},
+					"response": []
+				},
+				{
+					"name": "get-community",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": {
+								"token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJjaHJpc3RvcGhlckBleGFtcGxlLmNvbSIsImlhdCI6MTc0Nzc0NDYwMCwiZXhwIjoxNzQ3NzQ4MjAwfQ.sitkHH4AmLkXSo255Bh3KWOq-1ygtggVsY6ojyckiMI"
+							}
+						},
+						"method": "GET",
+						"header": [],
+						"url": "http://localhost:8080/communities"
+					},
+					"response": []
+				},
+				{
+					"name": "get-all-community",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": {
+								"token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJhZG1pbkBleGFtcGxlLmNvbSIsImlhdCI6MTc0Nzc0MDg3OCwiZXhwIjoxNzQ3NzQ0NDc4fQ.Bk1Zz5eULrGHl3D_90_Oy4ZtKAjbINLPv5wRMPd26DE"
+							}
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8080/communities?page=1&size=3",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"communities"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "size",
+									"value": "3"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "auth-server",
+			"item": [
+				{
+					"name": "login",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"email\": \"christopher@example.com\",\r\n    \"password\": \"christopher\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "http://localhost:9000/auth/login"
+					},
+					"response": []
+				},
+				{
+					"name": "refresh",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"refreshToken\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJuYXRhbGllQGV4YW1wbGUuY29tIiwiaWF0IjoxNzQ3MDMzMjI1LCJleHAiOjE3NDk2MjUyMjV9.4ItThSbesziQw8Uh-4rrT0l_LK82cFXrWGUErkMNCUE\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "http://localhost:9000/auth/token"
+					},
+					"response": []
+				},
+				{
+					"name": "create-user",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Successful POST request\", function () {",
+									"    pm.expect(pm.response.code).to.be.oneOf([200, 201]);",
+									"});",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": {
+								"token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJuYXRhbGllQGV4YW1wbGUuY29tIiwiaWF0IjoxNzQ3MDYxOTYyLCJleHAiOjE3NDcwNjU1NjJ9.EyiHVcuyyjBDUit_D3c70mS72BZdyj9X7JRX6R4Svm4"
+							}
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Role",
+								"value": "ROLE_ADMIN",
+								"type": "text",
+								"disabled": true
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"lashkevich@gmail.com\",\n  \"password\": \"pass123\",\n  \"firstName\": \"Lash\",\n  \"lastName\": \"Art\",\n  \"birthDay\": \"2001-02-05\",\n  \"gender\": \"MALE\"\n}\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "http://localhost:9000/users",
+						"description": "This is a POST request, submitting data to an API via the request body. This request submits JSON data, and the data is reflected in the response.\n\nA successful POST request typically returns a `200 OK` or `201 Created` response code."
+					},
+					"response": []
+				}
+			]
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "id",
+			"value": "1"
+		},
+		{
+			"key": "base_url",
+			"value": "https://postman-rest-api-learner.glitch.me/"
+		}
+	]
+}

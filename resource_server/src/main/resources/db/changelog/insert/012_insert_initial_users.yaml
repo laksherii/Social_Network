@@ -1,0 +1,100 @@
+databaseChangeLog:
+  - changeSet:
+      id: 014-1-insert-elizabeth
+      author: Lashkevich Artem
+      preConditions:
+        - onFail: MARK_RAN
+        - sqlCheck:
+            expectedResult: "0"
+            sql: "SELECT COUNT(*) FROM users WHERE email = 'admin@example.com'"
+      changes:
+        - insert:
+            tableName: users
+            columns:
+              - column: { name: email, value: 'admin@example.com' }
+              - column: { name: first_name, value: 'Admin' }
+              - column: { name: last_name, value: 'Admin' }
+              - column: { name: birth_day, value: '1992-08-20' }
+              - column: { name: enabled, value: 'true' }
+              - column: { name: gender, value: 'FEMALE' }
+              - column: { name: role, value: 'ROLE_ADMIN' }
+
+  - changeSet:
+      id: 014-2-insert-christopher
+      author: Lashkevich Artem
+      preConditions:
+        - onFail: MARK_RAN
+        - sqlCheck:
+            expectedResult: "0"
+            sql: "SELECT COUNT(*) FROM users WHERE email = 'christopher@example.com'"
+      changes:
+        - insert:
+            tableName: users
+            columns:
+              - column: { name: email, value: 'christopher@example.com' }
+              - column: { name: first_name, value: 'Christopher' }
+              - column: { name: last_name, value: 'Williams' }
+              - column: { name: birth_day, value: '1988-11-03' }
+              - column: { name: enabled, value: 'true' }
+              - column: { name: gender, value: 'MALE' }
+              - column: { name: role, value: 'ROLE_USER' }
+
+  - changeSet:
+      id: 014-3-insert-victoria
+      author: Lashkevich Artem
+      preConditions:
+        - onFail: MARK_RAN
+        - sqlCheck:
+            expectedResult: "0"
+            sql: "SELECT COUNT(*) FROM users WHERE email = 'victoria@example.com'"
+      changes:
+        - insert:
+            tableName: users
+            columns:
+              - column: { name: email, value: 'victoria@example.com' }
+              - column: { name: first_name, value: 'Victoria' }
+              - column: { name: last_name, value: 'Brown' }
+              - column: { name: birth_day, value: '1995-02-28' }
+              - column: { name: enabled, value: 'true' }
+              - column: { name: gender, value: 'FEMALE' }
+              - column: { name: role, value: 'ROLE_MODERATOR' }
+
+  - changeSet:
+      id: 014-4-insert-benjamin
+      author: Lashkevich Artem
+      preConditions:
+        - onFail: MARK_RAN
+        - sqlCheck:
+            expectedResult: "0"
+            sql: "SELECT COUNT(*) FROM users WHERE email = 'benjamin@example.com'"
+      changes:
+        - insert:
+            tableName: users
+            columns:
+              - column: { name: email, value: 'benjamin@example.com' }
+              - column: { name: first_name, value: 'Benjamin' }
+              - column: { name: last_name, value: 'Jones' }
+              - column: { name: birth_day, value: '1993-07-10' }
+              - column: { name: enabled, value: 'true' }
+              - column: { name: gender, value: 'MALE' }
+              - column: { name: role, value: 'ROLE_USER' }
+
+  - changeSet:
+      id: 014-5-insert-natalie
+      author: Lashkevich Artem
+      preConditions:
+        - onFail: MARK_RAN
+        - sqlCheck:
+            expectedResult: "0"
+            sql: "SELECT COUNT(*) FROM users WHERE email = 'natalie@example.com'"
+      changes:
+        - insert:
+            tableName: users
+            columns:
+              - column: { name: email, value: 'natalie@example.com' }
+              - column: { name: first_name, value: 'Natalie' }
+              - column: { name: last_name, value: 'Garcia' }
+              - column: { name: birth_day, value: '1991-04-22' }
+              - column: { name: enabled, value: 'true' }
+              - column: { name: gender, value: 'FEMALE' }
+              - column: { name: role, value: 'ROLE_USER' }

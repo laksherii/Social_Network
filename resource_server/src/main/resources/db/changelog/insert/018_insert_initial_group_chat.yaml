@@ -1,0 +1,42 @@
+databaseChangeLog:
+  - changeSet:
+      id: 020-1-insert-group-chat-general
+      author: Lashkevich Artem
+      preConditions:
+        - onFail: MARK_RAN
+        - sqlCheck:
+            expectedResult: "0"
+            sql: "SELECT COUNT(*) FROM group_chat WHERE name = 'General Group'"
+      changes:
+        - insert:
+            tableName: group_chat
+            columns:
+              - column: { name: name, value: "General Group" }
+
+  - changeSet:
+      id: 020-2-insert-group-chat-work
+      author: Lashkevich Artem
+      preConditions:
+        - onFail: MARK_RAN
+        - sqlCheck:
+            expectedResult: "0"
+            sql: "SELECT COUNT(*) FROM group_chat WHERE name = 'Work Group'"
+      changes:
+        - insert:
+            tableName: group_chat
+            columns:
+              - column: { name: name, value: "Work Group" }
+
+  - changeSet:
+      id: 020-3-insert-group-chat-friends
+      author: Lashkevich Artem
+      preConditions:
+        - onFail: MARK_RAN
+        - sqlCheck:
+            expectedResult: "0"
+            sql: "SELECT COUNT(*) FROM group_chat WHERE name = 'Friends'"
+      changes:
+        - insert:
+            tableName: group_chat
+            columns:
+              - column: { name: name, value: "Friends" }
